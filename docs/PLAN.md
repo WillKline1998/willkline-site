@@ -32,7 +32,7 @@ One home for every part of Will's life — music, CV, media, writing, and future
 - **M7 — Ship** Domain, hosting, Postgres, analytics, SEO, performance + accessibility pass.
 
 ## Open questions (for Will)
-- Domain: willkline.com is already registered by someone (since 2020, via Cloudflare) — is it yours? If not, candidates that looked free on 2026-10-05: willkline.net, willkline.io, willkline.art, willklinemusic.com, wskline.com.
-- Visual vibe for normal mode (sites you like?).
+- Domain: willkline.com is taken (not Will's). Will wants `willkline` + a cheap, innocuous TLD, and a **dedicated, instructional session** on buying/connecting a domain (registrar, DNS, pricing incl. renewal costs) so he learns it. Candidates free on 2026-10-05: willkline.net, .io, .art; also willklinemusic.com, wskline.com.
+- Visual vibe for normal mode — Will is researching. Known so far: simple artist-page structure, content area + **side navigation menu** (Bio, Media, etc.). Sidebar implemented in M0.
 - What music/media exists today to seed M2?
 - Wall: open sign-up, or invite-only at first? (moderation burden)

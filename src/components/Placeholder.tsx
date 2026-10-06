@@ -4,7 +4,7 @@ import { sections } from "@/lib/sections";
 export function Placeholder({ href, children }: { href: string; children?: React.ReactNode }) {
   const s = sections.find((x) => x.href === href);
   return (
-    <section className="mx-auto w-full max-w-5xl px-6 py-16">
+    <section className="w-full max-w-4xl px-6 py-16 md:px-12">
       <h1 className="text-4xl font-bold tracking-tight">{s?.label}</h1>
       <p className="mt-3 text-lg opacity-80">{s?.blurb}</p>
       {children}

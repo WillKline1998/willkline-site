@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description: "Musician, software engineer, and tinkerer. Music, CV, media, writing, and experiments.",
 };
 
+// Artist-page layout: sidebar nav on desktop, top bar on mobile.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -19,13 +20,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-mode="normal"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full md:flex">
         <DemoModeProvider>
           <Nav />
-          <main className="flex-1">{children}</main>
-          <footer className="mx-auto w-full max-w-5xl px-6 py-8 text-sm opacity-50">
-            © {new Date().getFullYear()} Will Kline
-          </footer>
+          <div className="flex min-h-screen flex-1 flex-col">
+            <main className="flex-1">{children}</main>
+            <footer className="w-full max-w-4xl px-6 py-8 text-sm opacity-50 md:px-12">
+              © {new Date().getFullYear()} Will Kline
+            </footer>
+          </div>
         </DemoModeProvider>
       </body>
     </html>

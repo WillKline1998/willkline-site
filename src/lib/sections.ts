@@ -9,6 +9,7 @@ export type Section = {
 };
 
 export const sections: Section[] = [
+  { href: "/bio", label: "Bio", blurb: "Who I am: bassist, engineer, tinkerer.", milestone: "M2" },
   { href: "/music", label: "Music", blurb: "Albums, recordings, and performances.", milestone: "M2" },
   { href: "/cv", label: "CV", blurb: "Résumé, experience, and a downloadable copy.", milestone: "M2" },
   { href: "/media", label: "Media", blurb: "Photos, video, and press.", milestone: "M2" },

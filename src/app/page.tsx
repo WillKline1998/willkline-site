@@ -3,7 +3,7 @@ import { sections } from "@/lib/sections";
 
 export default function Home() {
   return (
-    <section className="mx-auto w-full max-w-5xl px-6 py-20">
+    <section className="w-full max-w-4xl px-6 py-20 md:px-12">
       <p className="text-sm uppercase tracking-widest opacity-60">Bassist · Engineer · Tinkerer</p>
       <h1 className="mt-3 text-5xl font-bold tracking-tight sm:text-6xl">Will Kline</h1>
       <p className="mt-5 max-w-2xl text-lg opacity-80">
