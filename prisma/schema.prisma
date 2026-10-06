@@ -1,0 +1,119 @@
+// Data model for willkline.com — see docs/PLAN.md for how each model maps to a feature.
+// Local dev uses SQLite; production will switch to Postgres (see docs/DECISIONS.md).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- People ----------
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String?
+  role         String     @default("MEMBER") // "ADMIN" | "MEMBER" (SQLite has no enums)
+  passwordHash String?
+  createdAt    DateTime   @default(now())
+  wallPosts    WallPost[]
+  saves        Save[]
+}
+
+// ---------- Will's content (admin-editable, M2/M3) ----------
+
+model Album {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @default("")
+  year        Int?
+  coverUrl    String?
+  published   Boolean  @default(false)
+  tracks      Track[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Track {
+  id       String  @id @default(cuid())
+  albumId  String
+  album    Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  title    String
+  position Int
+  audioUrl String?
+  notes    String  @default("")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  body        String    // Markdown
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model MediaItem {
+  id        String   @id @default(cuid())
+  kind      String   // "IMAGE" | "VIDEO" | "PRESS"
+  title     String
+  url       String
+  caption   String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model ResumeFile {
+  id         String   @id @default(cuid())
+  url        String
+  label      String   @default("")
+  isCurrent  Boolean  @default(false)
+  uploadedAt DateTime @default(now())
+}
+
+model LabProject {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @default("")
+  status      String   @default("IDEA") // "IDEA" | "BUILDING" | "LIVE"
+  url         String?
+  createdAt   DateTime @default(now())
+}
+
+// Free-form editable text blocks (home bio, CV summary, etc.)
+model SiteSetting {
+  key   String @id
+  value String
+}
+
+// ---------- Inspiration Wall (M4) ----------
+
+model WallPost {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  kind      String   // "ART" | "MUSIC" | "OTHER"
+  title     String
+  url       String
+  note      String   @default("")
+  createdAt DateTime @default(now())
+  saves     Save[]
+}
+
+// A user's personal collection = the WallPosts they've saved.
+model Save {
+  userId     String
+  wallPostId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallPost   WallPost @relation(fields: [wallPostId], references: [id], onDelete: Cascade)
+
+  @@id([userId, wallPostId])
+}

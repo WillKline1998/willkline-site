@@ -22,5 +22,60 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background 0.6s ease, color 0.6s ease;
+}
+
+/* ------------------------------------------------------------------
+   DEMO MODE ("kaleidoscope glasses")
+   Everything flashy lives below, scoped to [data-mode="demo"].
+   Starter effects only — the real razzle-dazzle is milestone M6.
+   ------------------------------------------------------------------ */
+
+[data-mode="demo"] body {
+  --background: #0b0420;
+  --foreground: #f5f0ff;
+  background:
+    radial-gradient(circle at 20% 20%, #ff3cac55, transparent 40%),
+    radial-gradient(circle at 80% 30%, #2b86c555, transparent 40%),
+    radial-gradient(circle at 50% 90%, #784ba055, transparent 45%),
+    #0b0420;
+  background-size: 200% 200%;
+  animation: wk-drift 18s ease-in-out infinite alternate;
+}
+
+[data-mode="demo"] h1 {
+  background: linear-gradient(90deg, #ff3cac, #784ba0, #2b86c5, #ff3cac);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: wk-shimmer 6s linear infinite;
+}
+
+[data-mode="demo"] .card {
+  border-color: #ffffff33;
+  backdrop-filter: blur(6px);
+  transition: transform 0.4s cubic-bezier(.2,.8,.2,1.4);
+}
+[data-mode="demo"] .card:hover {
+  transform: rotate(-1.5deg) scale(1.04);
+}
+
+[data-mode="demo"] .demo-toggle {
+  box-shadow: 0 0 18px #ff3cac;
+}
+
+@keyframes wk-drift {
+  from { background-position: 0% 0%; }
+  to   { background-position: 100% 100%; }
+}
+@keyframes wk-shimmer {
+  to { background-position: 300% 0; }
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-mode="demo"] body,
+  [data-mode="demo"] h1 { animation: none; }
 }
