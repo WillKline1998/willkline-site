@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/admin";
-import { deleteFile, saveFile } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
+import { deleteFile, saveUpload } from "@/lib/storage";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
 async function store(file: File) {
-  const key = await saveFile(Buffer.from(await file.arrayBuffer()), file.name);
-  return { fileKey: key, fileName: file.name, mimeType: file.type || "application/octet-stream", size: file.size };
+  const u = await saveUpload(file);
+  return { fileKey: u.key, fileName: u.fileName, mimeType: u.mimeType, size: u.size };
 }
 
 function done() {
@@ -19,7 +19,7 @@ function done() {
 
 // New document: title + file required, description optional.
 export async function createDocument(form: FormData) {
-  requireAdmin();
+  await requireAdmin();
   const file = form.get("file");
   const title = str(form, "title");
   if (!(file instanceof File) || file.size === 0 || !title) return;
@@ -32,7 +32,7 @@ export async function createDocument(form: FormData) {
 
 // Swap in a new draft. Same entry, same place on the page; the old file is removed.
 export async function replaceFile(form: FormData) {
-  requireAdmin();
+  await requireAdmin();
   const id = str(form, "id");
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) return;
@@ -44,7 +44,7 @@ export async function replaceFile(form: FormData) {
 }
 
 export async function updateDetails(form: FormData) {
-  requireAdmin();
+  await requireAdmin();
   await db.document.update({
     where: { id: str(form, "id") },
     data: {
@@ -58,7 +58,7 @@ export async function updateDetails(form: FormData) {
 }
 
 export async function deleteDocument(form: FormData) {
-  requireAdmin();
+  await requireAdmin();
   const doc = await db.document.delete({ where: { id: str(form, "id") } });
   await deleteFile(doc.fileKey);
   done();

@@ -22,6 +22,27 @@ model User {
   createdAt    DateTime   @default(now())
   wallPosts    WallPost[]
   saves        Save[]
+  sessions     Session[]
+}
+
+// Login sessions. The cookie holds a random token; only its SHA-256 hash is
+// stored, so a leaked database can't be used to log in.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// Every file saved through src/lib/storage.ts. /uploads/[key] serves these.
+model Upload {
+  key       String   @id
+  fileName  String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
 }
 
 // ---------- Will's content (admin-editable, M2/M3) ----------

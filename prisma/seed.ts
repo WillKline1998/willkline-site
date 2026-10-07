@@ -49,6 +49,15 @@ async function main() {
   const cv = readFileSync("prisma/seed-data/cv.json", "utf8");
   await db.siteSetting.upsert({ where: { key: "cv" }, update: { value: cv }, create: { key: "cv", value: cv } });
 
+  // Backfill Upload rows for files stored before the Upload table existed.
+  for (const d of await db.document.findMany()) {
+    await db.upload.upsert({
+      where: { key: d.fileKey },
+      update: {},
+      create: { key: d.fileKey, fileName: d.fileName, mimeType: d.mimeType, size: d.size },
+    });
+  }
+
   // Starter downloads. Only seeded when there are none, so Will's uploads are never clobbered.
   if ((await db.document.count()) === 0) {
     const starters = [
@@ -57,7 +66,7 @@ async function main() {
     ];
     for (const [i, s] of starters.entries()) {
       const path = `prisma/seed-data/documents/${s.file}`;
-      const fileKey = await saveFile(readFileSync(path), s.file);
+      const fileKey = await saveFile(readFileSync(path), s.file, "application/pdf");
       await db.document.create({
         data: { title: s.title, description: s.description, fileKey, fileName: s.file, mimeType: "application/pdf", size: statSync(path).size, sortOrder: i + 1 },
       });

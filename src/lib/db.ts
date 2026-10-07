@@ -1,6 +1,6 @@
 // Shared Prisma client (reused across hot reloads in dev).
 import path from "node:path";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "../generated/prisma/client"; // relative: also imported by prisma/seed.ts
 
 // SQLite paths in DATABASE_URL ("file:./dev.db") are relative to prisma/ for the
 // CLI, but the Next.js server bundle can't infer that, so resolve it explicitly.

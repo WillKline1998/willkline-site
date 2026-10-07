@@ -1,26 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { adminEnabled } from "@/lib/admin";
+import { requireAdmin } from "@/lib/auth";
+import { logout } from "@/app/login/actions";
 
-export const metadata: Metadata = { title: "Admin" };
+export const metadata: Metadata = { title: "Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-// Admin home. Real login arrives in M3; until then admin tools only run locally.
-export default function AdminPage() {
+const TOOLS = [
+  { href: "/admin/notices", label: "Bulletin", note: "Post shows, releases, news, notes, with photos, videos, PDFs" },
+  { href: "/admin/documents", label: "Documents", note: "Résumé, CV, and any other downloads" },
+  { href: "/admin/bio", label: "Bio", note: "The text on the Bio page" },
+  { href: "/admin/cv", label: "CV text", note: "The CV shown on the CV page" },
+  { href: "/admin/music", label: "Music", note: "Liner notes, years, visibility, order" },
+];
+
+export default async function AdminPage() {
+  const user = await requireAdmin();
   return (
     <section className="page">
       <h1 className="page-title">Admin</h1>
-      {adminEnabled() ? (
-        <>
-          <p className="admin-note">Local-only for now. Login (and editing from anywhere) arrives in milestone M3.</p>
-          <ul className="cv-list">
-            <li><Link href="/admin/documents">Documents</Link>: résumé, CV, and any other downloads</li>
-            <li className="muted">Bulletin posts, bio, CV text, music: coming in M3</li>
-          </ul>
-        </>
-      ) : (
-        <p className="muted">Admin login is coming soon.</p>
-      )}
+      <p className="lede">Signed in as {user.email}.</p>
+      <ul className="admin-tools">
+        {TOOLS.map((t) => (
+          <li key={t.href}>
+            <Link href={t.href}>{t.label}</Link>
+            <span className="muted small">{t.note}</span>
+          </li>
+        ))}
+      </ul>
+      <form action={logout}><button className="btn btn-quiet">Log out</button></form>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/admin";
+import { requireAdmin } from "@/lib/auth";
 import { fileUrl, formatBytes } from "@/lib/storage";
 import { createDocument, deleteDocument, replaceFile, updateDetails } from "./actions";
 
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 // Upload / replace / rename / reorder / hide downloadable documents.
 // Everything published here shows up on /cv immediately (no redeploy).
 export default async function AdminDocuments() {
-  requireAdmin();
+  await requireAdmin("/admin/documents");
   const docs = await db.document.findMany({ orderBy: [{ sortOrder: "asc" }, { uploadedAt: "asc" }] });
 
   return (
