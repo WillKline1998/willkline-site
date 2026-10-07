@@ -1,33 +1,42 @@
 // Create or reset the admin account. Run on the Mac:  npm run admin:create
-// Prompts for email + password (password hidden). Never stores plaintext.
+// (live site: npm run admin:create:prod). Prompts for email + password;
+// the password is hidden while typing and never stored in plaintext.
 import "dotenv/config";
 import { createInterface } from "node:readline/promises";
+import { Writable } from "node:stream";
 import { stdin, stdout } from "node:process";
 import { db } from "../src/lib/db";
 import { hashPasswordNode } from "./hash";
 
+// One readline for every prompt; while `muted`, typed characters aren't echoed.
+let muted = false;
+const output = new Writable({
+  write(chunk, _enc, done) {
+    if (!muted) stdout.write(chunk);
+    done();
+  },
+});
+const rl = createInterface({ input: stdin, output, terminal: true });
 
-async function askHidden(q: string): Promise<string> {
-  stdout.write(q);
-  stdin.setRawMode?.(true);
-  let s = "";
-  for await (const chunk of stdin) {
-    for (const ch of chunk.toString()) {
-      if (ch === "\r" || ch === "\n") { stdin.setRawMode?.(false); stdout.write("\n"); return s; }
-      if (ch === "\u0003") process.exit(1);
-      if (ch === "\u007f") s = s.slice(0, -1); else s += ch;
-    }
-  }
-  return s;
+async function ask(question: string, hidden = false) {
+  stdout.write(question);
+  muted = hidden;
+  const answer = await rl.question("");
+  muted = false;
+  if (hidden) stdout.write("\n");
+  return answer;
 }
 
 async function main() {
-  const rl = createInterface({ input: stdin, output: stdout });
-  const email = (process.env.ADMIN_EMAIL || (await rl.question("Admin email: "))).trim().toLowerCase();
-  rl.close();
-  const pw = process.env.ADMIN_PASSWORD || (await askHidden("New password (12+ characters): "));
+  const email = (process.env.ADMIN_EMAIL || (await ask("Admin email: "))).trim().toLowerCase();
+  if (!email.includes("@")) throw new Error("That doesn't look like an email address.");
+  let pw = process.env.ADMIN_PASSWORD;
+  if (!pw) {
+    pw = await ask("New password (12+ characters, hidden as you type): ", true);
+    if (pw.length < 12) throw new Error("Use at least 12 characters.");
+    if (pw !== (await ask("Repeat password: ", true))) throw new Error("Passwords didn't match.");
+  }
   if (pw.length < 12) throw new Error("Use at least 12 characters.");
-  if (!process.env.ADMIN_PASSWORD && pw !== (await askHidden("Repeat password: "))) throw new Error("Passwords didn't match.");
   const passwordHash = await hashPasswordNode(pw);
   await db.user.upsert({
     where: { email },
@@ -35,7 +44,15 @@ async function main() {
     create: { email, name: "Will Kline", passwordHash, role: "ADMIN" },
   });
   await db.session.deleteMany({ where: { user: { email } } }); // log out everywhere on reset
-  console.log(`Admin ready: ${email}`);
+  console.log(`\nAdmin ready: ${email}. Log in at /login.`);
 }
 
-main().finally(() => db.$disconnect());
+main()
+  .catch((e) => {
+    console.error(`\n${e instanceof Error ? e.message : e}`);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    rl.close();
+    await db.$disconnect();
+  });
