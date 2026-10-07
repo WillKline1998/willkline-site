@@ -1,0 +1,26 @@
+{
+  "_source": "DistroKid HyperFollow page https://distrokid.com/hyperfollow/willthedude/ (fetched 2026-10-06). Order as listed there (appears newest first). Descriptions, years and per-platform links TBD; YouTube compositions to be added by Will.",
+  "artist": {
+    "name": "Will Kline",
+    "location": "Cleveland, OH",
+    "tagline": "All music written, performed, produced, and mastered by Will Kline.",
+    "hyperfollow": "https://distrokid.com/hyperfollow/willthedude/",
+    "soundcloud": "https://soundcloud.com/will-kline-36214054"
+  },
+  "releases": [
+    { "title": "X25", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/x25" } },
+    { "title": "Glowing", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/glowing" } },
+    { "title": "E", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/e" } },
+    { "title": "BECOMING", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/becoming" } },
+    { "title": "Joyful Noise", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/joyful-noise" } },
+    { "title": "In Performance", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/in-performance" } },
+    { "title": "Dream Journal", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/dream-journal" } },
+    { "title": "consumption", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/consumption" } },
+    { "title": "thoughts in isolation", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/thoughts-in-isolation" } },
+    { "title": "THE ARTS", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/the-arts-2" } },
+    { "title": "Senta: Songs My Mother Taught Me", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/senta-songs-my-mother-taught-me" } },
+    { "title": "Close Your Eyes.", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/close-your-eyes" } },
+    { "title": "COOKY", "kind": "soundcloud-set", "links": { "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/cooky" } },
+    { "title": "Tempted", "kind": "soundcloud-set", "links": { "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/tempted" } }
+  ]
+}
