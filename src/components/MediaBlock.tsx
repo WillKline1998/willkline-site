@@ -51,7 +51,7 @@ export function MediaBlock({ m }: { m: NoticeMedia }) {
     );
 
   // LINK, or an EMBED from a provider we don't trust to iframe
-  const host = e.kind === "link" ? e.host : new URL(m.url).hostname.replace(/^www\./, "");
+  const host = e.kind === "link" ? e.host : new URL(m.url, "https://willkline.net").hostname.replace(/^www\./, "");
   return (
     <a className="file-card link-card" href={m.url} target="_blank" rel="noreferrer">
       <span className="file-icon" aria-hidden>↗</span>

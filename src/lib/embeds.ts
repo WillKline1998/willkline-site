@@ -8,6 +8,10 @@ export type Embed =
   | { kind: "link"; href: string; host: string };
 
 export function toEmbed(raw: string): Embed {
+  // Uploaded files are site-relative ("/uploads/…"): direct video plays inline.
+  if (raw.startsWith("/")) {
+    return /\.(mp4|webm|mov)$/i.test(raw) ? { kind: "video", src: raw } : { kind: "link", href: raw, host: "willkline.net" };
+  }
   let u: URL;
   try {
     u = new URL(raw);
