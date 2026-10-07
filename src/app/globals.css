@@ -1,50 +1,13 @@
 @import "tailwindcss";
 
 /* ==================================================================
-   NORMAL MODE: three candidate themes (see src/lib/themes.ts).
-   Each theme only sets variables + a few signature details; the
-   shared structure below reads the variables.
+   NORMAL MODE: "Quiet Studio" (chosen by Will 2026-10-07; the
+   alternatives live in git history, commit c17f2c9).
    ================================================================== */
 
-/* --- Theme A: Recital Program (default) --- */
-:root,
-[data-theme="recital"] {
-  --bg: #f6f1e7;
-  --panel: #fbf8f1;
-  --ink: #2a2420;
-  --muted: #7a6e63;
-  --accent: #7b1e2b;
-  --rule: #d9cfbf;
-  --font-body: var(--font-garamond), Garamond, Georgia, serif;
-  --font-display: var(--font-garamond), Garamond, Georgia, serif;
-  --font-label: var(--font-garamond), Georgia, serif;
-  --body-size: 1.15rem;
-  --shell-max: 1100px;
-  --nav-width: 230px;
-  --radius: 0;
-}
-
-/* --- Theme B: Self-Hosted '07 --- */
-[data-theme="homepage"] {
-  --bg: #dcd6c8;
-  --panel: #fffdf6;
-  --ink: #1d1d1d;
-  --muted: #666;
-  --accent: #1a3f8f;
-  --rule: #9c9482;
-  --font-body: Verdana, Geneva, Tahoma, sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-label: Verdana, Geneva, sans-serif;
-  --body-size: 0.82rem;
-  --shell-max: 900px;
-  --nav-width: 190px;
-  --radius: 0;
-}
-
-/* --- Theme C: Quiet Studio --- */
-[data-theme="studio"] {
+:root {
   --bg: #ffffff;
-  --panel: #ffffff;
+  --panel: #f6f6f4;
   --ink: #111;
   --muted: #8a8a8a;
   --accent: #c2410c;
@@ -163,41 +126,11 @@ a:hover { text-decoration: underline; }
 @media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
 .listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
 
-/* --- Theme signature details --- */
-
-/* Recital: centered small-caps labels, double rule like a printed program */
-[data-theme="recital"] .section-label { font-variant: small-caps; text-transform: none; letter-spacing: 0.08em; font-size: 1em; border-bottom: 3px double var(--rule); }
-[data-theme="recital"] .site-nav li a { font-variant: small-caps; letter-spacing: 0.05em; font-size: 1.05em; }
-[data-theme="recital"] .notice { box-shadow: 0 1px 0 var(--rule); }
-
-/* Homepage '07: the whole page is a bordered box on a textured backdrop; visited links purple */
-[data-theme="homepage"] body {
-  background-color: var(--bg);
-  background-image: radial-gradient(#00000014 1px, transparent 1px);
-  background-size: 4px 4px;
-}
-[data-theme="homepage"] .site-shell {
-  margin: 1.5rem auto; min-height: auto;
-  background: var(--panel); border: 2px solid var(--rule);
-  box-shadow: 4px 4px 0 #00000022;
-}
-[data-theme="homepage"] .site-nav { background: #ece5d3; }
-[data-theme="homepage"] .site-nav li a { color: var(--accent); text-decoration: underline; }
-[data-theme="homepage"] .site-nav li::before { content: "» "; color: var(--muted); }
-[data-theme="homepage"] .site-shell { align-items: stretch; }
-[data-theme="homepage"] .site-nav { position: static; min-height: 0; }
-[data-theme="homepage"] .site-main { min-height: 640px; }
-[data-theme="homepage"] a:visited { color: #5a2a82; }
-[data-theme="homepage"] .page-title { font-size: 2em; }
-[data-theme="homepage"] .notice { border: 1px dashed var(--rule); }
-[data-theme="homepage"] .section-label { background: var(--accent); color: #fff; padding: 0.2rem 0.5rem; border: 0; letter-spacing: 0.08em; }
-[data-theme="homepage"] .last-updated::before { content: "★ "; }
-
-/* Studio: no borders, big type, monospace labels */
-[data-theme="studio"] .site-nav { border-right-color: transparent; }
-[data-theme="studio"] .page-title { font-size: 3.4em; font-weight: 600; letter-spacing: -0.03em; }
-[data-theme="studio"] .notice { border: 0; background: #f6f6f4; }
-[data-theme="studio"] .section-label { border-bottom: 0; }
+/* --- Quiet Studio details --- */
+.site-nav { border-right-color: transparent; }
+.page-title { font-size: 3.4em; font-weight: 600; letter-spacing: -0.03em; }
+.notice { border: 0; }
+.section-label { border-bottom: 0; }
 
 /* ------------------------------------------------------------------
    DEMO MODE ("kaleidoscope glasses")
