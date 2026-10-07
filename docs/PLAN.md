@@ -25,6 +25,8 @@ One home for every part of Will's life — music, CV, media, writing, and future
 - **M0 — Scaffold** ✅ Project, routes, nav, demo toggle + starter effects, data model, docs.
 - **M1 — Design system & home** Visual identity (type, color, layout), real home/bio, responsive nav, normal-mode polish.
 - **M2 — Content sections (read-only)** Music (albums/tracks/audio player), CV (rendered + PDF download), Media gallery, Writing (Markdown posts). Seed with real content.
+  - Music catalog requirements (from Will, 2026-10-06): ~10 solo albums + ~5 other projects, every genre, spread across Spotify/Bandcamp (DistroKid), SoundCloud (older, unremastered), YouTube (classical compositions from college). **One page per work** with description, credits/notes and links to every platform; site becomes the single home that unites them. Album model may need a `links` field (platform → URL) and a `kind` (album / EP / composition / project).
+  - Lab note: Will uses Ableton + Max/MSP (Max 9) and has built Max patches. Strong candidates for M5 experiments / showcasing existing patches.
 - **M3 — Admin & auth** Login, admin role, admin dashboard to create/edit/delete all content, file uploads (résumé, art, audio).
 - **M4 — Inspiration Wall** Member sign-up, post art/music links, save to collections, shareable collection pages, basic moderation (admin can remove).
 - **M5 — Lab** Project index + first music-software experiment (e.g., Web Audio toy).
