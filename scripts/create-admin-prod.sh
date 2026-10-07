@@ -6,6 +6,10 @@ set -e
 cd "$(dirname "$0")/.."
 ENV_FILE="$(mktemp)"
 trap 'rm -f "$ENV_FILE"' EXIT
-vercel env pull "$ENV_FILE" --environment=production --yes >/dev/null
+echo "Connecting to the live site (a few seconds)..."
+vercel env pull "$ENV_FILE" --environment=production --yes >/dev/null 2>&1 || {
+  echo "Couldn't reach Vercel. Are you logged in? Try: vercel login"; exit 1; }
 set -a; . "$ENV_FILE"; set +a
-npx tsx scripts/create-admin.ts
+echo "Connected. Setting up the admin login for willkline.net:"
+echo
+npx --no-install tsx scripts/create-admin.ts
