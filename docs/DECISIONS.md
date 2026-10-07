@@ -11,3 +11,12 @@ Short record of choices and why, so future sessions (and future Will) don't reli
 - **2026-10-07 · Domain: willkline.net** registered at Porkbun (account username "willthedude", email wskline4@gmail.com). $12.52/yr flat; auto-renew ON, transfer lock ON, WHOIS privacy ON; expires 2027-10-07. Nameservers = Porkbun default (parked). At M7: add DNS records at Porkbun pointing to the host (e.g., Vercel).
 - **2026-10-07 · Note: earlier attempt exists.** Private repos `WillKline1998/personal-site` (C# backend + Angular frontend, Mar 2026) and `WillKline1998/frontend` (Angular, Mar 2026). Found after choosing Next.js; asked Will whether to reuse anything or keep the fresh start.
 - **2026-10-07 · Plan to make this repo public** once it's presentable (portfolio piece; his public GitHub is otherwise empty).
+
+## 2026-10-07 — Hand-rolled auth instead of a library
+scrypt (node:crypto) + database sessions, ~70 lines in src/lib/auth.ts. Auth.js/Lucia would add a dependency and config for a site with one admin; this is small enough to read in one sitting (and is itself portfolio material). Revisit if social login is wanted for Wall members (M4).
+
+## 2026-10-07 — Uploads go through one storage module
+src/lib/storage.ts (save/read/delete + Upload table). Local disk for now (storage/, gitignored). At deploy, swap the driver for cloud storage (Vercel Blob/S3) without touching pages.
+
+## 2026-10-07 — CV text stored as JSON
+Same shape as ~/JobSearch/resume/*.json so résumé builds and the site share one source. v1 editor is raw JSON with validation; a section-by-section form can come later.

@@ -2,6 +2,12 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (midday) — M3: login + admin for everything
+**Done**: Real login (src/lib/auth.ts): scrypt password hashes, DB `Session` (only token hash stored), httpOnly cookie, 30 days, brute-force brake (5 tries → 5 min). `requireAdmin()` gates every admin page AND every Server Action. Admin account via `npm run admin:create` (prompts; never stored in plaintext). `Upload` table records every stored file; /uploads serves any upload except files of hidden documents. Admin tools: **Bulletin** (create/edit/delete posts; attachments by upload or pasted link, reorder, remove, live preview; deleting a post deletes its files), **Documents**, **Bio**, **CV text** (JSON, validated so a typo can't break /cv), **Music** (liner notes, year, order, visibility).
+**Verified**: lint + build; scripts/e2e_admin.py = 16/16 PASS (login gate, wrong password, redirect back, post + uploaded image + YouTube on home, file served + deleted with post, document upload/replace/delete, bio round-trip, CV validation, liner notes, logout). Screenshots: docs/mockups/admin_*.png.
+**Blocked on Will**: create his admin account once at the Mac: `cd ~/Projects/willkline-site && npm run admin:create`.
+**Next**: M4 Inspiration Wall (member accounts) or M7 deploy (needs: Postgres host, file storage, Vercel). CV editor could become a friendly form later.
+
 ## 2026-10-07 (late morning) — Bio, CV, configurable documents
 **Done**: Bio page (SiteSetting "bio"; draft adapted + lengthened from Will's LinkedIn About, third person). CV page = the CV itself (SiteSetting "cv" JSON, same shape as ~/JobSearch/resume/*.json, **no phone number**) + a Download section listing every published `Document`. Generalized `Document` model replaces ResumeFile. Local storage driver (storage/uploads, gitignored; served by /uploads/[key] only for published docs). /admin/documents: upload with title/description, replace file (same entry), rename, reorder, hide, delete. Admin is gated to local use (dev, or `ADMIN_LOCAL=1 next start`) until M3 login; it 404s otherwise. Starter docs: one-page Résumé + 2-page CV (generated from JobSearch builder, phone stripped).
 **Verified**: lint + build; scripts/e2e_documents.py passes (upload, appears on /cv, file served, replace swaps file + old one 404s, delete removes it); /admin/documents 404s without the flag.
