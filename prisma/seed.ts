@@ -40,6 +40,10 @@ async function main() {
     await db.album.upsert({ where: { slug }, update: data, create: { slug, ...data } });
   }
 
+  // Bio text (SiteSetting "bio"); admin-editable in M3.
+  const bio = readFileSync("prisma/seed-data/bio.md", "utf8");
+  await db.siteSetting.upsert({ where: { key: "bio" }, update: { value: bio }, create: { key: "bio", value: bio } });
+
   // Notices are demo content until the admin page exists (M3): replace wholesale.
   await db.notice.deleteMany();
   const notices = [

@@ -1,0 +1,11 @@
+Will Kline is a bassist, composer, and software engineer based in Cleveland, Ohio.
+
+Engineering came first. As a kid he was obsessed with rockets and airplanes, designing and building his own for school competitions (and sometimes just for fun), and sketching space shuttles and stations that fixed what he saw as flaws in the real ones. That instinct, to find the problem and build the better version, followed him straight into music.
+
+Will studied double bass at the Indiana University Jacobs School of Music, earning a Bachelor of Music in Performance and a Performer Diploma in Solo Performance. At IU he was Principal Bassist of the Indiana University New Music Ensemble, premiering new works, often with the composer in the room reshaping the music in real time. Summers took him to the Texas Music Festival, the Chautauqua Institution School of Music, and the Aspen Music Festival and School, where he played in the Aspen Festival Orchestra, the Aspen Chamber Symphony, and the Aspen Contemporary Ensemble; performed alongside Augustin Hadelich and Joyce Yang; worked in masterclasses with Edgar Meyer; and performed his own solo bass composition on a soloists' recital. He went on to serve as Assistant Principal Bass of the Carmel Symphony Orchestra in Indiana. Along the way he coached sectionals, taught private students, and played more school and community outreach concerts than he can count.
+
+In 2023 he brought the engineering back to the front. After completing Tech Elevator's full-stack software bootcamp in Cleveland, he joined CutterCroix, where he builds custom software for some of the largest companies in the roofing and construction industries, working directly with their teams to turn what they need into tools they use every day.
+
+The music never left. Will has self-released fourteen albums, EPs, and projects across nearly every genre, each one written, performed, recorded, mixed, and mastered on his own in Ableton Live and Max/MSP. He's most interested in the places where his two lives meet: sound, code, and the small tools that make new music possible. Some of those will live here, in the Lab.
+
+When he isn't making something, Will is usually traveling the country, hiking, or hunting down a new vegan recipe or restaurant.

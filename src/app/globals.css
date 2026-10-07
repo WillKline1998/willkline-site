@@ -115,6 +115,9 @@ a:hover { text-decoration: underline; }
 .notice-link { font-size: 0.95em; }
 .notice-show { border-left: 4px solid var(--accent); }
 
+.prose { max-width: 640px; font-size: 1.05em; line-height: 1.75; }
+.prose p { margin: 0 0 1.1em; }
+
 /* Attachments on bulletin posts */
 .notice-media { display: grid; gap: 0.9rem; margin: 0.8rem 0 0.6rem; }
 .media { margin: 0; }
