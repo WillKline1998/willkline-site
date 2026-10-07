@@ -155,6 +155,7 @@ a:hover { text-decoration: underline; }
 .cv-dates { font-family: var(--font-label); font-size: 0.8em; color: var(--muted); white-space: nowrap; }
 .cv-meta { color: var(--muted); font-size: 0.9em; margin: 0.15rem 0 0.4rem; }
 .cv ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+.cv ul.doc-list { padding-left: 0; margin-bottom: 1.5rem; }
 .cv li { margin: 0.3rem 0; }
 .cv-skills div { display: grid; grid-template-columns: 200px 1fr; gap: 1rem; padding: 0.35rem 0; border-bottom: 1px solid var(--rule); }
 .cv-skills dt { font-family: var(--font-label); font-size: 0.8em; color: var(--muted); }
@@ -162,7 +163,11 @@ a:hover { text-decoration: underline; }
 
 /* Admin */
 .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-.admin-table td { padding: 0.6rem 0.4rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.admin-table td { padding: 0.9rem 0.4rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.admin-table input[type=text], .admin-table input[type=number] { font: inherit; font-size: 0.95rem; padding: 0.35rem 0.5rem; border: 1px solid var(--rule); border-radius: 6px; }
+.admin-table input[name=title] { width: 220px; }
+.admin-table input[name=description] { width: 300px; }
+.admin-table .small.muted { margin: 0.35rem 0; }
 .admin-form { display: grid; gap: 0.6rem; max-width: 520px; padding: 1rem; background: var(--panel); border-radius: var(--radius); }
 .admin-form label { display: grid; gap: 0.2rem; font-family: var(--font-label); font-size: 0.75em; color: var(--muted); }
 .admin-form input[type=text], .admin-form input[type=number], .admin-form textarea { font: inherit; font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }

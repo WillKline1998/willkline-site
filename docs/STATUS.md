@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (late morning) — Bio, CV, configurable documents
+**Done**: Bio page (SiteSetting "bio"; draft adapted + lengthened from Will's LinkedIn About, third person). CV page = the CV itself (SiteSetting "cv" JSON, same shape as ~/JobSearch/resume/*.json, **no phone number**) + a Download section listing every published `Document`. Generalized `Document` model replaces ResumeFile. Local storage driver (storage/uploads, gitignored; served by /uploads/[key] only for published docs). /admin/documents: upload with title/description, replace file (same entry), rename, reorder, hide, delete. Admin is gated to local use (dev, or `ADMIN_LOCAL=1 next start`) until M3 login; it 404s otherwise. Starter docs: one-page Résumé + 2-page CV (generated from JobSearch builder, phone stripped).
+**Verified**: lint + build; scripts/e2e_documents.py passes (upload, appears on /cv, file served, replace swaps file + old one 404s, delete removes it); /admin/documents 404s without the flag.
+**Next**: M3 login so Will can manage everything from anywhere; then admin for bulletin posts (with uploads), bio, and CV text. At deploy, swap the storage driver to cloud storage.
+
 ## 2026-10-07 (mid-morning) — design chosen + bulletin attachments
 **Done**: Will picked **Quiet Studio**, so it's now the only theme (alternates removed, preserved in c17f2c9). Added `NoticeMedia` (IMAGE / EMBED / FILE / LINK) with faithful rendering: images, YouTube (nocookie) / Vimeo / Spotify / SoundCloud players, direct video, PDF inline preview + file card, link cards. Allowlisted iframes only (src/lib/embeds.ts). Seeded real posts (BECOMING on Spotify, COOKY on SoundCloud) + [Example] flyer/PDF/YouTube posts. Muroki reference captured.
 **Verified**: lint + build; full-page screenshot shows every embed rendering (docs/mockups/studio_home_full.png).
