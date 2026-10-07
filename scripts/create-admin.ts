@@ -18,12 +18,16 @@ const output = new Writable({
 });
 const rl = createInterface({ input: stdin, output, terminal: true });
 
+// Visible prompts go through readline (it redraws its own prompt line, which
+// would erase text written separately). Hidden ones print the label first and
+// mute readline entirely, redraws included.
 async function ask(question: string, hidden = false) {
+  if (!hidden) return rl.question(question);
   stdout.write(question);
-  muted = hidden;
+  muted = true;
   const answer = await rl.question("");
   muted = false;
-  if (hidden) stdout.write("\n");
+  stdout.write("\n");
   return answer;
 }
 
