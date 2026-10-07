@@ -2,6 +2,12 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (evening) — M7: LIVE at https://willkline.net
+**Done**: Vercel project willkline-site (account willkline1998, Hobby), GitHub-connected: every push to main deploys production. Neon Postgres (free, via Vercel integration; env DATABASE_URL + DATABASE_URL_UNPOOLED) — local dev now Homebrew Postgres 17 too. Vercel Blob private store `willkline-uploads` (BLOB_READ_WRITE_TOKEN) behind src/lib/storage.ts. Prisma switched to engine-less client (engineType="client" + @prisma/adapter-pg) after Vercel couldn't find the native engine. `vercel-build` = migrate deploy + next build. Production seeded. DNS at Porkbun: A @ 216.198.79.1, CNAME www → 43aa37c1dae9c2e5.vercel-dns-017.com; www 308-redirects to apex. Cert issued manually via `vercel certs issue`.
+**Verified**: https://willkline.net home/cv/login 200; résumé PDF streams from Blob; e2e_admin ALL PASS locally on Postgres.
+**Blocked on Will**: `npm run admin:create:prod` (creates his live admin login).
+**Known limits / next**: uploads ≤4.5MB (Vercel body cap) → client-direct Blob uploads for video later; preview deployments share the prod DB → give previews a Neon branch before M4 (public sign-ups).
+
 ## 2026-10-07 (afternoon) — Responsive / mobile foundation
 **Done**: Mobile-first pass. Phones get a compact sticky top bar (name + one-line tagline + Menu button) that unfolds the nav and closes after you pick a page; ≥768px keeps the sidebar. Fixed: bulletin cards overflowing (grid min-width), admin Documents/Music/Bulletin overflowing (stacked rows, fluid inputs), small tap targets (44px nav/menu/demo, 40px buttons), 11px labels → 12px, CV skills/rows wrap, PDF preview capped to 70vh, fluid title size, 16px inputs. Rules written into AGENTS.md.
 **Verified**: scripts/responsive_audit.py: 15 pages × 4 viewports (320, 390, 768, 1366) = 0 issues (overflow / tap targets / tiny text) + phone menu open→navigate→close + sidebar on tablet/desktop. e2e_admin still ALL PASS. Overview: docs/mockups/phone_overview.png.
