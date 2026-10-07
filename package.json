@@ -12,7 +12,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "admin:create": "tsx scripts/create-admin.ts",
-    "vercel-build": "prisma migrate deploy && next build"
+    "vercel-build": "prisma migrate deploy && next build",
+    "admin:create:prod": "sh scripts/create-admin-prod.sh"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^6.19.3",
