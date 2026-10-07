@@ -3,6 +3,7 @@
 // notices are replaced wholesale.
 // Run: npm run db:seed
 
+import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
