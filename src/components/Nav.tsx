@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { sections } from "@/lib/sections";
 import { DemoToggle } from "@/components/DemoMode";
+import { NavShell } from "@/components/NavShell";
 
 export function Nav() {
   return (
-    <aside className="site-nav">
-      <Link href="/" className="site-name">
-        Will Kline
-        <span className="site-tagline">
-          <span>Bassist</span> <span>Composer</span> <span>Engineer</span>
-        </span>
-      </Link>
-      <nav>
+    <NavShell
+      brand={
+        <Link href="/" className="site-name">
+          Will Kline
+          <span className="site-tagline">
+            <span>Bassist</span> <span>Composer</span> <span>Engineer</span>
+          </span>
+        </Link>
+      }
+    >
+      <nav aria-label="Site">
         <ul>
           <li><Link href="/">Home</Link></li>
           {sections.map((s) => (
@@ -20,6 +24,6 @@ export function Nav() {
         </ul>
       </nav>
       <div className="nav-foot"><DemoToggle /></div>
-    </aside>
+    </NavShell>
   );
 }

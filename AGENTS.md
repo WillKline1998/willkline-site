@@ -17,6 +17,7 @@ Read `docs/PLAN.md` (vision + milestones), `docs/STATUS.md` (latest progress), a
 - Site sections are defined once in `src/lib/sections.ts`.
 - Data model: `prisma/schema.prisma`. Change it via `npm run db:migrate`. Keep it Postgres-compatible (no SQLite-only tricks).
 - Prisma client is generated to `src/generated/prisma` (gitignored); import the shared client from `@/lib/db`.
-- Before finishing any task: `npm run lint` and `npm run build` must pass.
+- **Mobile-first, always.** Base CSS is for phones; widen with `@media (min-width: …)` (breakpoints: 640 / 768 / 900). Rules: no horizontal scroll at 320px; tap targets ≥ 40–44px; form inputs ≥ 16px (stops iOS zoom); text ≥ 12px; grid/flex children that hold embeds get `min-width: 0`; tables collapse to stacked rows on phones. The sidebar becomes a top bar + Menu under 768px (src/components/NavShell.tsx).
+- Before finishing any task: `npm run lint` and `npm run build` must pass. For UI changes also run `scripts/responsive_audit.py` (phone / small-phone / tablet / desktop; must report 0 issues), and for admin/auth changes run `scripts/e2e_admin.py`.
 - End every work session by adding an entry to `docs/STATUS.md` (done / verified / next) and recording notable choices in `docs/DECISIONS.md`.
 - Never commit secrets. `.env` is gitignored; document new variables in `.env.example`.

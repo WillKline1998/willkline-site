@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (afternoon) — Responsive / mobile foundation
+**Done**: Mobile-first pass. Phones get a compact sticky top bar (name + one-line tagline + Menu button) that unfolds the nav and closes after you pick a page; ≥768px keeps the sidebar. Fixed: bulletin cards overflowing (grid min-width), admin Documents/Music/Bulletin overflowing (stacked rows, fluid inputs), small tap targets (44px nav/menu/demo, 40px buttons), 11px labels → 12px, CV skills/rows wrap, PDF preview capped to 70vh, fluid title size, 16px inputs. Rules written into AGENTS.md.
+**Verified**: scripts/responsive_audit.py: 15 pages × 4 viewports (320, 390, 768, 1366) = 0 issues (overflow / tap targets / tiny text) + phone menu open→navigate→close + sidebar on tablet/desktop. e2e_admin still ALL PASS. Overview: docs/mockups/phone_overview.png.
+**Not covered**: real iPhone Safari quirks (only Chrome emulation). Will to sanity-check on his phone once the site is reachable.
+
 ## 2026-10-07 (midday) — M3: login + admin for everything
 **Done**: Real login (src/lib/auth.ts): scrypt password hashes, DB `Session` (only token hash stored), httpOnly cookie, 30 days, brute-force brake (5 tries → 5 min). `requireAdmin()` gates every admin page AND every Server Action. Admin account via `npm run admin:create` (prompts; never stored in plaintext). `Upload` table records every stored file; /uploads serves any upload except files of hidden documents. Admin tools: **Bulletin** (create/edit/delete posts; attachments by upload or pasted link, reorder, remove, live preview; deleting a post deletes its files), **Documents**, **Bio**, **CV text** (JSON, validated so a typo can't break /cv), **Music** (liner notes, year, order, visibility).
 **Verified**: lint + build; scripts/e2e_admin.py = 16/16 PASS (login gate, wrong password, redirect back, post + uploaded image + YouTube on home, file served + deleted with post, document upload/replace/delete, bio round-trip, CV validation, liner notes, logout). Screenshots: docs/mockups/admin_*.png.
