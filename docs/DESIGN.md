@@ -10,7 +10,13 @@ Nostalgic **self-hosted classical-artist website**: the site a rising soloist ha
 ## References
 - **Jeffrey Turner** (former principal bass, Pittsburgh Symphony; IU faculty; Will's teacher): jeffreyturner.net. Georgia-style serif, small-caps top nav (HOME / BIOGRAPHY / MEDIA / CONTACT), name + "Bassist / Conductor / Educator" stacked in serif over a full-bleed photo. Quiet, classic, understated. Screenshot: research/ref_jeffreyturner.net.png
 - **Marguerite (Maggie) Cox** (bassist, NYC; Will's friend): margueritecox.com. Squarespace, lavender/purple tint, centered name, nav split left. Under the hero: press quotes, then an **"Upcoming Performances" list (date / venue / ensemble / Read more →)**. That list is close to Will's bulletin idea. Screenshot: research/ref_margueritecox.com.png
-- **Kurt Muroki** (IU bass professor; Will's teacher; built his own site): Will said "marocchi.com"; marocchi.com has no SSL and muroki.com / kurtmuroki.com didn't resolve on 2026-10-07. **Ask Will for the URL.**
+- **Kurt Muroki** (IU bass professor; Will's teacher; built his own site): muroki.com/wp/?page_id=5 (http only). WordPress Twenty Fourteen: black left sidebar with Recent Posts / Pages / Archives, green accent, Lato, one narrow text column with photos floated right. The blog-style sidebar (recent posts + archives) is a nice fit for the bulletin board. Screenshot: research/ref_muroki.com.png
+
+## Decision (2026-10-07)
+**Quiet Studio** (theme C) chosen: white, Geist sans + mono labels, one orange accent (#c2410c), soft panels. The nostalgic charm should come through in content and small details, not a retro skin. Recital and Self-Hosted '07 remain in git history (commit c17f2c9).
+
+## Bulletin attachments (Will: "represented faithfully")
+Images inline; YouTube/Vimeo/Spotify/SoundCloud as real players; direct mp4 as <video>; PDFs as an inline preview + file card; anything else as a link card. Only allowlisted providers get iframes (src/lib/embeds.ts).
 
 ## Takeaways
 - Serif typography (Georgia/Garamond family), small-caps labels, generous whitespace, restrained color.

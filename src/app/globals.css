@@ -118,7 +118,7 @@ a:hover { text-decoration: underline; }
 /* Attachments on bulletin posts */
 .notice-media { display: grid; gap: 0.9rem; margin: 0.8rem 0 0.6rem; }
 .media { margin: 0; }
-.media img { display: block; max-width: 100%; height: auto; border-radius: var(--radius); }
+.media img { display: block; max-width: 100%; max-height: 560px; width: auto; height: auto; border-radius: var(--radius); }
 .media iframe, .media video { display: block; width: 100%; border: 0; border-radius: var(--radius); background: #000; }
 .aspect-video iframe, .aspect-video video { aspect-ratio: 16 / 9; }
 .aspect-audio-tall iframe { height: 352px; background: transparent; }
