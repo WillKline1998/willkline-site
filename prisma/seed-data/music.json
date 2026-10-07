@@ -8,19 +8,153 @@
     "soundcloud": "https://soundcloud.com/will-kline-36214054"
   },
   "releases": [
-    { "title": "X25", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/x25" } },
-    { "title": "Glowing", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/glowing" } },
-    { "title": "E", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/e" } },
-    { "title": "BECOMING", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/becoming" } },
-    { "title": "Joyful Noise", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/joyful-noise" } },
-    { "title": "In Performance", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/in-performance" } },
-    { "title": "Dream Journal", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/dream-journal" } },
-    { "title": "consumption", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/consumption" } },
-    { "title": "thoughts in isolation", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/thoughts-in-isolation" } },
-    { "title": "THE ARTS", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/the-arts-2" } },
-    { "title": "Senta: Songs My Mother Taught Me", "kind": "EP", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/senta-songs-my-mother-taught-me" } },
-    { "title": "Close Your Eyes.", "kind": "release", "links": { "hyperfollow": "https://distrokid.com/hyperfollow/willkline/close-your-eyes" } },
-    { "title": "COOKY", "kind": "soundcloud-set", "links": { "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/cooky" } },
-    { "title": "Tempted", "kind": "soundcloud-set", "links": { "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/tempted" } }
+    {
+      "title": "X25",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/x25",
+        "spotify": "https://open.spotify.com/album/3D77A6MEfx4A6XHehLNEk1",
+        "apple": "https://music.apple.com/us/album/x25-ep/1835341313?uo=4",
+        "deezer": "https://www.deezer.com/album/809820221"
+      },
+      "cover": "/covers/x25.jpg"
+    },
+    {
+      "title": "Glowing",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/glowing",
+        "spotify": "https://open.spotify.com/album/1Hawcsy5Uf2E343k65dgWJ",
+        "apple": "https://music.apple.com/us/album/glowing/1817963432?uo=4",
+        "deezer": "https://www.deezer.com/album/765658751"
+      },
+      "cover": "/covers/glowing.jpg"
+    },
+    {
+      "title": "E",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/e",
+        "spotify": "https://open.spotify.com/album/7sIq9RbZ48Nomz9Cfk624l",
+        "apple": "https://music.apple.com/us/album/e/1766552038?uo=4",
+        "deezer": "https://www.deezer.com/album/637768481"
+      },
+      "cover": "/covers/e.jpg"
+    },
+    {
+      "title": "BECOMING",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/becoming",
+        "spotify": "https://open.spotify.com/album/0kiVJpJSOSltv0nk1hkkqU",
+        "apple": "https://music.apple.com/us/album/becoming/1757085839?uo=4",
+        "deezer": "https://www.deezer.com/album/609147792"
+      },
+      "cover": "/covers/becoming.jpg"
+    },
+    {
+      "title": "Joyful Noise",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/joyful-noise",
+        "spotify": "https://open.spotify.com/album/5JTz6RiZEMpV6r4W1b2mzK",
+        "apple": "https://music.apple.com/us/album/joyful-noise/1723046235?uo=4",
+        "deezer": "https://www.deezer.com/album/527707662"
+      },
+      "cover": "/covers/joyful-noise.jpg"
+    },
+    {
+      "title": "In Performance",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/in-performance",
+        "spotify": "https://open.spotify.com/album/2E6J1qeWNjIGASTW7dm39e",
+        "apple": "https://music.apple.com/us/album/in-performance/1694656323?uo=4",
+        "deezer": "https://www.deezer.com/album/458626715"
+      },
+      "cover": "/covers/in-performance.jpg"
+    },
+    {
+      "title": "Dream Journal",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/dream-journal",
+        "spotify": "https://open.spotify.com/album/5ukHkGzOlCoNO8L5dz0LSJ",
+        "apple": "https://music.apple.com/us/album/dream-journal/1663415046?uo=4",
+        "deezer": "https://www.deezer.com/album/393771477"
+      },
+      "cover": "/covers/dream-journal.jpg"
+    },
+    {
+      "title": "consumption",
+      "kind": "EP",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/consumption",
+        "spotify": "https://open.spotify.com/album/5DJZlKVQQrSTNdcMUEwjlP",
+        "apple": "https://music.apple.com/us/album/consumption-ep/1637752280?uo=4",
+        "deezer": "https://www.deezer.com/album/342553667"
+      },
+      "cover": "/covers/consumption.jpg"
+    },
+    {
+      "title": "thoughts in isolation",
+      "kind": "EP",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/thoughts-in-isolation",
+        "spotify": "https://open.spotify.com/album/4HZv18quUFUOQSFEnBm3FZ",
+        "apple": "https://music.apple.com/us/album/thoughts-in-isolation-ep/1626218767?uo=4",
+        "deezer": "https://www.deezer.com/album/322158297"
+      },
+      "cover": "/covers/thoughts-in-isolation.jpg"
+    },
+    {
+      "title": "THE ARTS",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/the-arts-2",
+        "spotify": "https://open.spotify.com/album/0dBDJGjtxT8rB2jiVEeTRg",
+        "apple": "https://music.apple.com/us/album/the-arts/1624141781?uo=4",
+        "deezer": "https://www.deezer.com/album/318668547"
+      },
+      "cover": "/covers/the-arts.jpg"
+    },
+    {
+      "title": "Senta: Songs My Mother Taught Me",
+      "kind": "EP",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/senta-songs-my-mother-taught-me",
+        "spotify": "https://open.spotify.com/album/480vw4Be2tMfMUdvXvA1ya",
+        "apple": "https://music.apple.com/us/album/senta-songs-my-mother-taught-me-single/1543038001?uo=4",
+        "deezer": "https://www.deezer.com/album/190418362"
+      },
+      "cover": "/covers/senta-songs-my-mother-taught-me.jpg"
+    },
+    {
+      "title": "Close Your Eyes.",
+      "kind": "release",
+      "links": {
+        "hyperfollow": "https://distrokid.com/hyperfollow/willkline/close-your-eyes",
+        "spotify": "https://open.spotify.com/album/3L4hEnG5HFFsCSzJmWQOUK",
+        "apple": "https://music.apple.com/us/album/close-your-eyes/1530072735?uo=4",
+        "deezer": "https://www.deezer.com/album/170679312"
+      },
+      "cover": "/covers/close-your-eyes.jpg"
+    },
+    {
+      "title": "COOKY",
+      "kind": "soundcloud-set",
+      "links": {
+        "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/cooky"
+      },
+      "cover": "/covers/cooky.jpg"
+    },
+    {
+      "title": "Tempted",
+      "kind": "soundcloud-set",
+      "links": {
+        "soundcloud": "https://soundcloud.com/will-kline-36214054/sets/tempted"
+      },
+      "cover": "/covers/tempted.jpg"
+    }
   ]
 }

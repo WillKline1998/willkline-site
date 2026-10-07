@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { KIND_LABEL } from "@/lib/music";
 
 export const metadata: Metadata = { title: "Music" };
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ export default async function MusicPage() {
                 <Image src={a.coverUrl} alt={`${a.title} cover`} width={300} height={300} className="album-cover" />
               )}
               <span className="album-title">{a.title}</span>
-              <span className="album-kind">{a.kind === "PROJECT" ? "Project" : a.kind === "EP" ? "EP" : "Album"}</span>
+              <span className="album-kind">{KIND_LABEL[a.kind] ?? "Album"}</span>
             </Link>
           </li>
         ))}

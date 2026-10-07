@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { KIND_LABEL } from "@/lib/music";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export default async function AlbumPage(props: PageProps<"/music/[slug]">) {
         )}
         <div>
           <h1 className="page-title">{a.title}</h1>
-          <p className="album-kind">{a.kind === "PROJECT" ? "Project" : a.kind === "EP" ? "EP" : "Album"}{a.year ? ` · ${a.year}` : ""}</p>
+          <p className="album-kind">{KIND_LABEL[a.kind] ?? "Album"}{a.year ? ` · ${a.year}` : ""}</p>
           <p className={a.description ? "" : "muted"}>
             {a.description || "Liner notes coming soon."}
           </p>

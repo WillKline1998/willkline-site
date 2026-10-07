@@ -99,6 +99,8 @@ a:hover { text-decoration: underline; }
   font-family: var(--font-display); font-size: 1.6em; line-height: 1.1;
 }
 .site-name:hover { text-decoration: none; }
+/* Stacked titles, a nod to the classic soloist site ("Bassist / Conductor / Educator"). */
+.site-tagline span { display: block; }
 .site-tagline {
   display: block; margin-top: 0.35rem;
   font-family: var(--font-label); font-size: 0.7em; letter-spacing: 0.04em;
@@ -182,7 +184,9 @@ a:hover { text-decoration: underline; }
 [data-theme="homepage"] .site-nav { background: #ece5d3; }
 [data-theme="homepage"] .site-nav li a { color: var(--accent); text-decoration: underline; }
 [data-theme="homepage"] .site-nav li::before { content: "» "; color: var(--muted); }
-[data-theme="homepage"] .site-main, [data-theme="homepage"] .site-nav { min-height: 640px; }
+[data-theme="homepage"] .site-shell { align-items: stretch; }
+[data-theme="homepage"] .site-nav { position: static; min-height: 0; }
+[data-theme="homepage"] .site-main { min-height: 640px; }
 [data-theme="homepage"] a:visited { color: #5a2a82; }
 [data-theme="homepage"] .page-title { font-size: 2em; }
 [data-theme="homepage"] .notice { border: 1px dashed var(--rule); }

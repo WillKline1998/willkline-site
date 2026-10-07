@@ -7,7 +7,9 @@ export function Nav() {
     <aside className="site-nav">
       <Link href="/" className="site-name">
         Will Kline
-        <span className="site-tagline">bassist · composer · engineer</span>
+        <span className="site-tagline">
+          <span>Bassist</span> <span>Composer</span> <span>Engineer</span>
+        </span>
       </Link>
       <nav>
         <ul>
