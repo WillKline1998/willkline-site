@@ -1,5 +1,5 @@
 // Data model for willkline.com — see docs/PLAN.md for how each model maps to a feature.
-// Local dev uses SQLite; production will switch to Postgres (see docs/DECISIONS.md).
+// Postgres everywhere: local Homebrew Postgres in dev, Neon in production.
 
 generator client {
   provider = "prisma-client"
@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -17,7 +17,7 @@ model User {
   id           String     @id @default(cuid())
   email        String     @unique
   name         String?
-  role         String     @default("MEMBER") // "ADMIN" | "MEMBER" (SQLite has no enums)
+  role         String     @default("MEMBER") // "ADMIN" | "MEMBER" (strings, not enums, keep migrations simple)
   passwordHash String?
   createdAt    DateTime   @default(now())
   wallPosts    WallPost[]

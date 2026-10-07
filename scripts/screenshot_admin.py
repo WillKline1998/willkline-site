@@ -2,6 +2,7 @@
 import os, secrets, subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from testdb import remove_user, sql
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs/mockups"
@@ -22,5 +23,4 @@ try:
         pg.screenshot(path=OUT / "admin_edit_post.png", full_page=True)
         b.close()
 finally:
-    db = str(ROOT / "prisma/dev.db")
-    subprocess.run(["sqlite3", db, f"DELETE FROM Session WHERE userId IN (SELECT id FROM User WHERE email='{EMAIL}'); DELETE FROM User WHERE email='{EMAIL}';"])
+    remove_user(EMAIL)

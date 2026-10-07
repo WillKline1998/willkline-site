@@ -7,6 +7,7 @@ Run: ~/JobSearch/.venv/bin/python scripts/e2e_admin.py
 import os, secrets, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from testdb import remove_user, sql
 
 BASE = "http://localhost:3123"
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,10 +31,6 @@ def status(path):
         return urllib.request.urlopen(BASE + path).status
     except urllib.error.HTTPError as e:
         return e.code
-
-
-def sql(q):
-    subprocess.run(["sqlite3", str(ROOT / "prisma/dev.db"), q], check=True)
 
 
 subprocess.run(["npm", "run", "-s", "admin:create"], cwd=ROOT, check=True,
@@ -138,11 +135,9 @@ try:
         b.close()
 finally:
     # Clean up everything this test created.
-    sql("DELETE FROM NoticeMedia WHERE noticeId IN (SELECT id FROM Notice WHERE title='E2E Test Show');")
-    sql("DELETE FROM Notice WHERE title='E2E Test Show';")
-    sql("UPDATE Album SET description='' WHERE description='E2E liner notes';")
-    sql(f"DELETE FROM Session WHERE userId IN (SELECT id FROM User WHERE email='{EMAIL}');")
-    sql(f"DELETE FROM User WHERE email='{EMAIL}';")
+    sql("""DELETE FROM "Notice" WHERE title = 'E2E Test Show';""")  # media cascade
+    sql("""UPDATE "Album" SET description = '' WHERE description = 'E2E liner notes';""")
+    remove_user(EMAIL)
 
 print("ALL PASS" if fails == 0 else f"{fails} FAILED")
 sys.exit(1 if fails else 0)

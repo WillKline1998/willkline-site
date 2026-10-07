@@ -8,6 +8,7 @@ Run with the server on :3123:  ~/JobSearch/.venv/bin/python scripts/responsive_a
 import os, secrets, subprocess, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from testdb import remove_user, sql
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs/mockups/responsive"; OUT.mkdir(parents=True, exist_ok=True)
@@ -73,7 +74,6 @@ try:
             ctx.close()
         b.close()
 finally:
-    subprocess.run(["sqlite3", str(ROOT / "prisma/dev.db"),
-                    f"DELETE FROM Session WHERE userId IN (SELECT id FROM User WHERE email='{EMAIL}'); DELETE FROM User WHERE email='{EMAIL}';"])
+    remove_user(EMAIL)
 print(f"\n{problems} page/viewport combos with issues")
 sys.exit(1 if problems else 0)
