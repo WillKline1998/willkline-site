@@ -1,0 +1,73 @@
+{
+  "name": "Will Kline",
+  "contact": [
+    "Cleveland, OH",
+    "wskline4@gmail.com",
+    "linkedin.com/in/william-kline-iv",
+    "github.com/WillKline1998"
+  ],
+  "summary": "Full-stack software engineer (Angular/TypeScript, C#/.NET, SQL Server) who works directly with enterprise clients to turn their needs into shipped software, often within the same day. Conservatory-trained bassist (Indiana University Jacobs School of Music; Aspen Music Festival) who brings an ensemble player's instinct for communication and a performer's standard of craft.",
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "org": "CutterCroix LLC",
+      "location": "Cleveland, OH",
+      "dates": "Jan 2024 – Present",
+      "note": "GiddyUp: a configurable CRM serving hundreds of companies, including SRS, Heritage, and Sherwin-Williams.",
+      "bullets": [
+        "Engineer on the two-person Enterprise Integrations team, building custom contractor-management apps (project bidding, multi-contractor workflows) for enterprise clients; work praised by client executive leadership and later released to all customers.",
+        "Work directly with client engineering and management teams, turning their requests into tested, deployed features, often within the same day; currently building public APIs that a client's team is building an app on.",
+        "Designed and built GiddyUp Teams, including a round-robin assignment algorithm. Built for one client, then released platform-wide and adopted internally.",
+        "Built the Procore integration for construction takeoffs: create from scratch, import items, upload material spreadsheets, manage access, and link directly into Procore.",
+        "Designed and built the calendar and Kanban project views and redesigned the job-intake form for an enterprise client's app.",
+        "Rewrote legacy SQL behind enterprise-scale screens: a 60,000-job list from ~30s (often timing out) to ~11s, and a Kanban board from 17s to 2s. Regularly untangle and modernize inherited code across database and application layers.",
+        "Early adopter of AI-assisted development (ChatGPT, Gemini, GitHub Copilot, Claude); now build with Claude daily across design, implementation, debugging, and refactoring.",
+        "Elected team lead for a company Innovation Day: gathered requirements from leaders of our largest clients, split the team between ship-now features and a vision mockup, and shipped more production changes than any other team.",
+        "Served on the deployment team running 4 AM production releases roughly every 1.5 weeks. Represent engineering at industry trade shows (e.g., FRSA Convention & Florida Roofing & Sheet Metal Expo) and handle booth logistics: shipping, setup, and teardown."
+      ]
+    }
+  ],
+  "additional_experience": "Delivery Driver (Top Dasher), DoorDash, 2020–2023: 3,000+ deliveries with near-perfect ratings. Production Associate, API Trucast (aerospace casting), 2018–2019: trained new hires on 3+ processes.",
+  "music": [
+    "Principal Bassist, Indiana University New Music Ensemble (2019–2022): premieres and commissions by student, faculty, and guest composers, often working directly with composers in rehearsal.",
+    "Assistant Principal Bass, Carmel Symphony Orchestra (2021–2023): 2–6 concerts per month, including school and community outreach; relayed direction from conductor and principals to the section; adapted to 1–2 guest soloists and conductors monthly.",
+    "Aspen Music Festival and School (2022): Aspen Festival Orchestra, Aspen Chamber Symphony, and Aspen Contemporary Ensemble; performed with Augustin Hadelich and Joyce Yang; masterclasses with Edgar Meyer; performed an original solo bass composition on a soloists' recital.",
+    "Chautauqua Institution School of Music (2019): Music School Festival Orchestra; performed an original solo bass composition on a soloists' recital.",
+    "Texas Music Festival, University of Houston (2018).",
+    "Auditioned for the Atlanta Symphony Orchestra and Pittsburgh Symphony Orchestra.",
+    "Composer and producer: 14 self-released albums, EPs, and projects (2016–present), written, performed, recorded, mixed, and mastered independently in Ableton Live and Max/MSP; distributed via DistroKid to Spotify, Apple Music, and other platforms.",
+    "Teaching: coached bass sectionals for school and youth orchestras (including paid sectional coaching for an Indianapolis youth orchestra); private bass instruction; frequent outreach performances in schools and senior centers."
+  ],
+  "education": [
+    {
+      "school": "Tech Elevator",
+      "detail": "Full-Stack Software Development Bootcamp (800+ hours)",
+      "location": "Cleveland, OH",
+      "dates": "2023"
+    },
+    {
+      "school": "Indiana University Jacobs School of Music",
+      "detail": "Performer Diploma, Solo Performance – Double Bass (2022) · Bachelor of Music in Performance, Double Bass (orchestral) (2020) · Honors student; Founders Scholar; Dean's List; Arthur R. Metz Scholar; graduated with honors",
+      "location": "Bloomington, IN",
+      "dates": "2016 – 2022"
+    }
+  ],
+  "skills": [
+    [
+      "Languages & frameworks",
+      "TypeScript, Angular, C#/.NET, ASP.NET Web API, SQL Server, JavaScript, HTML/CSS"
+    ],
+    [
+      "Tools & platforms",
+      "REST APIs, SignalR, Procore API, Snowflake, Postman, Git, ngrok"
+    ],
+    [
+      "AI-assisted development",
+      "Claude / Claude Code, GitHub Copilot, ChatGPT, Gemini"
+    ],
+    [
+      "Music technology",
+      "Ableton Live, Max/MSP, Logic Pro"
+    ]
+  ]
+}

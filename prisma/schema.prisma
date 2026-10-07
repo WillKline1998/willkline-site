@@ -72,12 +72,20 @@ model MediaItem {
   createdAt DateTime @default(now())
 }
 
-model ResumeFile {
-  id         String   @id @default(cuid())
-  url        String
-  label      String   @default("")
-  isCurrent  Boolean  @default(false)
-  uploadedAt DateTime @default(now())
+// Downloadable documents (résumé, CV, anything else). Will uploads/replaces
+// these from the admin page; the CV page lists whatever is published.
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  fileKey     String   // name in storage (see src/lib/storage.ts)
+  fileName    String   // original filename, used for the download
+  mimeType    String   @default("application/octet-stream")
+  size        Int      @default(0)
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(true)
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model LabProject {

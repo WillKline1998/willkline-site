@@ -4,7 +4,8 @@
 // Run: npm run db:seed
 
 import "dotenv/config";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
+import { saveFile } from "../src/lib/storage";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const db = new PrismaClient();
@@ -43,6 +44,25 @@ async function main() {
   // Bio text (SiteSetting "bio"); admin-editable in M3.
   const bio = readFileSync("prisma/seed-data/bio.md", "utf8");
   await db.siteSetting.upsert({ where: { key: "bio" }, update: { value: bio }, create: { key: "bio", value: bio } });
+
+  // CV page text (SiteSetting "cv"): structured JSON, phone number omitted on purpose.
+  const cv = readFileSync("prisma/seed-data/cv.json", "utf8");
+  await db.siteSetting.upsert({ where: { key: "cv" }, update: { value: cv }, create: { key: "cv", value: cv } });
+
+  // Starter downloads. Only seeded when there are none, so Will's uploads are never clobbered.
+  if ((await db.document.count()) === 0) {
+    const starters = [
+      { title: "Résumé", description: "One page, software-focused", file: "Will_Kline_Resume.pdf" },
+      { title: "Curriculum Vitae", description: "Full version, with music, teaching, and performance history", file: "Will_Kline_CV.pdf" },
+    ];
+    for (const [i, s] of starters.entries()) {
+      const path = `prisma/seed-data/documents/${s.file}`;
+      const fileKey = await saveFile(readFileSync(path), s.file);
+      await db.document.create({
+        data: { title: s.title, description: s.description, fileKey, fileName: s.file, mimeType: "application/pdf", size: statSync(path).size, sortOrder: i + 1 },
+      });
+    }
+  }
 
   // Notices are demo content until the admin page exists (M3): replace wholesale.
   await db.notice.deleteMany();
