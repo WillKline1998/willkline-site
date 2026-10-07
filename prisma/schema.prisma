@@ -30,9 +30,12 @@ model Album {
   id          String   @id @default(cuid())
   slug        String   @unique
   title       String
+  kind        String   @default("ALBUM") // "ALBUM" | "EP" | "SINGLE" | "COMPOSITION" | "PROJECT"
   description String   @default("")
   year        Int?
   coverUrl    String?
+  links       String   @default("{}") // JSON: { spotify?, bandcamp?, soundcloud?, youtube?, hyperfollow?, ... }
+  sortOrder   Int      @default(0)    // lower = shown first
   published   Boolean  @default(false)
   tracks      Track[]
   createdAt   DateTime @default(now())
@@ -91,6 +94,25 @@ model LabProject {
 model SiteSetting {
   key   String @id
   value String
+}
+
+// ---------- Home page bulletin board ----------
+// Will (admin) posts anything here: shows, releases, news, notes.
+// Each notice can point deeper into the site (or off-site).
+
+model Notice {
+  id        String    @id @default(cuid())
+  kind      String    @default("NOTE") // "SHOW" | "RELEASE" | "NEWS" | "NOTE"
+  title     String
+  body      String    @default("") // Markdown
+  eventDate DateTime? // for shows / release dates
+  venue     String?   // for shows
+  linkHref  String?   // internal path ("/music/becoming") or external URL
+  linkLabel String?
+  pinned    Boolean   @default(false)
+  published Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 // ---------- Inspiration Wall (M4) ----------
