@@ -180,6 +180,8 @@ a:hover { text-decoration: underline; }
 .admin-tools a { font-weight: 600; }
 .admin-form input[type=password], .admin-form input[type=datetime-local], .admin-form input[type=url], .admin-form select { font: inherit; font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
 .form-error { color: #b91c1c; margin: 0; font-size: 0.9em; }
+.admin-album { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+.admin-album .album-cover { width: 96px; flex-shrink: 0; }
 .admin-note { padding: 0.6rem 0.9rem; border-left: 3px solid var(--accent); background: var(--panel); font-size: 0.9em; }
 
 /* Music */
