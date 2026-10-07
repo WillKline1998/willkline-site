@@ -1,40 +1,219 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==================================================================
+   NORMAL MODE: three candidate themes (see src/lib/themes.ts).
+   Each theme only sets variables + a few signature details; the
+   shared structure below reads the variables.
+   ================================================================== */
+
+/* --- Theme A: Recital Program (default) --- */
+:root,
+[data-theme="recital"] {
+  --bg: #f6f1e7;
+  --panel: #fbf8f1;
+  --ink: #2a2420;
+  --muted: #7a6e63;
+  --accent: #7b1e2b;
+  --rule: #d9cfbf;
+  --font-body: var(--font-garamond), Garamond, Georgia, serif;
+  --font-display: var(--font-garamond), Garamond, Georgia, serif;
+  --font-label: var(--font-garamond), Georgia, serif;
+  --body-size: 1.15rem;
+  --shell-max: 1100px;
+  --nav-width: 230px;
+  --radius: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- Theme B: Self-Hosted '07 --- */
+[data-theme="homepage"] {
+  --bg: #dcd6c8;
+  --panel: #fffdf6;
+  --ink: #1d1d1d;
+  --muted: #666;
+  --accent: #1a3f8f;
+  --rule: #9c9482;
+  --font-body: Verdana, Geneva, Tahoma, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-label: Verdana, Geneva, sans-serif;
+  --body-size: 0.82rem;
+  --shell-max: 900px;
+  --nav-width: 190px;
+  --radius: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --- Theme C: Quiet Studio --- */
+[data-theme="studio"] {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --ink: #111;
+  --muted: #8a8a8a;
+  --accent: #c2410c;
+  --rule: #ececec;
+  --font-body: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: var(--font-geist-sans), system-ui, sans-serif;
+  --font-label: var(--font-geist-mono), ui-monospace, monospace;
+  --body-size: 1rem;
+  --shell-max: 1180px;
+  --nav-width: 220px;
+  --radius: 10px;
 }
+
+/* ------------------------------------------------------------------
+   Shared structure
+   ------------------------------------------------------------------ */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.6;
   transition: background 0.6s ease, color 0.6s ease;
 }
+
+a { color: var(--accent); }
+a:hover { text-decoration: underline; }
+
+.site-shell {
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+@media (min-width: 768px) {
+  .site-shell { display: flex; align-items: flex-start; }
+}
+
+.site-nav { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--rule); }
+@media (min-width: 768px) {
+  .site-nav {
+    position: sticky; top: 0;
+    width: var(--nav-width); flex-shrink: 0;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 2.5rem 1.5rem;
+    border-bottom: 0; border-right: 1px solid var(--rule);
+  }
+}
+.site-name {
+  display: block; color: var(--ink); text-decoration: none;
+  font-family: var(--font-display); font-size: 1.6em; line-height: 1.1;
+}
+.site-name:hover { text-decoration: none; }
+.site-tagline {
+  display: block; margin-top: 0.35rem;
+  font-family: var(--font-label); font-size: 0.7em; letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.site-nav ul { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+@media (min-width: 768px) {
+  .site-nav ul { flex-direction: column; margin-top: 2rem; }
+}
+.site-nav li a {
+  color: var(--ink); text-decoration: none;
+  font-family: var(--font-label);
+}
+.site-nav li a:hover { color: var(--accent); }
+.nav-foot { margin-top: 1rem; }
+@media (min-width: 768px) { .nav-foot { margin-top: auto; padding-top: 2rem; } }
+
+.site-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.site-main main { flex: 1; }
+.site-footer { padding: 1.5rem 2rem; font-size: 0.8em; color: var(--muted); border-top: 1px solid var(--rule); }
+
+.page { padding: 2.5rem 2rem 3rem; max-width: 760px; }
+.page-title { font-family: var(--font-display); font-size: 2.6em; line-height: 1.1; margin: 0 0 0.4rem; font-weight: 500; }
+.lede { font-size: 1.1em; color: var(--muted); margin: 0 0 2rem; }
+.section-label {
+  font-family: var(--font-label); font-size: 0.75em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+  border-bottom: 1px solid var(--rule); padding-bottom: 0.4rem; margin: 2rem 0 1rem;
+}
+.muted { color: var(--muted); }
+.small { font-size: 0.85em; }
+
+/* Bulletin board */
+.notices { display: grid; gap: 1.25rem; }
+.notice {
+  background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1.1rem 1.3rem;
+}
+.notice-meta { display: flex; gap: 0.6rem; align-items: baseline; }
+.notice-kind, .notice-pin {
+  font-family: var(--font-label); font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.notice-pin { color: var(--muted); }
+.notice-date { font-size: 0.9em; margin-top: 0.2rem; }
+.notice-venue { color: var(--muted); }
+.notice-title { font-family: var(--font-display); font-size: 1.35em; margin: 0.25rem 0; font-weight: 500; }
+.notice-body { margin: 0.25rem 0 0.4rem; }
+.notice-link { font-size: 0.95em; }
+.notice-show { border-left: 4px solid var(--accent); }
+
+/* Music */
+.album-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem 1.25rem; }
+.album-card { display: flex; flex-direction: column; color: var(--ink); text-decoration: none; }
+.album-card:hover .album-title { color: var(--accent); text-decoration: underline; }
+.album-cover { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--rule); border-radius: var(--radius); }
+.album-title { margin-top: 0.45rem; font-family: var(--font-display); line-height: 1.25; }
+.album-kind { font-family: var(--font-label); font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.album-detail { display: grid; gap: 2rem; margin-top: 1rem; }
+@media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
+.listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+
+/* --- Theme signature details --- */
+
+/* Recital: centered small-caps labels, double rule like a printed program */
+[data-theme="recital"] .section-label { font-variant: small-caps; text-transform: none; letter-spacing: 0.08em; font-size: 1em; border-bottom: 3px double var(--rule); }
+[data-theme="recital"] .site-nav li a { font-variant: small-caps; letter-spacing: 0.05em; font-size: 1.05em; }
+[data-theme="recital"] .notice { box-shadow: 0 1px 0 var(--rule); }
+
+/* Homepage '07: the whole page is a bordered box on a textured backdrop; visited links purple */
+[data-theme="homepage"] body {
+  background-color: var(--bg);
+  background-image: radial-gradient(#00000014 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+[data-theme="homepage"] .site-shell {
+  margin: 1.5rem auto; min-height: auto;
+  background: var(--panel); border: 2px solid var(--rule);
+  box-shadow: 4px 4px 0 #00000022;
+}
+[data-theme="homepage"] .site-nav { background: #ece5d3; }
+[data-theme="homepage"] .site-nav li a { color: var(--accent); text-decoration: underline; }
+[data-theme="homepage"] .site-nav li::before { content: "» "; color: var(--muted); }
+[data-theme="homepage"] .site-main, [data-theme="homepage"] .site-nav { min-height: 640px; }
+[data-theme="homepage"] a:visited { color: #5a2a82; }
+[data-theme="homepage"] .page-title { font-size: 2em; }
+[data-theme="homepage"] .notice { border: 1px dashed var(--rule); }
+[data-theme="homepage"] .section-label { background: var(--accent); color: #fff; padding: 0.2rem 0.5rem; border: 0; letter-spacing: 0.08em; }
+[data-theme="homepage"] .last-updated::before { content: "★ "; }
+
+/* Studio: no borders, big type, monospace labels */
+[data-theme="studio"] .site-nav { border-right-color: transparent; }
+[data-theme="studio"] .page-title { font-size: 3.4em; font-weight: 600; letter-spacing: -0.03em; }
+[data-theme="studio"] .notice { border: 0; background: #f6f6f4; }
+[data-theme="studio"] .section-label { border-bottom: 0; }
 
 /* ------------------------------------------------------------------
    DEMO MODE ("kaleidoscope glasses")
    Everything flashy lives below, scoped to [data-mode="demo"].
-   Starter effects only — the real razzle-dazzle is milestone M6.
+   Starter effects only; the real razzle-dazzle is milestone M6.
    ------------------------------------------------------------------ */
 
+.demo-toggle {
+  font-family: var(--font-label); font-size: 0.8em;
+  border: 1px solid currentColor; border-radius: 999px; padding: 0.2rem 0.8rem;
+  background: transparent; color: var(--ink); cursor: pointer;
+}
+
 [data-mode="demo"] body {
-  --background: #0b0420;
-  --foreground: #f5f0ff;
+  --bg: #0b0420;
+  --panel: #ffffff10;
+  --ink: #f5f0ff;
+  --muted: #b9a9e6;
+  --accent: #ff3cac;
+  --rule: #ffffff22;
   background:
     radial-gradient(circle at 20% 20%, #ff3cac55, transparent 40%),
     radial-gradient(circle at 80% 30%, #2b86c555, transparent 40%),
@@ -43,6 +222,8 @@ body {
   background-size: 200% 200%;
   animation: wk-drift 18s ease-in-out infinite alternate;
 }
+[data-mode="demo"] .site-shell { background: transparent; }
+[data-mode="demo"] .site-nav { background: transparent; }
 
 [data-mode="demo"] h1 {
   background: linear-gradient(90deg, #ff3cac, #784ba0, #2b86c5, #ff3cac);
@@ -53,18 +234,17 @@ body {
   animation: wk-shimmer 6s linear infinite;
 }
 
-[data-mode="demo"] .card {
-  border-color: #ffffff33;
+[data-mode="demo"] .notice,
+[data-mode="demo"] .album-card {
   backdrop-filter: blur(6px);
   transition: transform 0.4s cubic-bezier(.2,.8,.2,1.4);
 }
-[data-mode="demo"] .card:hover {
-  transform: rotate(-1.5deg) scale(1.04);
+[data-mode="demo"] .notice:hover,
+[data-mode="demo"] .album-card:hover {
+  transform: rotate(-1.5deg) scale(1.03);
 }
 
-[data-mode="demo"] .demo-toggle {
-  box-shadow: 0 0 18px #ff3cac;
-}
+[data-mode="demo"] .demo-toggle { box-shadow: 0 0 18px #ff3cac; }
 
 @keyframes wk-drift {
   from { background-position: 0% 0%; }

@@ -51,7 +51,7 @@ export function DemoToggle() {
     <button
       onClick={toggle}
       aria-pressed={demo}
-      className="demo-toggle rounded-full border border-current px-3 py-1 text-sm"
+      className="demo-toggle"
     >
       {demo ? "✕ Normal mode" : "✦ Demo mode"}
     </button>

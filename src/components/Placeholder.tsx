@@ -4,13 +4,11 @@ import { sections } from "@/lib/sections";
 export function Placeholder({ href, children }: { href: string; children?: React.ReactNode }) {
   const s = sections.find((x) => x.href === href);
   return (
-    <section className="w-full max-w-4xl px-6 py-16 md:px-12">
-      <h1 className="text-4xl font-bold tracking-tight">{s?.label}</h1>
-      <p className="mt-3 text-lg opacity-80">{s?.blurb}</p>
+    <section className="page">
+      <h1 className="page-title">{s?.label}</h1>
+      <p className="lede">{s?.blurb}</p>
       {children}
-      <p className="mt-10 text-sm opacity-50">
-        Scaffold — built out in milestone {s?.milestone} (see docs/PLAN.md).
-      </p>
+      <p className="muted small">Coming soon.</p>
     </section>
   );
 }
