@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Notice } from "@/generated/prisma/client";
+import type { Notice, NoticeMedia } from "@/generated/prisma/client";
+import { MediaBlock } from "@/components/MediaBlock";
 
 const LABELS: Record<string, string> = {
   SHOW: "Upcoming show",
@@ -12,7 +13,7 @@ const fmt = (d: Date) =>
   d.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" });
 
 // One post on the home-page bulletin board.
-export function NoticeCard({ n }: { n: Notice }) {
+export function NoticeCard({ n }: { n: Notice & { media: NoticeMedia[] } }) {
   const external = n.linkHref?.startsWith("http");
   return (
     <article className={`notice notice-${n.kind.toLowerCase()}${n.pinned ? " notice-pinned" : ""}`}>
@@ -28,6 +29,11 @@ export function NoticeCard({ n }: { n: Notice }) {
       )}
       <h2 className="notice-title">{n.title}</h2>
       {n.body && <p className="notice-body">{n.body}</p>}
+      {n.media.length > 0 && (
+        <div className="notice-media">
+          {n.media.map((m) => <MediaBlock key={m.id} m={m} />)}
+        </div>
+      )}
       {n.linkHref && (
         external ? (
           <a className="notice-link" href={n.linkHref} target="_blank" rel="noreferrer">{n.linkLabel ?? "More →"}</a>

@@ -9,6 +9,7 @@ export default async function Home() {
   const notices = await db.notice.findMany({
     where: { published: true },
     orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+    include: { media: { orderBy: { position: "asc" } } },
   });
 
   return (

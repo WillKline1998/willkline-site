@@ -111,8 +111,22 @@ model Notice {
   linkLabel String?
   pinned    Boolean   @default(false)
   published Boolean   @default(true)
+  media     NoticeMedia[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+// Things attached to a notice, rendered faithfully: images inline,
+// video/audio as real players (YouTube, Vimeo, Spotify, SoundCloud),
+// documents as a preview + download, anything else as a link card.
+model NoticeMedia {
+  id       String @id @default(cuid())
+  noticeId String
+  notice   Notice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  kind     String // "IMAGE" | "EMBED" | "FILE" | "LINK"
+  url      String
+  caption  String @default("")
+  position Int    @default(0)
 }
 
 // ---------- Inspiration Wall (M4) ----------

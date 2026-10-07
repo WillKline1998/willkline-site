@@ -115,6 +115,28 @@ a:hover { text-decoration: underline; }
 .notice-link { font-size: 0.95em; }
 .notice-show { border-left: 4px solid var(--accent); }
 
+/* Attachments on bulletin posts */
+.notice-media { display: grid; gap: 0.9rem; margin: 0.8rem 0 0.6rem; }
+.media { margin: 0; }
+.media img { display: block; max-width: 100%; height: auto; border-radius: var(--radius); }
+.media iframe, .media video { display: block; width: 100%; border: 0; border-radius: var(--radius); background: #000; }
+.aspect-video iframe, .aspect-video video { aspect-ratio: 16 / 9; }
+.aspect-audio-tall iframe { height: 352px; background: transparent; }
+.aspect-audio-short iframe { height: 152px; background: transparent; }
+.media-file iframe { height: 420px; background: #fff; border: 1px solid var(--rule); }
+.media-caption { font-size: 0.85em; color: var(--muted); margin-top: 0.35rem; }
+.file-card {
+  display: flex; align-items: center; gap: 0.8rem; margin-top: 0.5rem;
+  padding: 0.7rem 0.9rem; border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--bg); color: var(--ink); text-decoration: none;
+}
+.file-card:hover { border-color: var(--accent); text-decoration: none; }
+.file-icon {
+  font-family: var(--font-label); font-size: 0.7em; font-weight: 700;
+  padding: 0.25rem 0.45rem; border-radius: 4px; background: var(--accent); color: #fff;
+}
+.file-action { margin-left: auto; font-family: var(--font-label); font-size: 0.75em; color: var(--muted); }
+
 /* Music */
 .album-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem 1.25rem; }
 .album-card { display: flex; flex-direction: column; color: var(--ink); text-decoration: none; }

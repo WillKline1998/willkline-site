@@ -40,40 +40,61 @@ async function main() {
     await db.album.upsert({ where: { slug }, update: data, create: { slug, ...data } });
   }
 
+  // Notices are demo content until the admin page exists (M3): replace wholesale.
   await db.notice.deleteMany();
-  await db.notice.createMany({
-    data: [
-      {
-        kind: "NEWS",
-        title: "Welcome to willkline.net",
-        body: "This site is under construction, built in public. Music, writing, experiments, and whatever else I'm up to will land here first.",
-        pinned: true,
+  const notices = [
+    {
+      kind: "NEWS",
+      title: "Welcome to willkline.net",
+      body: "This site is under construction, built in public. Music, writing, experiments, and whatever else I'm up to will land here first.",
+      pinned: true,
+    },
+    {
+      kind: "RELEASE",
+      title: "BECOMING",
+      body: "Give it a listen. Every release now has its own page on the site.",
+      linkHref: "/music/becoming",
+      linkLabel: "About this album →",
+      media: [{ kind: "EMBED", url: "https://open.spotify.com/album/0kiVJpJSOSltv0nk1hkkqU" }],
+    },
+    {
+      kind: "SHOW",
+      title: "[Example] Solo bass recital",
+      body: "Placeholder showing a show post with a flyer and a program PDF attached.",
+      eventDate: new Date("2026-11-14T19:30:00-05:00"),
+      venue: "Somewhere in Cleveland, OH",
+      media: [
+        { kind: "IMAGE", url: "/images/example-flyer.png", caption: "Flyer (example)" },
+        { kind: "FILE", url: "/files/example-program.pdf", caption: "Recital program (example PDF)" },
+      ],
+    },
+    {
+      kind: "NOTE",
+      title: "From the archive: COOKY",
+      body: "Older, unremastered work that only lives on SoundCloud for now.",
+      media: [{ kind: "EMBED", url: "https://soundcloud.com/will-kline-36214054/sets/cooky" }],
+    },
+    {
+      kind: "NOTE",
+      title: "[Example] Something I've been watching",
+      body: "Placeholder showing how a YouTube link appears in a post.",
+      media: [
+        { kind: "EMBED", url: "https://www.youtube.com/watch?v=P4uPK809WlM", caption: "Edgar Meyer, BACH & friends (Michael Lawrence Films)" },
+      ],
+    },
+  ];
+  // Spread createdAt so "newest first" order matches the list above.
+  for (const [i, { media = [], ...n }] of notices.entries()) {
+    await db.notice.create({
+      data: {
+        ...n,
+        createdAt: new Date(Date.now() - i * 60_000),
+        media: { create: media.map((m, position) => ({ ...m, position })) },
       },
-      {
-        kind: "RELEASE",
-        title: "The whole catalog, in one place",
-        body: `${catalog.releases.length} albums, EPs, and projects, from SoundCloud-era experiments to the latest releases.`,
-        linkHref: "/music",
-        linkLabel: "Browse the music →",
-      },
-      {
-        kind: "SHOW",
-        title: "[Example] An upcoming show",
-        body: "Placeholder so the layout can be designed. Will replaces it from the admin page.",
-        eventDate: new Date("2026-11-14T19:30:00-05:00"),
-        venue: "Somewhere in Cleveland, OH",
-      },
-      {
-        kind: "NOTE",
-        title: "[Example] A note from the lab",
-        body: "Placeholder: a short post pointing at a new experiment in the Lab.",
-        linkHref: "/lab",
-        linkLabel: "Visit the Lab →",
-      },
-    ],
-  });
+    });
+  }
 
-  console.log(`Seeded ${catalog.releases.length} releases and 4 notices.`);
+  console.log(`Seeded ${catalog.releases.length} releases and ${notices.length} notices.`);
 }
 
 main().finally(() => db.$disconnect());
