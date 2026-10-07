@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (mid-morning) — design chosen + bulletin attachments
+**Done**: Will picked **Quiet Studio**, so it's now the only theme (alternates removed, preserved in c17f2c9). Added `NoticeMedia` (IMAGE / EMBED / FILE / LINK) with faithful rendering: images, YouTube (nocookie) / Vimeo / Spotify / SoundCloud players, direct video, PDF inline preview + file card, link cards. Allowlisted iframes only (src/lib/embeds.ts). Seeded real posts (BECOMING on Spotify, COOKY on SoundCloud) + [Example] flyer/PDF/YouTube posts. Muroki reference captured.
+**Verified**: lint + build; full-page screenshot shows every embed rendering (docs/mockups/studio_home_full.png).
+**Next**: Bio + CV pages (needs Will's bio text; CV can render from ~/JobSearch/resume/resume_base.json minus phone number); then M3 admin (post/edit notices with uploads).
+
 ## 2026-10-07 (morning, power-outage-safe session) — M1/M2 kickoff
 **Done** (committed + pushed after every step)
 - docs/DESIGN.md: Will's direction (nostalgic self-hosted soloist site; sidebar nav; home = bulletin board, not a hero photo) + reference screenshots (Jeffrey Turner, Maggie Cox).
