@@ -8,3 +8,5 @@ Short record of choices and why, so future sessions (and future Will) don't reli
 - **2026-10-05 · Normal mode = artist-page layout.** Sidebar nav (desktop) / top bar (mobile), simple content column. Will's stated preference.
 - **2026-10-05 · Code lives on GitHub under WillKline1998** (private repo `willkline-site`).
 - **2026-10-05 · Content comes from the database, not hardcoded files.** Required for the admin-editing pillar.
+- **2026-10-07 · Note: earlier attempt exists.** Private repos `WillKline1998/personal-site` (C# backend + Angular frontend, Mar 2026) and `WillKline1998/frontend` (Angular, Mar 2026). Found after choosing Next.js; asked Will whether to reuse anything or keep the fresh start.
+- **2026-10-07 · Plan to make this repo public** once it's presentable (portfolio piece; his public GitHub is otherwise empty).
