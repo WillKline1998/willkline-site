@@ -6,9 +6,7 @@
 import "dotenv/config";
 import { readFileSync, statSync } from "node:fs";
 import { saveFile } from "../src/lib/storage";
-import { PrismaClient } from "../src/generated/prisma/client";
-
-const db = new PrismaClient();
+import { db } from "../src/lib/db";
 
 type Release = { title: string; kind: string; cover?: string; links: Record<string, string> };
 type Catalog = { releases: Release[] };

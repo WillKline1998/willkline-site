@@ -2,8 +2,11 @@
 // Postgres everywhere: local Homebrew Postgres in dev, Neon in production.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  // No native query engine: queries run in JS through the pg driver adapter
+  // (src/lib/db.ts). Nothing platform-specific to bundle on Vercel.
+  engineType = "client"
 }
 
 datasource db {

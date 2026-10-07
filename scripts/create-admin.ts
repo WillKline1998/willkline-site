@@ -3,10 +3,9 @@
 import "dotenv/config";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { db } from "../src/lib/db";
 import { hashPasswordNode } from "./hash";
 
-const db = new PrismaClient();
 
 async function askHidden(q: string): Promise<string> {
   stdout.write(q);
