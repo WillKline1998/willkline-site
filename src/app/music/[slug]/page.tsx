@@ -14,6 +14,9 @@ const PLATFORM: Record<string, string> = {
   soundcloud: "SoundCloud",
   youtube: "YouTube",
   apple: "Apple Music",
+  deezer: "Deezer",
+  amazon: "Amazon Music",
+  tidal: "TIDAL",
 };
 
 async function getAlbum(slug: string) {
