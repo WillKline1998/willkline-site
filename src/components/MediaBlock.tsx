@@ -1,9 +1,11 @@
-import type { NoticeMedia } from "@/generated/prisma/client";
 import { fileName, isPdf, toEmbed } from "@/lib/embeds";
 
-// Renders one attachment on a bulletin post. Kinds come from the admin:
-// IMAGE (photo/flyer), EMBED (video/audio URL), FILE (PDF/doc), LINK.
-export function MediaBlock({ m }: { m: NoticeMedia }) {
+export type MediaLike = { kind: string; url: string; caption: string };
+
+// Renders one piece of media faithfully: bulletin attachments, Media page
+// videos/audio, and players inside Writing posts all come through here.
+// Kinds: IMAGE (photo/flyer), EMBED (video/audio URL), FILE (PDF/doc), LINK.
+export function MediaBlock({ m }: { m: MediaLike }) {
   const caption = m.caption ? <figcaption className="media-caption">{m.caption}</figcaption> : null;
 
   if (m.kind === "IMAGE")
@@ -46,6 +48,14 @@ export function MediaBlock({ m }: { m: NoticeMedia }) {
     return (
       <figure className="media media-embed aspect-video">
         <video src={e.src} controls preload="metadata" />
+        {caption}
+      </figure>
+    );
+
+  if (m.kind === "EMBED" && e.kind === "audio")
+    return (
+      <figure className="media media-audio">
+        <audio src={e.src} controls preload="metadata" />
         {caption}
       </figure>
     );

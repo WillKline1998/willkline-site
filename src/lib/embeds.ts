@@ -5,12 +5,18 @@
 export type Embed =
   | { kind: "iframe"; provider: string; src: string; aspect: "video" | "audio-tall" | "audio-short" }
   | { kind: "video"; src: string }
+  | { kind: "audio"; src: string }
   | { kind: "link"; href: string; host: string };
+
+const VIDEO_FILE = /\.(mp4|webm|mov|m4v)$/i;
+const AUDIO_FILE = /\.(mp3|m4a|wav|ogg|aac|flac)$/i;
 
 export function toEmbed(raw: string): Embed {
   // Uploaded files are site-relative ("/uploads/…"): direct video plays inline.
   if (raw.startsWith("/")) {
-    return /\.(mp4|webm|mov)$/i.test(raw) ? { kind: "video", src: raw } : { kind: "link", href: raw, host: "willkline.net" };
+    if (VIDEO_FILE.test(raw)) return { kind: "video", src: raw };
+    if (AUDIO_FILE.test(raw)) return { kind: "audio", src: raw };
+    return { kind: "link", href: raw, host: "willkline.net" };
   }
   let u: URL;
   try {
@@ -52,8 +58,9 @@ export function toEmbed(raw: string): Embed {
       aspect: u.pathname.includes("/sets/") ? "audio-tall" : "audio-short",
     };
 
-  // Direct video files
-  if (/\.(mp4|webm|mov)$/i.test(u.pathname)) return { kind: "video", src: raw };
+  // Direct media files
+  if (VIDEO_FILE.test(u.pathname)) return { kind: "video", src: raw };
+  if (AUDIO_FILE.test(u.pathname)) return { kind: "audio", src: raw };
 
   return { kind: "link", href: raw, host };
 }

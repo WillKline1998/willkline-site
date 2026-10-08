@@ -12,6 +12,9 @@ const TOOLS = [
   { href: "/admin/bio", label: "Bio", note: "The text on the Bio page" },
   { href: "/admin/cv", label: "CV text", note: "The CV shown on the CV page" },
   { href: "/admin/music", label: "Music", note: "Liner notes, years, visibility, order" },
+  { href: "/admin/media", label: "Media", note: "Photos, videos, audio, press" },
+  { href: "/admin/writing", label: "Writing", note: "Posts and essays (drafts stay private)" },
+  { href: "/admin/lab", label: "Lab", note: "Projects and experiments" },
 ];
 
 export default async function AdminPage() {

@@ -78,10 +78,12 @@ model Track {
   notes    String  @default("")
 }
 
+// Writing. `body` is Markdown; a line holding only a YouTube/Spotify/… link becomes a player.
 model Post {
   id          String    @id @default(cuid())
   slug        String    @unique
   title       String
+  summary     String    @default("")
   body        String    // Markdown
   published   Boolean   @default(false)
   publishedAt DateTime?
@@ -89,12 +91,15 @@ model Post {
   updatedAt   DateTime  @updatedAt
 }
 
+// Media page: photos, videos (YouTube/Vimeo/uploaded), audio, and press links.
 model MediaItem {
   id        String   @id @default(cuid())
-  kind      String   // "IMAGE" | "VIDEO" | "PRESS"
-  title     String
-  url       String
-  caption   String   @default("")
+  kind      String   // "PHOTO" | "VIDEO" | "AUDIO" | "PRESS"
+  title     String   @default("")
+  url       String   // /uploads/<key> or an external URL
+  caption   String   @default("") // photo credit, source, or a pull quote for press
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
@@ -114,14 +119,21 @@ model Document {
   updatedAt   DateTime @updatedAt
 }
 
+// Lab: experiments and projects. `body` is Markdown for the project's own page.
 model LabProject {
   id          String   @id @default(cuid())
   slug        String   @unique
   title       String
-  description String   @default("")
+  description String   @default("") // one-line summary for the card
+  body        String   @default("")
   status      String   @default("IDEA") // "IDEA" | "BUILDING" | "LIVE"
-  url         String?
+  tech        String   @default("") // comma-separated, e.g. "Next.js, Web Audio"
+  url         String?  // live demo
+  repoUrl     String?
+  sortOrder   Int      @default(0)
+  published   Boolean  @default(true)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // Free-form editable text blocks (home bio, CV summary, etc.)
