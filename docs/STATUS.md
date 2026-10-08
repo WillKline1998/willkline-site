@@ -2,6 +2,19 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-07 (night) — Media, Writing, Lab, friendly CV editor (all live)
+**Done**:
+- **Media** (/media): photo grid with a pure-CSS lightbox, video and audio players (YouTube, Vimeo, Spotify, SoundCloud, or uploaded files), and press quotes with links. Admin at /admin/media: add by upload or link, title/caption, order, visibility, delete.
+- **Writing** (/writing, /writing/[slug]): Markdown posts via react-markdown (no raw HTML). A paragraph that is just a YouTube/Spotify/etc. link becomes a player. Drafts are visible only to the admin, with a banner. Admin: create a draft, edit the slug/summary/body, publish (stamps publishedAt the first time), upload an image and append it to the body, delete.
+- **Lab** (/lab, /lab/[slug]): cards with a status badge (Idea / In progress / Live), tech chips, Try it / Code / Read more links. Write-up pages use Markdown. Admin: create (starts hidden) and edit all fields. First entry is willkline.net (added on prod via a one-off script).
+- **CV editor**: /admin/cv is now a section-by-section form (jobs with bullets one per line, schools, music lines, "Label: list" skills, add/remove/order). The raw JSON editor moved to /admin/cv/raw. The public CV skips blank entries.
+- **Seed is now FILL-ONLY**: it never overwrites or deletes. Verified by editing the bio/notes/notices and re-seeding.
+- Audio files play inline (embeds.ts `audio` kind).
+
+**Verified**: lint and build pass. e2e_admin passes 26 checks, twice: media players and press, draft privacy, publish, Markdown and embed in posts, lab hidden→visible, CV form save with no edits is lossless, adding a job shows on /cv. The responsive audit covers 20 pages × 4 viewports with 0 issues. Live pages all return 200.
+
+**Next**: M4 Inspiration Wall (needs a Neon branch for preview deploys first). Optional later: client-direct Blob uploads for video over 4.5 MB.
+
 ## 2026-10-07 (evening) — M7: LIVE at https://willkline.net
 **Done**: Vercel project willkline-site (account willkline1998, Hobby), GitHub-connected: every push to main deploys production. Neon Postgres (free, via Vercel integration; env DATABASE_URL + DATABASE_URL_UNPOOLED) — local dev now Homebrew Postgres 17 too. Vercel Blob private store `willkline-uploads` (BLOB_READ_WRITE_TOKEN) behind src/lib/storage.ts. Prisma switched to engine-less client (engineType="client" + @prisma/adapter-pg) after Vercel couldn't find the native engine. `vercel-build` = migrate deploy + next build. Production seeded. DNS at Porkbun: A @ 216.198.79.1, CNAME www → 43aa37c1dae9c2e5.vercel-dns-017.com; www 308-redirects to apex. Cert issued manually via `vercel certs issue`.
 **Verified**: https://willkline.net home/cv/login 200; résumé PDF streams from Blob; e2e_admin ALL PASS locally on Postgres.
