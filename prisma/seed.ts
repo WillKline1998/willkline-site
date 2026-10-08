@@ -1,6 +1,7 @@
-// Seeds the local dev database with Will's real catalog (prisma/seed-data/music.json)
-// plus a few bulletin-board notices. Safe to re-run: upserts by slug, and
-// notices are replaced wholesale.
+// Seeds a database with Will's starting content (catalog, bio, CV, documents,
+// example bulletin posts, first Lab project). FILL-ONLY: it never overwrites
+// or deletes anything that already exists, so it's safe against the live
+// site, where Will edits content through the admin.
 // Run: npm run db:seed
 
 import "dotenv/config";
@@ -36,16 +37,16 @@ async function main() {
       sortOrder: i,
       published: true,
     };
-    await db.album.upsert({ where: { slug }, update: data, create: { slug, ...data } });
+    await db.album.upsert({ where: { slug }, update: {}, create: { slug, ...data } });
   }
 
   // Bio text (SiteSetting "bio"); admin-editable in M3.
   const bio = readFileSync("prisma/seed-data/bio.md", "utf8");
-  await db.siteSetting.upsert({ where: { key: "bio" }, update: { value: bio }, create: { key: "bio", value: bio } });
+  await db.siteSetting.upsert({ where: { key: "bio" }, update: {}, create: { key: "bio", value: bio } });
 
   // CV page text (SiteSetting "cv"): structured JSON, phone number omitted on purpose.
   const cv = readFileSync("prisma/seed-data/cv.json", "utf8");
-  await db.siteSetting.upsert({ where: { key: "cv" }, update: { value: cv }, create: { key: "cv", value: cv } });
+  await db.siteSetting.upsert({ where: { key: "cv" }, update: {}, create: { key: "cv", value: cv } });
 
   // Backfill Upload rows for files stored before the Upload table existed.
   for (const d of await db.document.findMany()) {
@@ -71,8 +72,7 @@ async function main() {
     }
   }
 
-  // Notices are demo content until the admin page exists (M3): replace wholesale.
-  await db.notice.deleteMany();
+  // Example bulletin posts, only for an empty board.
   const notices = [
     {
       kind: "NEWS",
@@ -115,7 +115,8 @@ async function main() {
     },
   ];
   // Spread createdAt so "newest first" order matches the list above.
-  for (const [i, { media = [], ...n }] of notices.entries()) {
+  const freshBoard = (await db.notice.count()) === 0;
+  for (const [i, { media = [], ...n }] of freshBoard ? notices.entries() : []) {
     await db.notice.create({
       data: {
         ...n,
@@ -125,7 +126,24 @@ async function main() {
     });
   }
 
-  console.log(`Seeded ${catalog.releases.length} releases and ${notices.length} notices.`);
+
+  // First Lab project: the site itself.
+  if ((await db.labProject.count()) === 0) {
+    await db.labProject.create({
+      data: {
+        slug: "willkline-net",
+        title: "willkline.net",
+        status: "LIVE",
+        description: "This site: a self-hosted artist page with its own admin, built from scratch.",
+        tech: "Next.js, React, TypeScript, PostgreSQL, Prisma, Vercel",
+        url: "https://willkline.net",
+        body: readFileSync("prisma/seed-data/lab-willkline-net.md", "utf8"),
+        sortOrder: 1,
+      },
+    });
+  }
+
+  console.log("Seed complete (fill-only: existing content untouched).");
 }
 
 main().finally(() => db.$disconnect());
