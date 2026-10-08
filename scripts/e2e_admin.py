@@ -21,6 +21,12 @@ v2 = tmp / "E2E_Doc_v2.txt"; v2.write_text("version two, updated")
 fails = 0
 
 
+
+def save_post(pg, expect="saved=1"):
+    """Click Save and wait for the redirect it causes (the URL may already contain `saved=1`)."""
+    with pg.expect_navigation(url=lambda u: expect in u):
+        pg.click("button:text('Save')")
+
 def check(cond, msg):
     global fails
     print(("PASS " if cond else "FAIL ") + msg)
@@ -167,35 +173,35 @@ try:
         pg.wait_for_url("**/admin/writing/*")
         edit_url = pg.url.split("?")[0]
         pg.fill("textarea[name=body]", "Hello **world**.\n\n- one\n- two\n\n## Section")
-        pg.click("button:text('Save')"); pg.wait_for_url("**saved=1**")
+        save_post(pg)
         check(status("/writing/e2e-post") == 404 and anon.goto(f"{BASE}/writing").ok and anon.get_by_text("E2E Post").count() == 0, "draft is private")
-        pg.check("input[name=published]"); pg.click("button:text('Save')"); pg.wait_for_url("**saved=1**")
+        pg.check("input[name=published]"); save_post(pg)
         anon.goto(f"{BASE}/writing/e2e-post")
         check(anon.locator("strong:text('world')").count() == 1 and anon.locator("h2:text('Section')").count() == 1, "markdown renders")
         check(anon.locator(".markdown li").first.evaluate("li => getComputedStyle(li).listStyleType") == "disc", "lists show bullets")
         check(":" in anon.locator("p.post-date time").inner_text(), "posting date + time shown")
         pg.goto(edit_url); pg.fill("input[name=title]", "")
         pg.evaluate("document.querySelector('input[name=title]').removeAttribute('required')")
-        pg.click("button:text('Save')"); pg.wait_for_url("**error=**")
+        save_post(pg, "error=")
         check(pg.locator(".form-error").count() == 1, "title is required")
         pg.goto(edit_url)
-        pg.check("input[name=media][value=image]"); pg.click("button:text('Save')"); pg.wait_for_url("**error=**")
+        pg.check("input[name=media][value=image]"); save_post(pg, "error=")
         check("Choose a picture" in pg.locator(".form-error").inner_text(), "picking Picture without a file asks for one")
         pg.goto(edit_url)
         pg.check("input[name=media][value=video]"); pg.fill("input[name=video]", "https://www.youtube.com/watch?v=P4uPK809WlM")
-        pg.click("button:text('Save')"); pg.wait_for_url("**saved=1**")
+        save_post(pg)
         anon.goto(f"{BASE}/writing/e2e-post")
         check(anon.locator(".lead-media iframe[src*='youtube-nocookie.com/embed/P4uPK809WlM']").count() == 1, "video lead renders as player")
         pg.goto(edit_url)
         pg.check("input[name=media][value=image]"); pg.set_input_files("input[name=image]", str(big))
-        pg.click("button:text('Save')"); pg.wait_for_url("**saved=1**")
+        save_post(pg)
         anon.goto(f"{BASE}/writing/e2e-post")
         lead = anon.locator(".lead-image img")
         check(lead.count() == 1 and anon.locator(".lead-media iframe").count() == 0, "switching to a picture replaces the video (one or the other)")
         lead_src = lead.get_attribute("src")
         anon.goto(f"{BASE}/writing")
         check(anon.get_by_text("E2E Post").count() == 1 and anon.locator("li.has-thumb img.post-thumb").count() >= 1, "published post listed with thumbnail")
-        pg.goto(edit_url); pg.check("input[name=media][value=none]"); pg.click("button:text('Save')"); pg.wait_for_url("**saved=1**")
+        pg.goto(edit_url); pg.check("input[name=media][value=none]"); save_post(pg)
         check(status(lead_src) == 404, "choosing None deletes the uploaded picture")
 
         # --- lab: hidden until made visible ---

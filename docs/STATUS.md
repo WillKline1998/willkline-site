@@ -2,6 +2,16 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (morning) — Writing & Media simplified, account corner, readable CV (Will's memo)
+**Done**:
+- **Writing** is an admin-only post maker. The title is required; the body is Markdown. Posts can have one optional lead **picture OR video** (radio picker, `src/components/PictureOrVideo.tsx` + `src/lib/lead-media.ts`; pictures resized to 1600px WebP; video = any web link, embedded when allowlisted). The posting time is stamped on first publish and shown in Eastern time (`src/lib/dates.ts`). Removed `summary` (the list shows an auto excerpt) and the old "insert image into body" uploader. Dropped columns Post.summary and MediaItem.caption (prod had 0 rows).
+- **Media** is admin-only: a photo upload (resized to 2000px) OR a video link, plus an optional title. Audio, press, and hosted video files were removed.
+- **Account corner**: "Log in" or "Admin · Log out" (members see "@handle · Log out") at the bottom of the sidebar and inside the phone menu. The duplicate log-out on /wall was removed.
+- **CV**: a date column on the left for wide screens; title → organization → meta → details; airy bullets with accent markers; music lines parsed into dates/lead/details; education details on separate lines; skills as chips. Tailwind's reset had stripped list markers, so `list-style` is restored for CV and Markdown lists.
+- **Admin forms**: radio/checkbox rows were stretched by the width rule (fixed), buttons size to content, and typed text uses the body font.
+
+**Verified**: e2e_admin passes 35 (three consecutive clean runs after fixing a Save-redirect race in the test). e2e_wall passes 36. The responsive audit shows 0 issues. Live is migrated with no advisory locks.
+
 ## 2026-10-08 (late night, cont.) — Wall: edit posts + optional images (Will's request)
 **Done**: /wall/edit/[id] lets the author or admin edit link, title, note, kind and image (replace or remove). An optional image on posts goes through src/lib/images.ts (sharp: auto-rotate, fit inside 1200×1200, strip metadata, WebP q80, max 4 MB input, non-images rejected). Cards show the player if the link has one, otherwise the uploaded image linking to the source plus a "host ↗" line. Wall images display at most 420px tall, uncropped. Deleting a post or removing a member deletes their images. /uploads now uses `Cache-Control: private` so the CDN never keeps deleted or hidden files.
 **Verified**: e2e_wall passes 32 checks: non-image rejected, form keeps text after an error, a 4000×3000 upload becomes 1200×900 WebP under 300KB, display height capped, source link, others can't see Edit or open the edit page, author edit plus image removal deletes the file. e2e_admin passes 26. The responsive audit shows 0 issues. **Live smoke test** with a temporary member on willkline.net: 3000×4000 JPEG became 900×1200 WebP; after delete the image returns 404; the temp user and post were removed.

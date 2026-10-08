@@ -346,13 +346,13 @@ a:hover { text-decoration: underline; }
 /* Admin */
 .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
 .admin-table td { padding: 0.9rem 0.4rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.admin-table input[type=text], .admin-table input[type=number] { font: inherit; font-size: 1rem; /* 16px+ stops iOS zooming on focus */ padding: 0.35rem 0.5rem; border: 1px solid var(--rule); border-radius: 6px; }
+.admin-table input[type=text], .admin-table input[type=number] { font: inherit; font-family: var(--font-body); font-size: 1rem; /* 16px+ stops iOS zooming on focus */ padding: 0.35rem 0.5rem; border: 1px solid var(--rule); border-radius: 6px; }
 .admin-table input[name=title] { width: min(220px, 100%); }
 .admin-table input[name=description] { width: min(300px, 100%); }
 .admin-table .small.muted { margin: 0.35rem 0; }
 .admin-form { display: grid; gap: 0.6rem; max-width: 520px; min-width: 0; padding: 1rem; background: var(--panel); border-radius: var(--radius); }
 .admin-form label { display: grid; gap: 0.2rem; font-family: var(--font-label); font-size: 0.75em; color: var(--muted); }
-.admin-form input[type=text], .admin-form input[type=number], .admin-form textarea { font: inherit; font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
+.admin-form input[type=text], .admin-form input[type=number], .admin-form textarea { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
 .btn { font: inherit; font-size: 0.9rem; padding: 0.4rem 0.9rem; min-height: 40px; border-radius: 6px; border: 1px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer; }
 .btn-quiet { background: transparent; color: var(--ink); }
 .btn-danger { background: transparent; color: #b91c1c; border-color: #b91c1c; }
@@ -360,7 +360,7 @@ a:hover { text-decoration: underline; }
 .admin-tools { list-style: none; padding: 0; display: grid; gap: 0.7rem; margin: 0 0 2rem; }
 .admin-tools li { display: flex; flex-direction: column; padding: 0.8rem 1rem; background: var(--panel); border-radius: var(--radius); }
 .admin-tools a { font-weight: 600; padding: 0.4rem 0; }
-.admin-form input[type=password], .admin-form input[type=datetime-local], .admin-form input[type=url], .admin-form select { font: inherit; font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
+.admin-form input[type=password], .admin-form input[type=datetime-local], .admin-form input[type=url], .admin-form select { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
 .admin-form .inline-form label, .admin-table label, .admin-album .inline-form label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; }
 /* Inputs sit inside mono labels; typed text should read in the body face. */
 .admin-form :is(input, textarea, select), .admin-table :is(input, select) { font-family: var(--font-body); }
@@ -374,9 +374,15 @@ a:hover { text-decoration: underline; }
   .admin-table tr { border-bottom: 1px solid var(--rule); padding: 0.6rem 0; }
   .admin-table td { border: 0; padding: 0.15rem 0; }
 }
-.admin-form textarea, .admin-form input:not([type=checkbox]), .admin-form select { width: 100%; max-width: 100%; box-sizing: border-box; }
+.admin-form textarea, .admin-form input:not([type=checkbox]):not([type=radio]), .admin-form select { width: 100%; max-width: 100%; box-sizing: border-box; }
+/* Checkbox/radio labels read as one row: box, then text. */
+.admin-form label:has(> input[type=checkbox]), .admin-form label:has(> input[type=radio]) {
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+}
+.admin-form input[type=checkbox], .admin-form input[type=radio] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); flex: none; }
+.admin-form > .btn { justify-self: start; min-width: 8rem; }
 .admin-form .inline-form input[type=number] { width: auto; }
-input[type=file] { max-width: 100%; min-height: 40px; font: inherit; font-size: 0.9rem; color: var(--muted); }
+input[type=file] { max-width: 100%; min-height: 40px; font: inherit; font-family: var(--font-body); font-size: 0.9rem; color: var(--muted); }
 /* Make "Choose file" look like the site's other buttons. */
 input[type=file]::file-selector-button {
   font: inherit; font-size: 0.9rem; margin-right: 0.75rem; min-height: 40px; padding: 0 1rem;
