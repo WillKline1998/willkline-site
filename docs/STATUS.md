@@ -14,7 +14,7 @@ Newest first. Every work session ends with an entry: what changed, what's verifi
 
 **Verified**: e2e_wall 48 (13 new: emails sent, switch, reset flow incl. bad/used/made-up links, short password, logout-everywhere, old password dead); e2e_admin 53; responsive 0 issues (incl. /forgot, /reset).
 **Pitfall found**: `vercel integration add` wrote `.env.local` with ALL production secrets, which Next would load over `.env`. Deleted immediately; confirmed 0 test users reached prod.
-**Pending (Will)**: add the Resend DNS records at Porkbun (DKIM TXT resend._domainkey, MX + SPF TXT on `send`, optional DMARC), then verify the domain.
+**DNS done (Will, 2026-10-08 7pm)**: DKIM, SPF MX/TXT and DMARC added at Porkbun; Resend domain **verified**. A live test reset email from hello@willkline.net reached wskline4's Gmail **inbox** (not spam).
 
 ## 2026-10-08 (afternoon, part 2) — Repo made public
 **Done**: The README is rewritten: what it does, a stack table, design notes pointing at the code, local setup, tests, and a rights note. The hero image is a real capture of the live site (`docs/mockups/readme_home.png`). Untracked and gitignored: `scripts/__pycache__`, integration-installed AI skill packs (`.agents/`, `.claude/`, `skills-lock.json`), and the regenerated `docs/mockups/responsive/`. DECISIONS.md no longer names the Porkbun account.
