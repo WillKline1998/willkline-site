@@ -2,6 +2,7 @@ import Link from "next/link";
 import { sections } from "@/lib/sections";
 import { DemoToggle } from "@/components/DemoMode";
 import { NavShell } from "@/components/NavShell";
+import { AccountLinks } from "@/components/AccountLinks";
 
 export function Nav() {
   return (
@@ -23,7 +24,10 @@ export function Nav() {
           ))}
         </ul>
       </nav>
-      <div className="nav-foot"><DemoToggle /></div>
+      <div className="nav-foot">
+        <DemoToggle />
+        <AccountLinks />
+      </div>
     </NavShell>
   );
 }

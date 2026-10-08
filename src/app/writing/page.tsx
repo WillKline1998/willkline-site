@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { longDate } from "@/lib/dates";
+import { excerpt } from "@/lib/excerpt";
 
 export const metadata: Metadata = { title: "Writing" };
 export const dynamic = "force-dynamic";
@@ -16,12 +17,17 @@ export default async function WritingPage() {
       ) : (
         <ul className="post-list">
           {posts.map((p) => (
-            <li key={p.id}>
+            <li key={p.id} className={p.mediaKind === "IMAGE" ? "has-thumb" : undefined}>
               <Link href={`/writing/${p.slug}`} className="post-link">
+                {p.publishedAt && <time className="post-date" dateTime={p.publishedAt.toISOString()}>{longDate(p.publishedAt)}</time>}
                 <span className="post-title">{p.title}</span>
-                {p.summary && <span className="post-summary">{p.summary}</span>}
+                {p.body && <span className="post-summary">{excerpt(p.body)}</span>}
+                {p.mediaKind === "VIDEO" && <span className="post-tag">▶ Video</span>}
               </Link>
-              {p.publishedAt && <time className="post-date" dateTime={p.publishedAt.toISOString()}>{longDate(p.publishedAt)}</time>}
+              {p.mediaKind === "IMAGE" && p.mediaUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.mediaUrl} alt="" className="post-thumb" loading="lazy" />
+              )}
             </li>
           ))}
         </ul>

@@ -42,41 +42,68 @@ export default async function CvPage() {
         <>
           <p className="cv-summary">{cv.summary}</p>
 
-          <h2 className="section-label">Experience</h2>
+          <h2 className="cv-heading">Experience</h2>
           {cv.experience.filter((e) => e.title || e.org).map((e) => (
-            <div key={e.title + e.org} className="cv-entry">
-              <div className="cv-row">
-                <h3>{e.title}, <span className="cv-org">{e.org}</span></h3>
-                <span className="cv-dates">{e.dates}</span>
-              </div>
-              <p className="cv-meta">{e.location}{e.note ? ` · ${e.note}` : ""}</p>
-              <ul>{e.bullets.map((b, i) => <li key={i}>{b}</li>)}</ul>
-            </div>
+            <CvItem key={e.title + e.org} dates={e.dates} title={e.title} sub={e.org} meta={[e.location, e.note].filter(Boolean).join(" · ")}>
+              {e.bullets.length > 0 && <ul className="cv-bullets">{e.bullets.map((b, i) => <li key={i}>{b}</li>)}</ul>}
+            </CvItem>
           ))}
-          {cv.additional_experience && <p className="cv-meta">{cv.additional_experience}</p>}
+          {cv.additional_experience && (
+            <CvItem title="Additional experience">
+              <p className="cv-text">{cv.additional_experience}</p>
+            </CvItem>
+          )}
 
-          <h2 className="section-label">Music</h2>
-          <ul className="cv-list">{cv.music.map((m, i) => <li key={i}>{m}</li>)}</ul>
+          <h2 className="cv-heading">Music</h2>
+          {cv.music.map((line, i) => {
+            const m = splitMusicLine(line);
+            return (
+              <CvItem key={i} dates={m.dates} title={m.lead}>
+                {m.rest && <p className="cv-text">{m.rest}</p>}
+              </CvItem>
+            );
+          })}
 
-          <h2 className="section-label">Education</h2>
+          <h2 className="cv-heading">Education</h2>
           {cv.education.filter((e) => e.school).map((e) => (
-            <div key={e.school} className="cv-entry">
-              <div className="cv-row">
-                <h3>{e.school}</h3>
-                <span className="cv-dates">{e.dates}</span>
-              </div>
-              <p className="cv-meta">{e.detail}</p>
-            </div>
+            <CvItem key={e.school} dates={e.dates} title={e.school} meta={e.location}>
+              <ul className="cv-lines">{e.detail.split(" · ").map((d, i) => <li key={i}>{d}</li>)}</ul>
+            </CvItem>
           ))}
 
-          <h2 className="section-label">Skills</h2>
-          <dl className="cv-skills">
-            {cv.skills.filter(([, v]) => v).map(([k, v]) => (
-              <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
-            ))}
-          </dl>
+          <h2 className="cv-heading">Skills</h2>
+          {cv.skills.filter(([, v]) => v).map(([k, v]) => (
+            <CvItem key={k} title={k}>
+              <ul className="chips cv-chips">{v.split(/,\s*/).map((s) => <li key={s}>{s}</li>)}</ul>
+            </CvItem>
+          ))}
         </>
       )}
     </section>
   );
+}
+
+// One CV row: dates in a left column (on wide screens), then a bold title,
+// an optional organization line, quiet meta, and details.
+function CvItem(props: { dates?: string; title: string; sub?: string; meta?: string; children?: React.ReactNode }) {
+  return (
+    <div className="cv-item">
+      <div className="cv-when">{props.dates}</div>
+      <div className="cv-what">
+        <h3 className="cv-title">{props.title}</h3>
+        {props.sub && <p className="cv-sub">{props.sub}</p>}
+        {props.meta && <p className="cv-meta">{props.meta}</p>}
+        {props.children}
+      </div>
+    </div>
+  );
+}
+
+/** "Role, Ensemble (2019–2022): details" → { lead, dates, rest }; "Label: details" → { lead, rest }. */
+function splitMusicLine(line: string) {
+  const dated = line.match(/^(.+?)\s*\(([^()]*\d{4}[^()]*)\)(?::\s*([\s\S]*)|\.?)$/);
+  if (dated) return { lead: dated[1], dates: dated[2], rest: dated[3] ?? "" };
+  const at = line.indexOf(": ");
+  if (at > 0 && at < 60) return { lead: line.slice(0, at), dates: "", rest: line.slice(at + 2) };
+  return { lead: line.replace(/\.$/, ""), dates: "", rest: "" };
 }

@@ -15,8 +15,9 @@ function Photos({ items }: { items: MediaItem[] }) {
           <li key={p.id}>
             <a href={`#photo-${p.id}`} className="photo-thumb">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.url} alt={p.title || p.caption || "Photo"} loading="lazy" />
+              <img src={p.url} alt={p.title || "Photo"} loading="lazy" />
             </a>
+            {p.title && <p className="media-title">{p.title}</p>}
           </li>
         ))}
       </ul>
@@ -25,12 +26,8 @@ function Photos({ items }: { items: MediaItem[] }) {
           <a href="#photos" className="lightbox-backdrop" aria-label="Close" />
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.url} alt={p.title || p.caption || "Photo"} loading="lazy" />
-            {(p.title || p.caption) && (
-              <figcaption>
-                {p.title && <strong>{p.title}</strong>} {p.caption && <span className="muted">{p.caption}</span>}
-              </figcaption>
-            )}
+            <img src={p.url} alt={p.title || "Photo"} loading="lazy" />
+            {p.title && <figcaption>{p.title}</figcaption>}
             <a href="#photos" className="lightbox-close">Close ✕</a>
           </figure>
         </div>
@@ -41,13 +38,13 @@ function Photos({ items }: { items: MediaItem[] }) {
 
 export default async function MediaPage() {
   const items = await db.mediaItem.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] });
-  const of = (k: string) => items.filter((i) => i.kind === k);
-  const [photos, videos, audio, press] = [of("PHOTO"), of("VIDEO"), of("AUDIO"), of("PRESS")];
+  const photos = items.filter((i) => i.kind === "PHOTO");
+  const videos = items.filter((i) => i.kind === "VIDEO");
 
   return (
     <section className="page page-wide">
       <h1 className="page-title">Media</h1>
-      {items.length === 0 && <p className="lede">Photos, video, and press are on the way.</p>}
+      {items.length === 0 && <p className="lede">Photos and video are on the way.</p>}
 
       {photos.length > 0 && (
         <section id="photos">
@@ -62,34 +59,11 @@ export default async function MediaPage() {
           <div className="media-grid">
             {videos.map((v) => (
               <div key={v.id}>
-                <MediaBlock m={{ kind: "EMBED", url: v.url, caption: v.title || v.caption }} />
-                {v.title && v.caption && <p className="media-caption">{v.caption}</p>}
+                <MediaBlock m={{ kind: "EMBED", url: v.url, caption: "" }} />
+                {v.title && <p className="media-title">{v.title}</p>}
               </div>
             ))}
           </div>
-        </section>
-      )}
-
-      {audio.length > 0 && (
-        <section>
-          <h2 className="section-label">Audio</h2>
-          <div className="media-grid">
-            {audio.map((a) => <MediaBlock key={a.id} m={{ kind: "EMBED", url: a.url, caption: a.title || a.caption }} />)}
-          </div>
-        </section>
-      )}
-
-      {press.length > 0 && (
-        <section>
-          <h2 className="section-label">Press</h2>
-          <ul className="press-list">
-            {press.map((p) => (
-              <li key={p.id}>
-                {p.caption && <blockquote>{p.caption}</blockquote>}
-                <a href={p.url} target="_blank" rel="noreferrer">{p.title || p.url} ↗</a>
-              </li>
-            ))}
-          </ul>
         </section>
       )}
     </section>

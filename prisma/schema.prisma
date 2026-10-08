@@ -80,26 +80,28 @@ model Track {
   notes    String  @default("")
 }
 
-// Writing. `body` is Markdown; a line holding only a YouTube/Spotify/… link becomes a player.
+// Writing (admin-only blog). `body` is Markdown; a line holding only a
+// YouTube/Spotify/… link becomes a player. One optional lead picture OR video.
 model Post {
   id          String    @id @default(cuid())
   slug        String    @unique
   title       String
-  summary     String    @default("")
   body        String    // Markdown
+  mediaKind   String?   // "IMAGE" | "VIDEO" | null
+  mediaUrl    String?   // IMAGE: /uploads/<key>; VIDEO: video page URL
   published   Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 
-// Media page: photos, videos (YouTube/Vimeo/uploaded), audio, and press links.
+// Media page (admin-only posting): uploaded photos and links to web-hosted
+// video (YouTube, Vimeo, …). Videos are never hosted here.
 model MediaItem {
   id        String   @id @default(cuid())
-  kind      String   // "PHOTO" | "VIDEO" | "AUDIO" | "PRESS"
-  title     String   @default("")
-  url       String   // /uploads/<key> or an external URL
-  caption   String   @default("") // photo credit, source, or a pull quote for press
+  kind      String   // "PHOTO" | "VIDEO"
+  title     String   @default("") // optional title / subtitle
+  url       String   // PHOTO: /uploads/<key>; VIDEO: the video page URL
   sortOrder Int      @default(0)
   published Boolean  @default(true)
   createdAt DateTime @default(now())

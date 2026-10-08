@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { logout } from "@/app/login/actions";
 import { WallCard } from "@/components/WallCard";
 import { WALL_KINDS, signupsOpen } from "@/lib/wall";
 import { PostForm } from "./PostForm";
@@ -71,8 +70,6 @@ export default async function WallPage(props: PageProps<"/wall">) {
           <p className="small muted">
             Signed in as {viewer.handle ? <Link href={`/wall/u/${viewer.handle}`}>@{viewer.handle}</Link> : viewer.email}
             {viewer.handle && <> · <Link href={`/wall/u/${viewer.handle}`}>My collection</Link></>}
-            {" · "}
-            <form action={logout} style={{ display: "inline" }}><button className="link-button">Log out</button></form>
           </p>
           <details className="wall-share">
             <summary className="btn">+ Share something</summary>
