@@ -2,6 +2,10 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (late night, cont.) — Wall: edit posts + optional images (Will's request)
+**Done**: /wall/edit/[id] lets the author or admin edit link, title, note, kind and image (replace or remove). An optional image on posts goes through src/lib/images.ts (sharp: auto-rotate, fit inside 1200×1200, strip metadata, WebP q80, max 4 MB input, non-images rejected). Cards show the player if the link has one, otherwise the uploaded image linking to the source plus a "host ↗" line. Wall images display at most 420px tall, uncropped. Deleting a post or removing a member deletes their images. /uploads now uses `Cache-Control: private` so the CDN never keeps deleted or hidden files.
+**Verified**: e2e_wall passes 32 checks: non-image rejected, form keeps text after an error, a 4000×3000 upload becomes 1200×900 WebP under 300KB, display height capped, source link, others can't see Edit or open the edit page, author edit plus image removal deletes the file. e2e_admin passes 26. The responsive audit shows 0 issues. **Live smoke test** with a temporary member on willkline.net: 3000×4000 JPEG became 900×1200 WebP; after delete the image returns 404; the temp user and post were removed.
+
 ## 2026-10-08 (late night) — M4: Inspiration Wall (live; sign-ups CLOSED pending Will)
 **Done**:
 - /signup: name, @handle, email, password. Bot traps (honeypot field plus a 3-second minimum) and a site-wide cap of 20 sign-ups/hour. Sign-ups are off unless SiteSetting `wall_signups` = "open". Login sends members to /wall and the admin to /admin.
