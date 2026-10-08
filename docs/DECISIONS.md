@@ -12,6 +12,9 @@ Short record of choices and why, so future sessions (and future Will) don't reli
 - **2026-10-07 · Note: earlier attempt exists.** Private repos `WillKline1998/personal-site` (C# backend + Angular frontend, Mar 2026) and `WillKline1998/frontend` (Angular, Mar 2026). Found after choosing Next.js; asked Will whether to reuse anything or keep the fresh start.
 - **2026-10-07 · Plan to make this repo public** once it's presentable (portfolio piece; his public GitHub is otherwise empty).
 
+## 2026-10-08 — Demo backdrop is a fixed, transform-animated layer
+The old demo animated `background-position` on the body (propagated to the canvas), forcing full-viewport repaints each frame with a transparent sticky sidebar over it; hovering nav links re-rasterised tiles and flashed an unpainted (white) rectangle between sidebar and page. Now `<html>` has an opaque dark base and the gradient is a `position: fixed` pseudo-element moved with `transform` (compositor only). Could not reproduce the flash in headless Chrome, so the fix is by diagnosis plus removal of the repaint path.
+
 ## 2026-10-07 — Hand-rolled auth instead of a library
 scrypt (node:crypto) + database sessions, ~70 lines in src/lib/auth.ts. Auth.js/Lucia would add a dependency and config for a site with one admin; this is small enough to read in one sitting (and is itself portfolio material). Revisit if social login is wanted for Wall members (M4).
 

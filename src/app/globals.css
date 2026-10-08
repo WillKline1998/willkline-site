@@ -477,9 +477,10 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .section-label { border-bottom: 0; }
 
 /* ------------------------------------------------------------------
-   DEMO MODE ("kaleidoscope glasses")
+   DEMO MODE ("effervescent orange")
    Everything flashy lives below, scoped to [data-mode="demo"].
-   Starter effects only; the real razzle-dazzle is milestone M6.
+   Palette: tangerine / amber / coral / hot pink-orange / golden
+   highlights on a dark warm brown. Motion is transform/opacity only.
    ------------------------------------------------------------------ */
 
 .demo-toggle {
@@ -488,55 +489,166 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   background: transparent; color: var(--ink); cursor: pointer;
 }
 
-[data-mode="demo"] body {
-  --bg: #0b0420;
-  --panel: #ffffff10;
-  --ink: #f5f0ff;
-  --muted: #b9a9e6;
-  --accent: #ff3cac;
-  --rule: #ffffff22;
-  background:
-    radial-gradient(circle at 20% 20%, #ff3cac55, transparent 40%),
-    radial-gradient(circle at 80% 30%, #2b86c555, transparent 40%),
-    radial-gradient(circle at 50% 90%, #784ba055, transparent 45%),
-    #0b0420;
-  background-size: 200% 200%;
-  animation: wk-drift 18s ease-in-out infinite alternate;
+/* An opaque base on <html> (not just <body>) means no seam can ever show
+   white, even while a layer is being re-rasterised. */
+[data-mode="demo"] {
+  background: #170804;
+  color-scheme: dark;
 }
-[data-mode="demo"] .site-shell { background: transparent; }
-[data-mode="demo"] .site-nav { background: transparent; }
+[data-mode="demo"] body {
+  --bg: #170804;
+  --panel: linear-gradient(135deg, #ffffff14, #ff8a3d14);
+  --ink: #fff4e8;       /* 17:1 on --bg */
+  --muted: #f2c9a6;     /* 11:1 on --bg */
+  --accent: #ffa13d;    /* 9:1 on --bg: bright tangerine that still reads as text */
+  --rule: #ffb86c33;
+  background: transparent;
+}
+[data-mode="demo"] ::selection { background: #ff7a18; color: #170804; }
 
+/* The animated backdrop is a fixed layer that we move with transform, not
+   an animated background-position: that repainted the whole canvas every
+   frame, and the sidebar flashed white while it was being re-rasterised. */
+[data-mode="demo"] body::before,
+[data-mode="demo"] body::after {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+}
+[data-mode="demo"] body::before {
+  inset: -30%;
+  background:
+    radial-gradient(circle at 18% 22%, #ff6a1a99, transparent 34%),
+    radial-gradient(circle at 78% 18%, #ff3d6e77, transparent 32%),
+    radial-gradient(circle at 70% 78%, #ffb02e88, transparent 36%),
+    radial-gradient(circle at 25% 82%, #ff8a4c77, transparent 32%),
+    radial-gradient(circle at 50% 50%, #ffd54a22, transparent 40%);
+  animation: wk-drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+/* Fine grain keeps the big gradients from banding and feels tactile. */
+[data-mode="demo"] body::after {
+  inset: 0; opacity: 0.09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+[data-mode="demo"] .site-shell { background: transparent; }
+/* Desktop: the sidebar floats on the backdrop (a tinted box would end where the
+   centred shell ends and read as a stray rectangle). Phones: the bar is sticky over
+   scrolling content, so it needs a body of its own. */
+[data-mode="demo"] .site-nav { background: transparent; border-right-color: var(--rule); }
+@media (max-width: 767px) {
+  [data-mode="demo"] .site-nav { background: #170804ee; border-bottom-color: var(--rule); }
+}
+
+/* Nav links: slide, glow, and an underline that draws in. */
+[data-mode="demo"] .site-nav li a {
+  position: relative; transition: color 0.25s, transform 0.25s, text-shadow 0.25s;
+}
+[data-mode="demo"] .site-nav li a::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, #ffd54a, #ff7a18, #ff3d81);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+}
+[data-mode="demo"] .site-nav li a:hover,
+[data-mode="demo"] .site-nav li a:focus-visible {
+  color: #ffc46b; transform: translateX(6px); text-shadow: 0 0 14px #ff8a3dcc;
+}
+[data-mode="demo"] .site-nav li a:hover::after,
+[data-mode="demo"] .site-nav li a:focus-visible::after { transform: scaleX(1); }
+
+[data-mode="demo"] .site-name { text-shadow: 0 0 22px #ff7a1899; }
+
+/* Headings: molten gradient with a soft glow. drop-shadow, because
+   text-shadow would paint behind the transparent gradient text. */
 [data-mode="demo"] h1 {
-  background: linear-gradient(90deg, #ff3cac, #784ba0, #2b86c5, #ff3cac);
+  background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62, #ff3d81, #ffd54a);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: wk-shimmer 6s linear infinite;
+  filter: drop-shadow(0 0 18px #ff7a1866);
+  animation: wk-shimmer 7s linear infinite;
 }
+[data-mode="demo"] .section-label,
+[data-mode="demo"] .rail-label { color: #ffc46b; }
+[data-mode="demo"] .rail-box { border-top-color: #ff9a3c; box-shadow: 0 -8px 18px -12px #ff7a18; }
 
+/* Warm glass panels that tilt ("cockeyed") and glow on hover. */
 [data-mode="demo"] .notice,
-[data-mode="demo"] .album-card {
+[data-mode="demo"] .album-card,
+[data-mode="demo"] .lab-card,
+[data-mode="demo"] .wall-card,
+[data-mode="demo"] .press-list li {
   backdrop-filter: blur(6px);
-  transition: transform 0.4s cubic-bezier(.2,.8,.2,1.4);
+  transition: transform 0.4s cubic-bezier(.2,.8,.2,1.4), box-shadow 0.4s, border-color 0.4s;
+}
+[data-mode="demo"] .notice,
+[data-mode="demo"] .lab-card,
+[data-mode="demo"] .wall-card,
+[data-mode="demo"] .press-list li {
+  border: 1px solid #ffb86c40;
+  box-shadow: 0 8px 30px -14px #ff7a18aa;
 }
 [data-mode="demo"] .notice:hover,
-[data-mode="demo"] .album-card:hover {
+[data-mode="demo"] .album-card:hover,
+[data-mode="demo"] .lab-card:hover,
+[data-mode="demo"] .wall-card:hover {
   transform: rotate(-1.5deg) scale(1.03);
+  border-color: #ffb347;
+  box-shadow: 0 0 34px #ff8a3d88, 0 12px 40px -10px #ff5e6288;
+}
+/* Alternate the lean so a grid of cards feels hand-scattered. */
+[data-mode="demo"] .notice:nth-child(even):hover,
+[data-mode="demo"] .album-card:nth-child(even):hover { transform: rotate(1.3deg) scale(1.03); }
+[data-mode="demo"] .notice-show { border-left: 4px solid #ffb02e; }
+
+/* Dark text on bright-orange fills (white on orange fails AA). */
+[data-mode="demo"] .cal-m,
+[data-mode="demo"] .file-icon,
+[data-mode="demo"] .btn { color: #170804; }
+[data-mode="demo"] .btn { background: var(--accent); border-color: var(--accent); }
+[data-mode="demo"] .wall-filters a[aria-current="page"],
+[data-mode="demo"] .wall-sort a[aria-current="page"] { background: var(--accent); border-color: var(--accent); }
+
+/* The toggle glows with a pulsing halo (opacity-animated pseudo-element). */
+[data-mode="demo"] .demo-toggle {
+  position: relative; color: #170804; border-color: transparent;
+  background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62);
+  background-size: 200% 100%;
+  font-weight: 700;
+  animation: wk-shimmer 5s linear infinite;
+}
+[data-mode="demo"] .demo-toggle::after {
+  content: ""; position: absolute; inset: -4px; border-radius: inherit; z-index: -1;
+  background: inherit; filter: blur(14px);
+  animation: wk-pulse 2.4s ease-in-out infinite alternate;
 }
 
-[data-mode="demo"] .demo-toggle { box-shadow: 0 0 18px #ff3cac; }
-
 @keyframes wk-drift {
-  from { background-position: 0% 0%; }
-  to   { background-position: 100% 100%; }
+  from { transform: translate(-4%, -3%) rotate(0deg) scale(1); }
+  to   { transform: translate(4%, 3%) rotate(8deg) scale(1.08); }
 }
 @keyframes wk-shimmer {
   to { background-position: 300% 0; }
 }
+@keyframes wk-pulse {
+  from { opacity: 0.35; }
+  to   { opacity: 0.85; }
+}
 
-/* Respect users who ask for less motion. */
+/* Respect users who ask for less motion: the palette and glow stay, motion goes. */
 @media (prefers-reduced-motion: reduce) {
-  [data-mode="demo"] body,
-  [data-mode="demo"] h1 { animation: none; }
+  [data-mode="demo"] body::before,
+  [data-mode="demo"] h1,
+  [data-mode="demo"] .demo-toggle,
+  [data-mode="demo"] .demo-toggle::after { animation: none; }
+  [data-mode="demo"] .notice,
+  [data-mode="demo"] .album-card,
+  [data-mode="demo"] .lab-card,
+  [data-mode="demo"] .wall-card,
+  [data-mode="demo"] .site-nav li a { transition: none; }
+  [data-mode="demo"] .notice:hover,
+  [data-mode="demo"] .album-card:hover,
+  [data-mode="demo"] .lab-card:hover,
+  [data-mode="demo"] .wall-card:hover,
+  [data-mode="demo"] .site-nav li a:hover { transform: none; }
 }

@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (night) — Demo mode goes orange
+**Done**: Demo palette rebuilt around tangerine/amber/coral/hot pink-orange/gold on dark warm brown (AA text). Animated glow-blob backdrop + grain, glowing gradient headings, nav links that slide/glow/underline, warm glass cards that tilt (alternating lean), glowing pulsing Demo button. Reduced motion keeps palette, drops motion. Fixed the white-rectangle hover bug in the sidebar (see DECISIONS).
+**Verified**: lint + build; screenshots docs/mockups/demo_*.png (home, music, phone, nav hover 2nd/3rd, normal mode unchanged).
+**Next**: Will reviews on the branch feature/demo-mode.
+
 ## 2026-10-08 (evening) — Site email (Resend)
 **Done**:
 - **Resend:** installed via the Vercel Marketplace (Will accepted the terms). It sets RESEND_API_KEY and RESEND_EMAIL_DOMAIN. `src/lib/email.ts` sends through the Resend REST API. With no key (local and tests), mail is written to `storage/outbox/`.
