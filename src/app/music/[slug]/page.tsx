@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { KIND_LABEL } from "@/lib/music";
 import { formatDuration } from "@/lib/duration";
+import { openGraph } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,11 @@ async function getAlbum(slug: string) {
 export async function generateMetadata(props: PageProps<"/music/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const a = await getAlbum(slug);
-  return { title: a?.title ?? "Music" };
+  if (!a) return { title: "Music" };
+  const description = `${KIND_LABEL[a.kind] ?? "Album"}${a.year ? ` (${a.year})` : ""} by Will Kline. Listen on every platform.`;
+  // Cover art becomes the link preview image.
+  const images = a.coverUrl ? [{ url: a.coverUrl, alt: `${a.title} cover` }] : undefined;
+  return { title: a.title, description, openGraph: openGraph({ title: a.title, description, type: "music.album", ...(images && { images }) }), twitter: { card: "summary", images } };
 }
 
 // One page per release (Will's request): cover, notes, and every place to listen.

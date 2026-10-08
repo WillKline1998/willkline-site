@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { openGraph } from "@/lib/seo";
 import { Markdown } from "@/components/Markdown";
 import { LabStatus, techList } from "@/components/LabStatus";
 
@@ -11,7 +12,7 @@ const load = (slug: string) => db.labProject.findFirst({ where: { slug, publishe
 
 export async function generateMetadata(props: PageProps<"/lab/[slug]">): Promise<Metadata> {
   const p = await load((await props.params).slug);
-  return p ? { title: p.title, description: p.description || undefined } : {};
+  return p ? { title: p.title, description: p.description || undefined, openGraph: openGraph({ title: p.title, description: p.description || undefined }) } : {};
 }
 
 export default async function LabProjectPage(props: PageProps<"/lab/[slug]">) {

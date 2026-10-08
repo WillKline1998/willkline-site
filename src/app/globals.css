@@ -9,7 +9,7 @@
   --bg: #ffffff;
   --panel: #f6f6f4;
   --ink: #111;
-  --muted: #8a8a8a;
+  --muted: #6b6b6b; /* 5.3:1 on white: passes WCAG AA for small text */
   --accent: #c2410c;
   --rule: #ececec;
   --font-body: var(--font-geist-sans), system-ui, sans-serif;
@@ -442,6 +442,8 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .album-detail { display: grid; gap: 2rem; margin-top: 1rem; }
 @media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
 .listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+
+.not-found-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; list-style: none; padding: 0; font-weight: 600; }
 
 /* Track list (public) */
 .track-total { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 0.5rem; }

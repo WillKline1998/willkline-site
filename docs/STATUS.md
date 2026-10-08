@@ -2,6 +2,17 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (afternoon) — "Ready to share" polish + Lab entry rewrite
+**Done**:
+- **Link previews (Open Graph / Twitter):** `src/app/opengraph-image.tsx` generates the site card (1200×630). Release pages use their cover art, Writing posts use their lead picture, and everything else falls back to the site card. `src/lib/seo.ts#openGraph()` exists because Next replaces the parent's openGraph instead of merging it; without it a page loses its site name and image. `metadataBase` is https://willkline.net.
+- **Icons:** `icon.tsx` (32px) and `apple-icon.tsx` (180px) draw "WK" on the accent orange. Removed the default favicon.ico and the leftover Next starter SVGs.
+- **Search:** `robots.ts` (disallows /admin, /login, /signup, /wall/edit) and `sitemap.ts` (sections, releases, posts, Lab, built live). `admin/layout.tsx` marks all of admin noindex.
+- **404:** `not-found.tsx`, "Wrong note.", with links to every section.
+- **Lighthouse (mobile, local prod build):** `--muted` changed #8a8a8a → #6b6b6b, which raises contrast from 3.45:1 to 5.3:1. Accessibility went from 95–96 to 100 on every page. The /music grid covers got `sizes`. Every page now scores perf 92–98, a11y 100, SEO 100, best practices 100, **except Home best practices = 77**: Spotify and SoundCloud embeds set third-party cookies. The fix would be "click to load" player facades, a UX call for Will.
+- **Lab entry** (willkline-net) rewritten as a representative snapshot ("What it does" / "How it's built") with 16 technologies. Keep it current by editing in place; don't append.
+
+**Verified**: e2e_admin 53, e2e_wall 36, responsive 0 issues (now includes the 404 page).
+
 ## 2026-10-08 (midday) — Writing search/sort + home page pass
 **Done**:
 - /writing has a search box (case-insensitive "contains" on title OR body, `?q=`) and Newest/Oldest pills (`?sort=old`, which keeps `q`). It shows a result count and Clear search, plus a friendly no-match message.

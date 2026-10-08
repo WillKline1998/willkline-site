@@ -32,7 +32,7 @@ export default async function MusicPage(props: PageProps<"/music">) {
           <li key={a.id}>
             <Link href={`/music/${a.slug}`} className="album-card">
               {a.coverUrl && (
-                <Image src={a.coverUrl} alt={`${a.title} cover`} width={300} height={300} className="album-cover" />
+                <Image src={a.coverUrl} alt={`${a.title} cover`} width={300} height={300} sizes="(min-width: 768px) 200px, 45vw" className="album-cover" />
               )}
               <span className="album-title">{a.title}</span>
               <span className="album-kind">{KIND_LABEL[a.kind] ?? "Album"}{a.year ? ` · ${a.year}` : ""}</span>

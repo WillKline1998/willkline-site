@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { dateTime } from "@/lib/dates";
 import { excerpt } from "@/lib/excerpt";
+import { openGraph } from "@/lib/seo";
 import { Markdown } from "@/components/Markdown";
 import { LeadMedia } from "@/components/LeadMedia";
 
@@ -20,7 +21,14 @@ async function load(slug: string) {
 
 export async function generateMetadata(props: PageProps<"/writing/[slug]">): Promise<Metadata> {
   const post = await load((await props.params).slug);
-  return post ? { title: post.title, description: excerpt(post.body) || undefined } : {};
+  if (!post) return {};
+  const description = excerpt(post.body) || undefined;
+  const images = post.mediaKind === "IMAGE" && post.mediaUrl ? [post.mediaUrl] : undefined;
+  return {
+    title: post.title,
+    description,
+    openGraph: openGraph({ title: post.title, description, type: "article", publishedTime: post.publishedAt?.toISOString(), ...(images && { images }) }),
+  };
 }
 
 export default async function PostPage(props: PageProps<"/writing/[slug]">) {
