@@ -50,3 +50,14 @@ next-env.d.ts
 
 # admin uploads (local storage driver)
 /storage
+
+# python bytecode from the test scripts
+__pycache__/
+
+# AI-assistant skill packs installed by integrations (local tooling, not project code)
+/.agents/
+/.claude/
+skills-lock.json
+
+# layout-audit screenshots, regenerated on every run of scripts/responsive_audit.py
+/docs/mockups/responsive/

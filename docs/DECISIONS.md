@@ -8,7 +8,7 @@ Short record of choices and why, so future sessions (and future Will) don't reli
 - **2026-10-05 · Normal mode = artist-page layout.** Sidebar nav (desktop) / top bar (mobile), simple content column. Will's stated preference.
 - **2026-10-05 · Code lives on GitHub under WillKline1998** (private repo `willkline-site`).
 - **2026-10-05 · Content comes from the database, not hardcoded files.** Required for the admin-editing pillar.
-- **2026-10-07 · Domain: willkline.net** registered at Porkbun (account username "willthedude", email wskline4@gmail.com). $12.52/yr flat; auto-renew ON, transfer lock ON, WHOIS privacy ON; expires 2027-10-07. Nameservers = Porkbun default (parked). At M7: add DNS records at Porkbun pointing to the host (e.g., Vercel).
+- **2026-10-07 · Domain: willkline.net** registered at Porkbun. Auto-renew, transfer lock and WHOIS privacy on. DNS points at Vercel (apex A record; www redirects to the apex). At M7: add DNS records at Porkbun pointing to the host (e.g., Vercel).
 - **2026-10-07 · Note: earlier attempt exists.** Private repos `WillKline1998/personal-site` (C# backend + Angular frontend, Mar 2026) and `WillKline1998/frontend` (Angular, Mar 2026). Found after choosing Next.js; asked Will whether to reuse anything or keep the fresh start.
 - **2026-10-07 · Plan to make this repo public** once it's presentable (portfolio piece; his public GitHub is otherwise empty).
 

@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (afternoon, part 2) — Repo ready to go public (awaiting Will's OK to flip)
+**Done**: The README is rewritten: what it does, a stack table, design notes pointing at the code, local setup, tests, and a rights note. The hero image is a real capture of the live site (`docs/mockups/readme_home.png`). Untracked and gitignored: `scripts/__pycache__`, integration-installed AI skill packs (`.agents/`, `.claude/`, `skills-lock.json`), and the regenerated `docs/mockups/responsive/`. DECISIONS.md no longer names the Porkbun account.
+**Audit**: gitleaks scanned the full history (63 commits) with 0 findings. Manual grep found no phone number, DB or Blob credentials, or chat IDs. The only email in the repo (wskline4) is the public CV contact. Older commits still contain the Porkbun username, which is the same public handle as his DistroKid page.
+**Open for Will**: flip visibility (`gh repo edit --visibility public --accept-visibility-change-consequences`). docs/PLAN.md credits "PM: Hermes · Builder: Hermes / Claude Code". Keep or reword it before going public (his call).
+
 ## 2026-10-08 (afternoon) — "Ready to share" polish + Lab entry rewrite
 **Done**:
 - **Link previews (Open Graph / Twitter):** `src/app/opengraph-image.tsx` generates the site card (1200×630). Release pages use their cover art, Writing posts use their lead picture, and everything else falls back to the site card. `src/lib/seo.ts#openGraph()` exists because Next replaces the parent's openGraph instead of merging it; without it a page loses its site name and image. `metadataBase` is https://willkline.net.
