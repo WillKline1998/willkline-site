@@ -17,7 +17,7 @@ const slugify = (s: string) =>
 
 // Apple Music URLs reveal the release type ("…/x25-ep/…", "…-single/…").
 const kindOf = (r: Release) => {
-  if (r.kind === "soundcloud-set") return "PROJECT";
+  if (r.kind === "soundcloud-set") return "ALBUM"; // SoundCloud-only sets (COOKY, Tempted) are albums too (Will, 2026-10-08)
   const apple = r.links.apple ?? "";
   if (r.kind === "EP" || /-ep\//.test(apple)) return "EP";
   if (/-single\//.test(apple)) return "SINGLE";
