@@ -1,35 +1,89 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { currentUser, requireAdmin, requireUser } from "@/lib/auth";
-import { str } from "@/lib/forms";
+import { fileFrom, str } from "@/lib/forms";
+import { ImageError, saveResizedImage } from "@/lib/images";
+import { deleteFile, keyFromUrl } from "@/lib/storage";
 import { LIMITS, WALL_KINDS, kindFromUrl } from "@/lib/wall";
 
-export type PostState = { error?: string; ok?: boolean; values?: { url: string; title: string; note: string; kind: string } };
+type Values = { url: string; title: string; note: string; kind: string };
+export type PostState = { error?: string; ok?: boolean; values?: Values };
 
 const refresh = () => revalidatePath("/wall", "layout");
 
+async function removeImage(url: string | null) {
+  const key = url && keyFromUrl(url);
+  if (key) await deleteFile(key);
+}
+
+/** Shared validation for create + edit. Returns clean fields or an error. */
+function readPost(form: FormData): { values: Values; error?: string } {
+  const values = {
+    url: str(form, "url"),
+    title: str(form, "title").slice(0, LIMITS.title),
+    note: str(form, "note").slice(0, LIMITS.note),
+    kind: str(form, "kind"),
+  };
+  try {
+    if (!/^https?:$/.test(new URL(values.url).protocol)) throw new Error();
+  } catch {
+    return { values, error: "Paste a full link that starts with https://" };
+  }
+  if (!values.title) return { values, error: "Give it a title (the piece, the artist, or both)." };
+  return { values };
+}
+
+const kindOf = (v: Values) => (v.kind in WALL_KINDS ? v.kind : kindFromUrl(v.url));
+
 export async function createWallPost(_prev: PostState, form: FormData): Promise<PostState> {
   const user = await requireUser();
-  const url = str(form, "url");
-  const title = str(form, "title").slice(0, LIMITS.title);
-  const note = str(form, "note").slice(0, LIMITS.note);
-  const values = { url, title, note, kind: str(form, "kind") };
-  const fail = (error: string): PostState => ({ error, values });
-  try {
-    if (!/^https?:$/.test(new URL(url).protocol)) throw new Error();
-  } catch {
-    return fail("Paste a full link that starts with https://");
-  }
-  if (!title) return fail("Give it a title (the piece, the artist, or both).");
+  const { values, error } = readPost(form);
+  if (error) return { error, values };
   const today = await db.wallPost.count({ where: { authorId: user.id, createdAt: { gt: new Date(Date.now() - 864e5) } } });
-  if (today >= LIMITS.postsPerDay) return fail(`That's ${LIMITS.postsPerDay} posts today. Come back tomorrow!`);
-  const picked = str(form, "kind");
-  const kind = picked in WALL_KINDS ? picked : kindFromUrl(url);
-  await db.wallPost.create({ data: { authorId: user.id, url, title, note, kind } });
+  if (today >= LIMITS.postsPerDay) return { error: `That's ${LIMITS.postsPerDay} posts today. Come back tomorrow!`, values };
+
+  let imageUrl: string | null = null;
+  const image = fileFrom(form, "image");
+  try {
+    if (image) imageUrl = await saveResizedImage(image);
+  } catch (e) {
+    return { error: e instanceof ImageError ? e.message : "Couldn't save that image.", values };
+  }
+  await db.wallPost.create({
+    data: { authorId: user.id, url: values.url, title: values.title, note: values.note, kind: kindOf(values), imageUrl },
+  });
   refresh();
   return { ok: true };
+}
+
+// Authors edit their own posts; the admin can edit anything.
+export async function updateWallPost(_prev: PostState, form: FormData): Promise<PostState> {
+  const user = await requireUser();
+  const post = await db.wallPost.findUnique({ where: { id: str(form, "id") } });
+  if (!post || (post.authorId !== user.id && user.role !== "ADMIN")) return { error: "You can only edit your own posts." };
+  const { values, error } = readPost(form);
+  if (error) return { error, values };
+
+  let imageUrl = post.imageUrl;
+  const image = fileFrom(form, "image");
+  try {
+    if (image) imageUrl = await saveResizedImage(image);
+  } catch (e) {
+    return { error: e instanceof ImageError ? e.message : "Couldn't save that image.", values };
+  }
+  if (image || form.get("removeImage") === "on") {
+    await removeImage(post.imageUrl);
+    if (!image) imageUrl = null;
+  }
+  await db.wallPost.update({
+    where: { id: post.id },
+    data: { url: values.url, title: values.title, note: values.note, kind: kindOf(values), imageUrl },
+  });
+  refresh();
+  redirect("/wall");
 }
 
 export async function toggleSave(form: FormData) {
@@ -47,6 +101,7 @@ export async function deleteWallPost(form: FormData) {
   const post = await db.wallPost.findUnique({ where: { id: str(form, "id") } });
   if (!post || (post.authorId !== user.id && user.role !== "ADMIN")) return;
   await db.wallPost.delete({ where: { id: post.id } });
+  await removeImage(post.imageUrl);
   refresh();
 }
 

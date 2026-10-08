@@ -188,6 +188,7 @@ model WallPost {
   title     String
   url       String
   note      String   @default("") // why it inspires them
+  imageUrl  String?  // optional uploaded preview (/uploads/<key>), resized on upload
   hidden    Boolean  @default(false) // admin moderation
   reports   Int      @default(0)
   createdAt DateTime @default(now())

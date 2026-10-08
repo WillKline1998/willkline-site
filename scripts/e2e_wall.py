@@ -5,7 +5,7 @@ posting, filters, saving/collections, permissions, reporting/moderation, and the
 sign-up switch. Everything created is removed afterwards.
 Run: ~/JobSearch/.venv/bin/python scripts/e2e_wall.py
 """
-import os, secrets, subprocess, sys, time
+import os, secrets, subprocess, sys, tempfile, time, urllib.error, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from testdb import remove_user, sql, sql_value
@@ -92,6 +92,50 @@ try:
         check(anon.locator("h2:text('Collection (1)')").count() == 1 and anon.get_by_text("E2E Edgar Meyer Bach").count() == 1, "B's public collection shows the save")
         anon.goto(f"{BASE}/wall/u/{A['handle']}")
         check(anon.locator("h2:text('Shared (1)')").count() == 1, "A's page lists what A shared")
+
+        # --- optional image upload: resized + capped; editing ---
+        big = Path(tempfile.mkdtemp()) / "huge-art.jpg"
+        subprocess.run(["node", "-e", f"require('sharp')({{create:{{width:4000,height:3000,channels:3,background:'#c2410c'}}}}).jpeg().toFile('{big}')"], cwd=ROOT, check=True)
+        notimg = big.with_name("notes.jpg"); notimg.write_text("not really an image")
+        a.goto(f"{BASE}/wall"); a.click("summary:text('+ Share something')")
+        a.fill("form.wall-form input[name=url]", "https://www.clevelandart.org/art/1958.31")
+        a.fill("form.wall-form input[name=title]", "E2E Museum Piece")
+        a.set_input_files("form.wall-form input[name=image]", str(notimg))
+        a.click("button:text('Post to the Wall')"); a.wait_for_selector(".form-error")
+        check("isn't an image" in a.locator(".form-error").inner_text(), "non-image upload is rejected")
+        check(a.locator("form.wall-form input[name=title]").input_value() == "E2E Museum Piece", "form keeps typed text after an error")
+        a.set_input_files("form.wall-form input[name=image]", str(big))
+        a.click("button:text('Post to the Wall')"); a.wait_for_selector("text=Posted ✓")
+        anon.goto(f"{BASE}/wall")
+        mcard = anon.locator(".wall-card", has_text="E2E Museum Piece")
+        img = mcard.locator(".wall-image img")
+        img.wait_for(); anon.wait_for_function("() => [...document.querySelectorAll('.wall-image img')].every(i => i.complete)")
+        nat = img.evaluate("i => [i.naturalWidth, i.naturalHeight]")
+        box = img.bounding_box()
+        check(nat[0] <= 1200 and nat[1] <= 1200, f"uploaded image resized on server ({nat[0]}x{nat[1]})")
+        check(box["height"] <= 421, f"image display capped ({round(box['height'])}px tall)")
+        src = img.get_attribute("src")
+        r = urllib.request.urlopen(BASE + src)
+        check(r.headers["Content-Type"] == "image/webp" and len(r.read()) < 300_000, "stored as small WebP")
+        check(mcard.locator(".wall-source a:text('clevelandart.org ↗')").count() == 1, "card links to the source site")
+
+        bo.goto(f"{BASE}/wall")
+        check(bo.locator(".wall-card", has_text="E2E Museum Piece").locator("a:text('Edit')").count() == 0, "others see no Edit button")
+        pid = sql_value("""SELECT id FROM "WallPost" WHERE title = 'E2E Museum Piece';""")
+        bo.goto(f"{BASE}/wall/edit/{pid}")
+        check(bo.locator("form.wall-form").count() == 0, "others can't open the edit page")
+        a.goto(f"{BASE}/wall")
+        a.locator(".wall-card", has_text="E2E Museum Piece").locator("a:text('Edit')").click(); a.wait_for_url("**/wall/edit/*")
+        a.fill("input[name=title]", "E2E Museum Piece (edited)")
+        a.check("input[name=removeImage]")
+        a.click("button:text('Save changes')"); a.wait_for_url(f"{BASE}/wall")
+        anon.goto(f"{BASE}/wall")
+        check(anon.locator("h2.wall-title", has_text="E2E Museum Piece (edited)").count() == 1, "author edits title")
+        try:
+            urllib.request.urlopen(BASE + src); gone = False
+        except urllib.error.HTTPError as e:
+            gone = e.code == 404
+        check(gone, "removing the image deletes the file")
 
         # --- reporting + moderation ---
         for _ in range(3):  # one person reporting repeatedly counts once

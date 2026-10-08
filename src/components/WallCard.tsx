@@ -7,7 +7,25 @@ import { deleteWallPost, reportWallPost, toggleSave } from "@/app/wall/actions";
 
 export type WallPostView = WallPost & { author: Pick<User, "handle" | "name">; _count: { saves: number } };
 
-function Preview({ url, title }: { url: string; title: string }) {
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+};
+
+// Player if the link has one; otherwise the uploaded image (linking to the
+// source), a direct image link, or a plain link card.
+function Preview({ url, title, imageUrl }: { url: string; title: string; imageUrl: string | null }) {
+  if (toEmbed(url).kind !== "link") return <MediaBlock m={{ kind: "EMBED", url, caption: "" }} />;
+  if (imageUrl)
+    return (
+      <a href={url} target="_blank" rel="noreferrer" className="wall-image">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imageUrl} alt={title} loading="lazy" />
+      </a>
+    );
   if (IMAGE_URL.test(url))
     return (
       <a href={url} target="_blank" rel="noreferrer" className="wall-image">
@@ -16,7 +34,6 @@ function Preview({ url, title }: { url: string; title: string }) {
         <img src={url} alt={title} loading="lazy" referrerPolicy="no-referrer" />
       </a>
     );
-  if (toEmbed(url).kind !== "link") return <MediaBlock m={{ kind: "EMBED", url, caption: "" }} />;
   return <MediaBlock m={{ kind: "LINK", url, caption: title }} />;
 }
 
@@ -25,11 +42,14 @@ export function WallCard({ p, viewer, saved }: { p: WallPostView; viewer: { id: 
   const mine = viewer?.id === p.authorId;
   return (
     <article className="wall-card">
-      <Preview url={p.url} title={p.title} />
+      <Preview url={p.url} title={p.title} imageUrl={p.imageUrl} />
       <div className="wall-body">
         <span className="notice-kind">{WALL_KINDS[p.kind as WallKind] ?? p.kind}</span>
         <h2 className="wall-title">{p.title}</h2>
         {p.note && <p className="wall-note">{p.note}</p>}
+        {p.imageUrl && toEmbed(p.url).kind === "link" && (
+          <p className="wall-source"><a href={p.url} target="_blank" rel="noreferrer">{hostOf(p.url)} ↗</a></p>
+        )}
         <p className="wall-meta">
           {p.author.handle ? <Link href={`/wall/u/${p.author.handle}`}>@{p.author.handle}</Link> : p.author.name}
           {" · "}
@@ -47,6 +67,7 @@ export function WallCard({ p, viewer, saved }: { p: WallPostView; viewer: { id: 
           ) : (
             <Link href="/login?next=/wall" className="btn btn-quiet">☆ Save {p._count.saves > 0 && p._count.saves}</Link>
           )}
+          {(mine || viewer?.role === "ADMIN") && <Link href={`/wall/edit/${p.id}`} className="btn btn-quiet">Edit</Link>}
           {(mine || viewer?.role === "ADMIN") && (
             <form action={deleteWallPost}>
               <input type="hidden" name="id" value={p.id} />
