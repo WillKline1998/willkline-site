@@ -47,7 +47,7 @@ export default async function WallPage(props: PageProps<"/wall">) {
             {" · "}
             <form action={logout} style={{ display: "inline" }}><button className="link-button">Log out</button></form>
           </p>
-          <details className="wall-share" open={shown.length === 0}>
+          <details className="wall-share">
             <summary className="btn">+ Share something</summary>
             <PostForm />
           </details>

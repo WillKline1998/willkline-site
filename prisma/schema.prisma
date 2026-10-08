@@ -29,6 +29,7 @@ model User {
   wallPosts    WallPost[]
   saves        Save[]
   sessions     Session[]
+  reports      WallReport[]
 }
 
 // Login sessions. The cookie holds a random token; only its SHA-256 hash is
@@ -191,8 +192,20 @@ model WallPost {
   reports   Int      @default(0)
   createdAt DateTime @default(now())
   saves     Save[]
+  flags     WallReport[]
 
   @@index([createdAt])
+}
+
+// One report per person per post, so a single account can't hide things.
+model WallReport {
+  userId     String
+  wallPostId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallPost   WallPost @relation(fields: [wallPostId], references: [id], onDelete: Cascade)
+
+  @@id([userId, wallPostId])
 }
 
 // A user's personal collection = the WallPosts they've saved.

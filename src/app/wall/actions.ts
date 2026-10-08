@@ -50,18 +50,28 @@ export async function deleteWallPost(form: FormData) {
   refresh();
 }
 
-// Three reports hide a post until the admin reviews it.
+// Reports from three different people hide a post until the admin reviews it.
 export async function reportWallPost(form: FormData) {
   const user = await currentUser();
   if (!user) return;
-  const post = await db.wallPost.update({ where: { id: str(form, "id") }, data: { reports: { increment: 1 } } });
-  if (post.reports >= 3 && !post.hidden) await db.wallPost.update({ where: { id: post.id }, data: { hidden: true } });
+  const wallPostId = str(form, "id");
+  await db.wallReport.upsert({
+    where: { userId_wallPostId: { userId: user.id, wallPostId } },
+    update: {},
+    create: { userId: user.id, wallPostId },
+  });
+  const reports = await db.wallReport.count({ where: { wallPostId } });
+  await db.wallPost.update({ where: { id: wallPostId }, data: { reports, ...(reports >= 3 ? { hidden: true } : {}) } });
   refresh();
 }
 
 export async function setHidden(form: FormData) {
   await requireAdmin("/admin/wall");
-  await db.wallPost.update({ where: { id: str(form, "id") }, data: { hidden: form.get("hidden") === "1", reports: 0 } });
+  const id = str(form, "id");
+  const hidden = form.get("hidden") === "1";
+  // Unhiding = the admin reviewed it: clear reports so it isn't re-hidden immediately.
+  if (!hidden) await db.wallReport.deleteMany({ where: { wallPostId: id } });
+  await db.wallPost.update({ where: { id }, data: { hidden, ...(hidden ? {} : { reports: 0 }) } });
   refresh();
   revalidatePath("/admin/wall");
 }
