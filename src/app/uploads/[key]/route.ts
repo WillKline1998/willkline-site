@@ -18,7 +18,8 @@ export async function GET(_req: Request, ctx: RouteContext<"/uploads/[key]">) {
       "Content-Length": String(upload.size),
       // inline: PDFs/images open in the browser; filename is used if saved.
       "Content-Disposition": `inline; filename="${upload.fileName.replace(/[^\w.\- ]/g, "")}"`,
-      "Cache-Control": "public, max-age=60",
+      // private: Vercel's CDN must not keep copies, so deleted/hidden files vanish at once.
+      "Cache-Control": "private, max-age=60",
       "X-Content-Type-Options": "nosniff",
     },
   });
