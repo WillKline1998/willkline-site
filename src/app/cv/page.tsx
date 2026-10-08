@@ -102,8 +102,10 @@ function CvItem(props: { dates?: string; title: string; sub?: string; meta?: str
 /** "Role, Ensemble (2019–2022): details" → { lead, dates, rest }; "Label: details" → { lead, rest }. */
 function splitMusicLine(line: string) {
   const dated = line.match(/^(.+?)\s*\(([^()]*\d{4}[^()]*)\)(?::\s*([\s\S]*)|\.?)$/);
-  if (dated) return { lead: dated[1], dates: dated[2], rest: dated[3] ?? "" };
+  if (dated) return { lead: dated[1], dates: dated[2], rest: capitalize(dated[3] ?? "") };
   const at = line.indexOf(": ");
-  if (at > 0 && at < 60) return { lead: line.slice(0, at), dates: "", rest: line.slice(at + 2) };
+  if (at > 0 && at < 60) return { lead: line.slice(0, at), dates: "", rest: capitalize(line.slice(at + 2)) };
   return { lead: line.replace(/\.$/, ""), dates: "", rest: "" };
 }
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
