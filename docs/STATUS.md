@@ -2,7 +2,21 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
-## 2026-10-08 (afternoon, part 2) — Repo ready to go public (awaiting Will's OK to flip)
+## 2026-10-08 (evening) — Site email (Resend)
+**Done**:
+- **Resend:** installed via the Vercel Marketplace (Will accepted the terms). It sets RESEND_API_KEY and RESEND_EMAIL_DOMAIN. `src/lib/email.ts` sends through the Resend REST API. With no key (local and tests), mail is written to `storage/outbox/`.
+- **Forgot / reset password:**
+  - `/forgot` gives the same answer for known and unknown emails, has a honeypot, and allows 3 requests per hour per account.
+  - `/reset` uses a PasswordReset row: sha256 token hash, 1 hour, single-use and claimed atomically. A reset logs the account out everywhere.
+  - The login page has a "Forgot your password?" link and a "Password changed" notice.
+- **Admin emails:** new Wall member and post reported/auto-hidden notices go to every ADMIN user. On/off switch in /admin/wall (SiteSetting `wall_notify`).
+- `/forgot` and `/reset` are disallowed in robots.txt.
+
+**Verified**: e2e_wall 48 (13 new: emails sent, switch, reset flow incl. bad/used/made-up links, short password, logout-everywhere, old password dead); e2e_admin 53; responsive 0 issues (incl. /forgot, /reset).
+**Pitfall found**: `vercel integration add` wrote `.env.local` with ALL production secrets, which Next would load over `.env`. Deleted immediately; confirmed 0 test users reached prod.
+**Pending (Will)**: add the Resend DNS records at Porkbun (DKIM TXT resend._domainkey, MX + SPF TXT on `send`, optional DMARC), then verify the domain.
+
+## 2026-10-08 (afternoon, part 2) — Repo made public
 **Done**: The README is rewritten: what it does, a stack table, design notes pointing at the code, local setup, tests, and a rights note. The hero image is a real capture of the live site (`docs/mockups/readme_home.png`). Untracked and gitignored: `scripts/__pycache__`, integration-installed AI skill packs (`.agents/`, `.claude/`, `skills-lock.json`), and the regenerated `docs/mockups/responsive/`. DECISIONS.md no longer names the Porkbun account.
 **Audit**: gitleaks scanned the full history (63 commits) with 0 findings. Manual grep found no phone number, DB or Blob credentials, or chat IDs. The only email in the repo (wskline4) is the public CV contact. Older commits still contain the Porkbun username, which is the same public handle as his DistroKid page.
 **Done (Will said "flip it")**: repo is PUBLIC. The Lab entry links to it. PLAN.md credits are kept as-is.
