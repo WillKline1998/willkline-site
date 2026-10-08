@@ -8,6 +8,7 @@ import { fileFrom, str } from "@/lib/forms";
 import { ImageError, saveResizedImage } from "@/lib/images";
 import { deleteFile, keyFromUrl } from "@/lib/storage";
 import { LIMITS, WALL_KINDS, kindFromUrl } from "@/lib/wall";
+import { notifyAdmins } from "@/lib/notify";
 
 type Values = { url: string; title: string; note: string; kind: string };
 export type PostState = { error?: string; ok?: boolean; values?: Values };
@@ -116,7 +117,16 @@ export async function reportWallPost(form: FormData) {
     create: { userId: user.id, wallPostId },
   });
   const reports = await db.wallReport.count({ where: { wallPostId } });
-  await db.wallPost.update({ where: { id: wallPostId }, data: { reports, ...(reports >= 3 ? { hidden: true } : {}) } });
+  const post = await db.wallPost.update({
+    where: { id: wallPostId },
+    data: { reports, ...(reports >= 3 ? { hidden: true } : {}) },
+    include: { author: { select: { handle: true } } },
+  });
+  await notifyAdmins(reports >= 3 ? `Post hidden after ${reports} reports` : "A Wall post was reported", [
+    `“${post.title}” by @${post.author.handle} has ${reports} report${reports === 1 ? "" : "s"}${reports >= 3 ? " and is now hidden" : ""}.`,
+    `Reported by @${user.handle ?? user.email}.`,
+    `Link: ${post.url}`,
+  ]);
   refresh();
 }
 

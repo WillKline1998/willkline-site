@@ -30,6 +30,21 @@ model User {
   saves        Save[]
   sessions     Session[]
   reports      WallReport[]
+  resets       PasswordReset[]
+}
+
+// One-time "forgot password" links. Only a hash of the token is stored, like
+// sessions, so a database leak can't be used to reset anyone's password.
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }
 
 // Login sessions. The cookie holds a random token; only its SHA-256 hash is

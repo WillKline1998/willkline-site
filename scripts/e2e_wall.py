@@ -25,6 +25,24 @@ def check(cond, msg):
     fails += 0 if cond else 1
 
 
+OUTBOX = ROOT / "storage" / "outbox"  # where emails land when no RESEND_API_KEY is set
+START = time.time()
+
+
+def emails(to):
+    """Emails sent to `to` since this test run started (newest last)."""
+    import json
+    found = []
+    for f in sorted(OUTBOX.glob("*.json")) if OUTBOX.exists() else []:
+        if f.stat().st_mtime < START:
+            continue
+        e = json.loads(f.read_text())
+        rcpt = e["to"] if isinstance(e["to"], list) else [e["to"]]
+        if to in rcpt:
+            found.append(e)
+    return found
+
+
 def signup(pg, m, wait=3.3, honeypot=False):
     pg.goto(f"{BASE}/signup")
     pg.fill("input[name=name]", m["name"]); pg.fill("input[name=handle]", m["handle"])
@@ -60,6 +78,7 @@ try:
         check(sql_value(f"""SELECT count(*) FROM "User" WHERE email = '{A['email']}';""") == "0", "honeypot blocks sign-up")
         signup(a, A); a.wait_for_url("**/wall?welcome=1")
         check(a.get_by_text("Welcome, Ada Test").count() == 1, "member A signs up and lands on the Wall")
+        check(any("New Wall member: @e2e_ada" in e["subject"] for e in emails(ADMIN)), "admin is emailed about the new member")
         signup(bo, {**B, "handle": A["handle"]}); bo.wait_for_selector(".form-error")
         check("taken" in bo.locator(".form-error").inner_text(), "duplicate handle rejected")
         signup(bo, B); bo.wait_for_url("**/wall?welcome=1")
@@ -172,7 +191,12 @@ try:
         row = admin.locator("tr", has_text="E2E Edgar Meyer Bach")
         check("HIDDEN" in row.inner_text(), "admin sees it flagged HIDDEN")
         row.locator("button:text('Unhide')").click(); admin.wait_for_selector("tr:has-text('E2E Edgar') button:text('Hide')")
-        anon.goto(f"{BASE}/wall")
+        # The unhide action and page re-render can land a beat after the button swaps; poll briefly.
+        for _ in range(10):
+            anon.goto(f"{BASE}/wall")
+            if anon.get_by_text("E2E Edgar Meyer Bach").count() == 1:
+                break
+            time.sleep(0.3)
         check(anon.get_by_text("E2E Edgar Meyer Bach").count() == 1, "admin unhide restores it")
 
         # --- owner delete ---
@@ -181,14 +205,58 @@ try:
         a.wait_for_load_state("networkidle"); anon.goto(f"{BASE}/wall")
         check(anon.get_by_text("E2E Edgar Meyer Bach").count() == 0, "author can delete own post")
 
+        # --- report emails + switch ---
+        check(any("reported" in e["subject"] for e in emails(ADMIN)), "admin is emailed about a report")
+        admin.goto(f"{BASE}/admin/wall"); admin.click("button:text('Turn off')"); admin.wait_for_selector("button:text('Turn on')")
+        before = len(emails(ADMIN))
+        signup(anon, {"name": "Cy Test", "handle": "e2e_cy", "email": "e2e-cy@test.local", "pw": secrets.token_urlsafe(12)}); anon.wait_for_url("**/wall?welcome=1")
+        check(len(emails(ADMIN)) == before, "no admin email when notifications are off")
+        admin.click("button:text('Turn on')"); admin.wait_for_selector("button:text('Turn off')")
+        anon.context.clear_cookies()
+
+        # --- forgot / reset password ---
+        anon.goto(f"{BASE}/login"); anon.click("a:text('Forgot your password?')"); anon.wait_for_url("**/forgot")
+        anon.fill("input[name=email]", "nobody-here@test.local"); anon.click("button:text('Email me a reset link')")
+        anon.wait_for_selector("text=a reset link is on its way")
+        check(len(emails("nobody-here@test.local")) == 0, "unknown email: same message, nothing sent")
+        anon.goto(f"{BASE}/forgot"); anon.fill("input[name=email]", A["email"].upper()); anon.click("button:text('Email me a reset link')")
+        anon.wait_for_selector("text=a reset link is on its way")
+        mail = emails(A["email"])
+        link = next((w for w in mail[-1]["text"].split() if "/reset?token=" in w), None) if mail else None
+        check(link is not None, "reset email with a one-time link is sent")
+        token = link.split("token=")[1]
+        anon.goto(f"{BASE}/reset?token={token}")
+        anon.fill("input[name=password]", "short"); anon.fill("input[name=confirm]", "short"); anon.locator("input[name=password]").evaluate("e => e.removeAttribute('minlength')")
+        anon.locator("input[name=confirm]").evaluate("e => e.removeAttribute('minlength')"); anon.click("button:text('Save new password')")
+        anon.wait_for_selector(".form-error")
+        check("at least 10" in anon.locator(".form-error").inner_text(), "short new password rejected")
+        new_pw = secrets.token_urlsafe(14)
+        anon.goto(f"{BASE}/reset?token={token}")
+        anon.fill("input[name=password]", new_pw); anon.fill("input[name=confirm]", new_pw); anon.click("button:text('Save new password')")
+        anon.wait_for_url("**/login?reset=1")
+        check(anon.get_by_text("Password changed").count() == 1, "reset succeeds and says so")
+        check(sql_value(f"""SELECT count(*) FROM "Session" s JOIN "User" u ON u.id = s."userId" WHERE u.email = '{A['email']}';""") == "0", "reset logs the account out everywhere")
+        anon.fill("input[name=email]", A["email"]); anon.fill("input[name=password]", A["pw"]); anon.click("button:text('Log in')")
+        anon.wait_for_selector(".form-error")
+        check(True, "old password no longer works")
+        anon.fill("input[name=email]", A["email"]); anon.fill("input[name=password]", new_pw); anon.click("button:text('Log in')")
+        anon.wait_for_url(lambda u: "/login" not in u)
+        check(True, "new password logs in")
+        anon.goto(f"{BASE}/reset?token={token}")
+        check(anon.get_by_text("expired or was already used").count() == 1, "a used link can't be reused")
+        anon.goto(f"{BASE}/reset?token=not-a-real-token")
+        check(anon.get_by_text("expired or was already used").count() == 1, "a made-up link is refused")
+        anon.context.clear_cookies()
+
         # --- closing sign-ups ---
         admin.goto(f"{BASE}/admin/wall"); admin.click("button:text('Close sign-ups')"); admin.wait_for_selector("button:text('Open sign-ups')")
         anon.goto(f"{BASE}/signup")
         check(anon.get_by_text("Sign-ups are closed").count() == 1 and anon.locator("input[name=handle]").count() == 0, "closed sign-ups hide the form")
         b.close()
 finally:
-    for m in (A, B):
-        remove_user(m["email"])
+    for email in (A["email"], B["email"], "e2e-cy@test.local"):
+        remove_user(email)
+    sql("""DELETE FROM "SiteSetting" WHERE key = 'wall_notify';""")
     remove_user(ADMIN)
     mode = previous_mode or "closed"
     sql(f"""INSERT INTO "SiteSetting"(key, value) VALUES ('wall_signups', '{mode}') ON CONFLICT (key) DO UPDATE SET value = '{mode}';""")

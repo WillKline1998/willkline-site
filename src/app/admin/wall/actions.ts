@@ -15,6 +15,13 @@ export async function setSignups(form: FormData) {
   revalidatePath("/signup");
 }
 
+export async function setNotify(form: FormData) {
+  await requireAdmin("/admin/wall");
+  const value = str(form, "mode") === "off" ? "off" : "on";
+  await db.siteSetting.upsert({ where: { key: "wall_notify" }, update: { value }, create: { key: "wall_notify", value } });
+  revalidatePath("/admin/wall");
+}
+
 // Removes a member and everything they posted/saved (cascades). Never the admin.
 export async function deleteMember(form: FormData) {
   await requireAdmin("/admin/wall");

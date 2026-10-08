@@ -399,7 +399,7 @@ a:hover { text-decoration: underline; }
 .admin-tools { list-style: none; padding: 0; display: grid; gap: 0.7rem; margin: 0 0 2rem; }
 .admin-tools li { display: flex; flex-direction: column; padding: 0.8rem 1rem; background: var(--panel); border-radius: var(--radius); }
 .admin-tools a { font-weight: 600; padding: 0.4rem 0; }
-.admin-form input[type=password], .admin-form input[type=datetime-local], .admin-form input[type=url], .admin-form select { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
+.admin-form input[type=email], .admin-form input[type=password], .admin-form input[type=datetime-local], .admin-form input[type=url], .admin-form select { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
 .admin-form .inline-form label, .admin-table label, .admin-album .inline-form label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; }
 /* Inputs sit inside mono labels; typed text should read in the body face. */
 .admin-form :is(input, textarea, select), .admin-table :is(input, select) { font-family: var(--font-body); }

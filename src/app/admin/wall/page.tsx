@@ -4,15 +4,17 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { signupsOpen } from "@/lib/wall";
 import { deleteWallPost, setHidden } from "@/app/wall/actions";
-import { deleteMember, setSignups } from "./actions";
+import { adminNotificationsOn } from "@/lib/notify";
+import { deleteMember, setNotify, setSignups } from "./actions";
 
 export const metadata: Metadata = { title: "Wall · Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminWall() {
   await requireAdmin("/admin/wall");
-  const [open, posts, members] = await Promise.all([
+  const [open, notify, posts, members] = await Promise.all([
     signupsOpen(),
+    adminNotificationsOn(),
     db.wallPost.findMany({
       orderBy: [{ hidden: "desc" }, { reports: "desc" }, { createdAt: "desc" }],
       take: 100,
@@ -31,6 +33,11 @@ export default async function AdminWall() {
         <span>New members can sign up: <strong>{open ? "Open" : "Closed"}</strong></span>
         <input type="hidden" name="mode" value={open ? "closed" : "open"} />
         <button className="btn btn-quiet">{open ? "Close sign-ups" : "Open sign-ups"}</button>
+      </form>
+      <form action={setNotify} className="inline-form">
+        <span>Email me about new members and reports: <strong>{notify ? "On" : "Off"}</strong></span>
+        <input type="hidden" name="mode" value={notify ? "off" : "on"} />
+        <button className="btn btn-quiet">{notify ? "Turn off" : "Turn on"}</button>
       </form>
 
       <h2 className="section-label">Posts (hidden &amp; reported first)</h2>

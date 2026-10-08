@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSession, hashPassword } from "@/lib/auth";
 import { HANDLE, LIMITS, signupsOpen } from "@/lib/wall";
+import { notifyAdmins } from "@/lib/notify";
+import { SITE_URL } from "@/lib/email";
 
 export type SignupState = { error?: string; values?: { name: string; handle: string; email: string } };
 
@@ -33,5 +35,6 @@ export async function signup(_prev: SignupState, form: FormData): Promise<Signup
 
   const user = await db.user.create({ data: { name, handle, email, passwordHash: await hashPassword(password), role: "MEMBER" } });
   await createSession(user.id);
+  await notifyAdmins(`New Wall member: @${handle}`, [`${name} (@${handle}, ${email}) just joined the Inspiration Wall.`, `Profile: ${SITE_URL}/wall/u/${handle}`]);
   redirect("/wall?welcome=1");
 }
