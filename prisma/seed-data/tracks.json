@@ -1,0 +1,481 @@
+{
+ "_source": "Apple Music catalog (iTunes lookup) and SoundCloud set data, fetched 2026-10-08",
+ "albums": {
+  "X25": [
+   {
+    "title": "Live Your Life",
+    "durationSec": 272
+   },
+   {
+    "title": "Sunny Day",
+    "durationSec": 203
+   },
+   {
+    "title": "Used To Be Easy",
+    "durationSec": 198
+   },
+   {
+    "title": "My New Analog Synthesizer",
+    "durationSec": 327
+   }
+  ],
+  "Glowing": [
+   {
+    "title": "The Birthday Song",
+    "durationSec": 206
+   },
+   {
+    "title": "Everyone I Love Is An Asset",
+    "durationSec": 197
+   },
+   {
+    "title": "Forget About Me",
+    "durationSec": 314
+   },
+   {
+    "title": "God Is Reborn, And We Killed Him",
+    "durationSec": 321
+   },
+   {
+    "title": "Fire",
+    "durationSec": 233
+   },
+   {
+    "title": "The Next Great American Novel",
+    "durationSec": 210
+   },
+   {
+    "title": "Go Down With The Ship",
+    "durationSec": 193
+   },
+   {
+    "title": "Hello It's Me",
+    "durationSec": 255
+   },
+   {
+    "title": "It's Not Over Yet (Glow On)",
+    "durationSec": 329
+   }
+  ],
+  "E": [
+   {
+    "title": "Space Trip",
+    "durationSec": 175
+   },
+   {
+    "title": "Bits",
+    "durationSec": 202
+   },
+   {
+    "title": "Loops",
+    "durationSec": 185
+   },
+   {
+    "title": "Unreasonable",
+    "durationSec": 131
+   },
+   {
+    "title": "bach^2",
+    "durationSec": 150
+   },
+   {
+    "title": "Sitting in class, thinking about Terry Riley",
+    "durationSec": 156
+   },
+   {
+    "title": "Do not go",
+    "durationSec": 126
+   },
+   {
+    "title": "Just Dance 2",
+    "durationSec": 152
+   },
+   {
+    "title": "omw 2 yandhi's circumscription",
+    "durationSec": 182
+   },
+   {
+    "title": "Indiana (in hindsight, probably venting)",
+    "durationSec": 174
+   }
+  ],
+  "BECOMING": [
+   {
+    "title": "Greenlight",
+    "durationSec": 193
+   },
+   {
+    "title": "End Times",
+    "durationSec": 236
+   },
+   {
+    "title": "The Secret",
+    "durationSec": 181
+   },
+   {
+    "title": "Beast",
+    "durationSec": 256
+   },
+   {
+    "title": "Friday Night",
+    "durationSec": 233
+   },
+   {
+    "title": "Becoming",
+    "durationSec": 399
+   },
+   {
+    "title": "Pain",
+    "durationSec": 227
+   },
+   {
+    "title": "Ministry",
+    "durationSec": 216
+   },
+   {
+    "title": "Prometheus",
+    "durationSec": 447
+   }
+  ],
+  "Joyful Noise": [
+   {
+    "title": "I Need To Hear Joyful Noise",
+    "durationSec": 91
+   },
+   {
+    "title": "An Old Dog Trying His Best",
+    "durationSec": 151
+   },
+   {
+    "title": "City Country",
+    "durationSec": 158
+   },
+   {
+    "title": "Driving Through a Rainbow",
+    "durationSec": 152
+   },
+   {
+    "title": "Friends",
+    "durationSec": 131
+   },
+   {
+    "title": "First Snow Back",
+    "durationSec": 214
+   },
+   {
+    "title": "Young Love",
+    "durationSec": 140
+   },
+   {
+    "title": "Getting Older",
+    "durationSec": 148
+   },
+   {
+    "title": "Give Thanks",
+    "durationSec": 189
+   }
+  ],
+  "In Performance": [
+   {
+    "title": "Intro Rondo",
+    "durationSec": 156
+   },
+   {
+    "title": "Allegro Ma Non Troppo",
+    "durationSec": 241
+   },
+   {
+    "title": "Quasi Recitativo",
+    "durationSec": 157
+   },
+   {
+    "title": "Scherzando Cantabile",
+    "durationSec": 201
+   },
+   {
+    "title": "Moderato",
+    "durationSec": 207
+   },
+   {
+    "title": "Finale",
+    "durationSec": 271
+   },
+   {
+    "title": "Chorale",
+    "durationSec": 122
+   },
+   {
+    "title": "All Alone",
+    "durationSec": 185
+   },
+   {
+    "title": "The Drinking Song",
+    "durationSec": 107
+   },
+   {
+    "title": "$65",
+    "durationSec": 165
+   },
+   {
+    "title": "Who Needs You",
+    "durationSec": 158
+   },
+   {
+    "title": "The Show's Over",
+    "durationSec": 233
+   }
+  ],
+  "Dream Journal": [
+   {
+    "title": "Dreamland",
+    "durationSec": 116
+   },
+   {
+    "title": "Old Man",
+    "durationSec": 153
+   },
+   {
+    "title": "Day in the Night",
+    "durationSec": 221
+   },
+   {
+    "title": "Potions Class",
+    "durationSec": 123
+   },
+   {
+    "title": "Bloodbarn",
+    "durationSec": 128
+   },
+   {
+    "title": "Miss Movie Maker",
+    "durationSec": 131
+   },
+   {
+    "title": "Wake Up",
+    "durationSec": 107
+   },
+   {
+    "title": "Different",
+    "durationSec": 168
+   },
+   {
+    "title": "Dream of You",
+    "durationSec": 148
+   },
+   {
+    "title": "I Wanna Be Good",
+    "durationSec": 128
+   },
+   {
+    "title": "Clean",
+    "durationSec": 170
+   },
+   {
+    "title": "Barbershop Dylan",
+    "durationSec": 101
+   },
+   {
+    "title": "Back to Sleep",
+    "durationSec": 112
+   }
+  ],
+  "consumption": [
+   {
+    "title": "Consumption_One",
+    "durationSec": 241
+   },
+   {
+    "title": "Consumption_Two",
+    "durationSec": 208
+   },
+   {
+    "title": "Consumption_Three",
+    "durationSec": 266
+   },
+   {
+    "title": "Consumption_Four",
+    "durationSec": 162
+   },
+   {
+    "title": "Consumption_Five",
+    "durationSec": 208
+   }
+  ],
+  "thoughts in isolation": [
+   {
+    "title": "Hater",
+    "durationSec": 152
+   },
+   {
+    "title": "Loner",
+    "durationSec": 130
+   },
+   {
+    "title": "Tweaker",
+    "durationSec": 133
+   },
+   {
+    "title": "Lover",
+    "durationSec": 197
+   }
+  ],
+  "THE ARTS": [
+   {
+    "title": "6.21Prelude",
+    "durationSec": 240
+   },
+   {
+    "title": "Loosely About the Second Coming",
+    "durationSec": 217
+   },
+   {
+    "title": "AWay2B",
+    "durationSec": 214
+   },
+   {
+    "title": "Naptha",
+    "durationSec": 369
+   },
+   {
+    "title": "Yeah",
+    "durationSec": 145
+   },
+   {
+    "title": "You Know",
+    "durationSec": 208
+   },
+   {
+    "title": "Lucky Dub",
+    "durationSec": 285
+   },
+   {
+    "title": "Aloe Vera",
+    "durationSec": 119
+   },
+   {
+    "title": "So Many of Me",
+    "durationSec": 198
+   },
+   {
+    "title": "Turn It Off",
+    "durationSec": 181
+   },
+   {
+    "title": "Calls My Name",
+    "durationSec": 210
+   },
+   {
+    "title": "I Don't Wanna Go To Sleep",
+    "durationSec": 375
+   }
+  ],
+  "Senta: Songs My Mother Taught Me": [
+   {
+    "title": "Let's Do Some Cleansing Breaths",
+    "durationSec": 112
+   },
+   {
+    "title": "Count Your Blessings",
+    "durationSec": 247
+   },
+   {
+    "title": "I'll Always Love You",
+    "durationSec": 238
+   }
+  ],
+  "Close Your Eyes.": [
+   {
+    "title": "Meditation",
+    "durationSec": 233
+   },
+   {
+    "title": "Art",
+    "durationSec": 242
+   },
+   {
+    "title": "Loss",
+    "durationSec": 254
+   },
+   {
+    "title": "Passion",
+    "durationSec": 272
+   },
+   {
+    "title": "Close Your Eyes.",
+    "durationSec": 181
+   },
+   {
+    "title": "One",
+    "durationSec": 288
+   },
+   {
+    "title": "Escape",
+    "durationSec": 338
+   }
+  ],
+  "COOKY": [
+   {
+    "title": "Track 1",
+    "durationSec": 171
+   },
+   {
+    "title": "A Statement",
+    "durationSec": 189
+   },
+   {
+    "title": "I'm Trapped",
+    "durationSec": 105
+   },
+   {
+    "title": "strauss/Interlude",
+    "durationSec": 161
+   },
+   {
+    "title": "Can You Feel Like Me?",
+    "durationSec": 120
+   },
+   {
+    "title": "New Balance ft. Jack Henning and Max Mulpagano",
+    "durationSec": 225
+   },
+   {
+    "title": "Marie's Song",
+    "durationSec": 188
+   }
+  ],
+  "Tempted": [
+   {
+    "title": "heaven",
+    "durationSec": 216
+   },
+   {
+    "title": "despair",
+    "durationSec": 237
+   },
+   {
+    "title": "temptation",
+    "durationSec": 195
+   },
+   {
+    "title": "love",
+    "durationSec": 157
+   },
+   {
+    "title": "creation",
+    "durationSec": 155
+   },
+   {
+    "title": "ascension",
+    "durationSec": 232
+   },
+   {
+    "title": "taken",
+    "durationSec": 174
+   },
+   {
+    "title": "hell",
+    "durationSec": 98
+   }
+  ]
+ }
+}

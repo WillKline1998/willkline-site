@@ -442,6 +442,31 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 @media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
 .listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
 
+/* Track list (public) */
+.track-total { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 0.5rem; }
+.tracklist { margin: 0 0 1.5rem; padding: 0; list-style: none; counter-reset: track; max-width: 560px; }
+/* Grid + counter (not ::marker) so number, title and time share one baseline. */
+.tracklist li { counter-increment: track; display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; align-items: baseline; gap: 0.5rem; padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
+.tracklist li::before { content: counter(track) "."; text-align: right; font-family: var(--font-label); font-size: 0.8em; color: var(--muted); }
+.tracklist-dur { font-family: var(--font-label); font-size: 0.85em; color: var(--muted); }
+
+/* Track list editor (admin) */
+.track-rows { list-style: none; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 0.4rem; }
+.track-row { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr) 5.5rem auto; gap: 0.4rem; align-items: center; }
+.track-no { font-family: var(--font-label); font-size: 0.85rem; color: var(--muted); text-align: right; }
+.track-row input { font: inherit; font-family: var(--font-body); font-size: 1rem; min-height: 40px; padding: 0 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); min-width: 0; }
+.track-dur { text-align: right; font-family: var(--font-label) !important; }
+.track-tools { display: inline-flex; gap: 0.2rem; }
+.icon-btn { width: 36px; height: 40px; border: 1px solid var(--rule); border-radius: 6px; background: transparent; color: var(--ink); cursor: pointer; font-size: 0.9rem; }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+.icon-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 560px) {
+  .track-row { grid-template-columns: 1.5rem minmax(0, 1fr) 4.5rem; }
+  .track-tools { grid-column: 2 / -1; justify-content: flex-end; }
+}
+.tap-link { display: inline-flex; align-items: center; min-height: 40px; }
+.track-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; }
+
 /* --- Quiet Studio details --- */
 .site-nav { border-right-color: transparent; }
 .page-title { font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; }

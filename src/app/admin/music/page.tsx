@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminMusic() {
   await requireAdmin("/admin/music");
-  const albums = await db.album.findMany({ orderBy: { sortOrder: "asc" } });
+  const albums = await db.album.findMany({ orderBy: { sortOrder: "asc" }, include: { _count: { select: { tracks: true } } } });
   return (
     <section className="page" style={{ maxWidth: 1000 }}>
       <p className="small"><Link href="/admin">← Admin</Link> · <Link href="/music">View Music page</Link></p>
@@ -23,6 +23,7 @@ export default async function AdminMusic() {
           {a.coverUrl && <Image src={a.coverUrl} alt="" width={96} height={96} className="album-cover" />}
           <div className="admin-form" style={{ maxWidth: "none", flex: 1 }}>
             <strong>{a.title}</strong>
+            <Link href={`/admin/music/${a.id}`} className="small tap-link">Track list ({a._count.tracks}) →</Link>
             <label>Liner notes<textarea name="description" rows={3} defaultValue={a.description} /></label>
             <div className="inline-form">
               <label className="small">Year <input type="number" name="year" defaultValue={a.year ?? ""} style={{ width: 90 }} /></label>

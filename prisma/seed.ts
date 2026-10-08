@@ -41,6 +41,15 @@ async function main() {
     await db.album.upsert({ where: { slug }, update: {}, create: { slug, ...data } });
   }
 
+  // Track lists (from Apple Music / SoundCloud), only for releases that have none yet.
+  const trackData: { albums: Record<string, { title: string; durationSec: number | null }[]> } =
+    JSON.parse(readFileSync("prisma/seed-data/tracks.json", "utf8"));
+  for (const [title, tracks] of Object.entries(trackData.albums)) {
+    const album = await db.album.findUnique({ where: { slug: slugify(title) }, include: { _count: { select: { tracks: true } } } });
+    if (!album || album._count.tracks > 0) continue;
+    await db.track.createMany({ data: tracks.map((t, i) => ({ albumId: album.id, position: i + 1, ...t })) });
+  }
+
   // Bio text (SiteSetting "bio"); admin-editable in M3.
   const bio = readFileSync("prisma/seed-data/bio.md", "utf8");
   await db.siteSetting.upsert({ where: { key: "bio" }, update: {}, create: { key: "bio", value: bio } });

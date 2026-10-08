@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { KIND_LABEL } from "@/lib/music";
+import { formatDuration } from "@/lib/duration";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ const PLATFORM: Record<string, string> = {
 };
 
 async function getAlbum(slug: string) {
-  return db.album.findUnique({ where: { slug } });
+  return db.album.findUnique({ where: { slug }, include: { tracks: { orderBy: { position: "asc" } } } });
 }
 
 export async function generateMetadata(props: PageProps<"/music/[slug]">): Promise<Metadata> {
@@ -49,6 +50,7 @@ export default async function AlbumPage(props: PageProps<"/music/[slug]">) {
           <p className={a.description ? "" : "muted"}>
             {a.description || "Liner notes coming soon."}
           </p>
+          {a.tracks.length > 0 && <TrackList tracks={a.tracks} />}
           <h2 className="section-label">Listen</h2>
           <ul className="listen-links">
             {links.map(([k, url]) => (
@@ -58,5 +60,26 @@ export default async function AlbumPage(props: PageProps<"/music/[slug]">) {
         </div>
       </div>
     </section>
+  );
+}
+
+// Display-only numbered list; durations and total runtime when known.
+function TrackList({ tracks }: { tracks: { id: string; title: string; durationSec: number | null }[] }) {
+  const timed = tracks.filter((t) => t.durationSec != null);
+  const total = timed.reduce((sum, t) => sum + (t.durationSec ?? 0), 0);
+  return (
+    <>
+      <h2 className="section-label">
+        Tracks <span className="track-total">{tracks.length} {tracks.length === 1 ? "track" : "tracks"}{timed.length === tracks.length && total ? ` · ${formatDuration(total)}` : ""}</span>
+      </h2>
+      <ol className="tracklist">
+        {tracks.map((t) => (
+          <li key={t.id}>
+            <span className="tracklist-title">{t.title}</span>
+            {t.durationSec != null && <span className="tracklist-dur">{formatDuration(t.durationSec)}</span>}
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }

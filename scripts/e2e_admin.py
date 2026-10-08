@@ -216,6 +216,41 @@ try:
         pg.goto(edit_url); pg.check("input[name=media][value=none]"); save_post(pg)
         check(status(lead_src) == 404, "choosing None deletes the uploaded picture")
 
+        # --- track lists: public numbered list + spreadsheet-style editor ---
+        anon.goto(f"{BASE}/music/x25")
+        rows = anon.locator("ol.tracklist li")
+        check(rows.count() == 4 and "Live Your Life" in rows.first.inner_text() and "4:32" in rows.first.inner_text(), "release page shows numbered tracks with durations")
+        check("4 tracks ·" in anon.locator(".track-total").inner_text(), "track count + total runtime shown")
+        aid = sql_value("""SELECT id FROM "Album" WHERE slug = 'tempted';""")
+        saved_tracks = sql_value(f"""SELECT json_agg(json_build_object('t', title, 'p', position, 'd', "durationSec") ORDER BY position) FROM "Track" WHERE "albumId" = '{aid}';""")
+        pg.goto(f"{BASE}/admin/music/{aid}")
+        check(pg.locator(".track-row").count() == 8, "editor loads the existing 8 tracks")
+        while pg.locator(".track-row").count() > 1:
+            pg.locator(".track-row button[aria-label^='Remove']").first.click()
+        pg.locator(".track-row button[aria-label^='Remove']").first.click()  # last row → resets to one blank row
+        check(pg.locator(".track-row").count() == 1 and pg.locator(".track-row input[name=title]").input_value() == "", "removing every row leaves one blank row")
+        pg.click("button:text('Save track list')"); pg.wait_for_selector("text=Saved ✓")
+        anon.goto(f"{BASE}/music/tempted")
+        check(anon.locator("ol.tracklist").count() == 0, "empty track list is hidden on the release page")
+        pg.fill(".track-row >> nth=0 >> input[name=title]", "E2E One"); pg.fill(".track-row >> nth=0 >> input[name=duration]", "3:25")
+        pg.click("button:text('+ Add track')")
+        pg.fill(".track-row >> nth=1 >> input[name=title]", "E2E Two")
+        pg.click("button:text('+ Add track')")
+        pg.fill(".track-row >> nth=2 >> input[name=title]", "E2E Three"); pg.fill(".track-row >> nth=2 >> input[name=duration]", "abc")
+        pg.click("button:text('Save track list')"); pg.wait_for_selector(".track-actions .form-error")
+        check("3:25" in pg.locator(".track-actions .form-error").inner_text(), "bad duration is rejected with a hint")
+        pg.fill(".track-row >> nth=2 >> input[name=duration]", "")
+        pg.click("button:text('+ Add track')")  # trailing blank row is skipped on save
+        pg.locator(".track-row >> nth=0").locator("button[aria-label='Move down']").click()
+        pg.click("button:text('Save track list')"); pg.wait_for_selector("text=Saved ✓")
+        anon.goto(f"{BASE}/music/tempted")
+        names = [x.split("\n")[0].strip() for x in anon.locator("ol.tracklist li .tracklist-title").all_inner_texts()]
+        check(names == ["E2E Two", "E2E One", "E2E Three"], f"order, add rows and blank-row skipping work ({names})")
+        check(anon.locator("ol.tracklist li", has_text="E2E One").locator(".tracklist-dur").inner_text() == "3:25", "optional duration shown only where given")
+        sql(f"""DELETE FROM "Track" WHERE "albumId" = '{aid}';
+                INSERT INTO "Track"(id, "albumId", title, position, "durationSec")
+                SELECT md5(random()::text), '{aid}', x->>'t', (x->>'p')::int, (x->>'d')::int FROM json_array_elements($j${saved_tracks}$j$::json) x;""")
+
         # --- lab: hidden until made visible ---
         pg.goto(f"{BASE}/admin/lab")
         pg.fill("input[name=title]", "E2E Gadget"); pg.click("button:text('Add project')")

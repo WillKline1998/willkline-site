@@ -70,14 +70,16 @@ model Album {
   updatedAt   DateTime @updatedAt
 }
 
+// Track list for a release (display only: a numbered list on /music/[slug]).
 model Track {
-  id       String  @id @default(cuid())
-  albumId  String
-  album    Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  title    String
-  position Int
-  audioUrl String?
-  notes    String  @default("")
+  id          String @id @default(cuid())
+  albumId     String
+  album       Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  title       String
+  position    Int    // 1-based order on the release
+  durationSec Int?   // optional; shown as m:ss
+
+  @@index([albumId, position])
 }
 
 // Writing (admin-only blog). `body` is Markdown; a line holding only a
