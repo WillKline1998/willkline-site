@@ -137,6 +137,25 @@ try:
             gone = e.code == 404
         check(gone, "removing the image deletes the file")
 
+        # --- sorting: newest / oldest / random ---
+        a.goto(f"{BASE}/wall")
+        for t in ("E2E Sort First", "E2E Sort Second"):
+            a.click("summary:text('+ Share something')") if not a.locator("form.wall-form").is_visible() else None
+            a.fill("form.wall-form input[name=url]", "https://example.com/" + t.split()[-1].lower())
+            a.fill("form.wall-form input[name=title]", t)
+            a.click("button:text('Post to the Wall')"); a.wait_for_selector(f".wall-card:has-text('{t}')")
+            time.sleep(1.1)
+        titles = lambda pg: [x for x in pg.locator("h2.wall-title").all_inner_texts() if x.startswith("E2E Sort")]
+        anon.goto(f"{BASE}/wall")
+        check(titles(anon) == ["E2E Sort Second", "E2E Sort First"], "Newest sort (default) puts latest first")
+        anon.click(".wall-sort a:text('Oldest')"); anon.wait_for_url("**sort=old**")
+        check(titles(anon) == ["E2E Sort First", "E2E Sort Second"], "Oldest sort reverses it")
+        anon.click(".wall-sort a:text('Random')"); anon.wait_for_url("**sort=random**")
+        check(sorted(titles(anon)) == ["E2E Sort First", "E2E Sort Second"] and anon.locator("a:text('Shuffle again')").count() == 1, "Random shows all posts + Shuffle again")
+        anon.click(".wall-filters a:text('Other')"); anon.wait_for_url("**kind=OTHER**")
+        check("sort=random" in anon.url and "kind=OTHER" in anon.url, "filters keep the chosen sort")
+        sql("""DELETE FROM "WallPost" WHERE title LIKE 'E2E Sort%';""")
+
         # --- reporting + moderation ---
         for _ in range(3):  # one person reporting repeatedly counts once
             bo.goto(f"{BASE}/wall")

@@ -11,27 +11,54 @@ export const metadata: Metadata = { title: "Inspiration Wall" };
 export const dynamic = "force-dynamic";
 
 const PAGE = 24;
+const SORTS = { new: "Newest", old: "Oldest", random: "Random" } as const;
+type Sort = keyof typeof SORTS;
+
+const include = { author: { select: { handle: true, name: true } }, _count: { select: { saves: true } } } as const;
+
+// Newest/oldest page through with a date cursor; random draws a fresh
+// sample of up to PAGE posts each visit (shuffle in memory: the wall is small).
+async function loadPosts(kind: string | undefined, sort: Sort, cursor: Date | undefined) {
+  const where = { hidden: false, kind };
+  if (sort === "random") {
+    const ids = (await db.wallPost.findMany({ where, select: { id: true } })).map((p) => p.id);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    const pick = ids.slice(0, PAGE);
+    const rows = await db.wallPost.findMany({ where: { id: { in: pick } }, include });
+    return { posts: pick.map((id) => rows.find((r) => r.id === id)!).filter(Boolean), more: false };
+  }
+  const posts = await db.wallPost.findMany({
+    where: { ...where, createdAt: cursor ? (sort === "old" ? { gt: cursor } : { lt: cursor }) : undefined },
+    orderBy: { createdAt: sort === "old" ? "asc" : "desc" },
+    take: PAGE + 1,
+    include,
+  });
+  return { posts: posts.slice(0, PAGE), more: posts.length > PAGE };
+}
 
 export default async function WallPage(props: PageProps<"/wall">) {
   const sp = await props.searchParams;
   const kind = typeof sp.kind === "string" && sp.kind in WALL_KINDS ? sp.kind : undefined;
-  const before = typeof sp.before === "string" && !isNaN(Date.parse(sp.before)) ? new Date(sp.before) : undefined;
+  const sort: Sort = typeof sp.sort === "string" && sp.sort in SORTS ? (sp.sort as Sort) : "new";
+  const cursor = typeof sp.cursor === "string" && !isNaN(Date.parse(sp.cursor)) ? new Date(sp.cursor) : undefined;
   const viewer = await currentUser();
 
-  const [posts, savedIds, open] = await Promise.all([
-    db.wallPost.findMany({
-      where: { hidden: false, kind, createdAt: before ? { lt: before } : undefined },
-      orderBy: { createdAt: "desc" },
-      take: PAGE + 1,
-      include: { author: { select: { handle: true, name: true } }, _count: { select: { saves: true } } },
-    }),
+  const [{ posts, more }, savedIds, open] = await Promise.all([
+    loadPosts(kind, sort, cursor),
     viewer ? db.save.findMany({ where: { userId: viewer.id }, select: { wallPostId: true } }) : [],
     signupsOpen(),
   ]);
   const saved = new Set(savedIds.map((s) => s.wallPostId));
-  const more = posts.length > PAGE;
-  const shown = posts.slice(0, PAGE);
-  const href = (k?: string) => (k ? `/wall?kind=${k}` : "/wall");
+  const href = (o: { kind?: string; sort?: Sort; cursor?: string }) => {
+    const q = new URLSearchParams();
+    if (o.kind) q.set("kind", o.kind);
+    if (o.sort && o.sort !== "new") q.set("sort", o.sort);
+    if (o.cursor) q.set("cursor", o.cursor);
+    return q.size ? `/wall?${q}` : "/wall";
+  };
 
   return (
     <section className="page page-wide">
@@ -59,22 +86,38 @@ export default async function WallPage(props: PageProps<"/wall">) {
         </p>
       )}
 
-      <nav className="wall-filters" aria-label="Filter">
-        <Link href={href()} aria-current={!kind ? "page" : undefined}>All</Link>
-        {Object.entries(WALL_KINDS).map(([k, label]) => (
-          <Link key={k} href={href(k)} aria-current={kind === k ? "page" : undefined}>{label}</Link>
-        ))}
-      </nav>
+      <div className="wall-controls">
+        <nav className="wall-filters" aria-label="Filter">
+          <Link href={href({ sort })} aria-current={!kind ? "page" : undefined}>All</Link>
+          {Object.entries(WALL_KINDS).map(([k, label]) => (
+            <Link key={k} href={href({ kind: k, sort })} aria-current={kind === k ? "page" : undefined}>{label}</Link>
+          ))}
+        </nav>
+        <nav className="wall-sort" aria-label="Sort">
+          <span className="wall-sort-label">Sort</span>
+          {(Object.keys(SORTS) as Sort[]).map((s) => (
+            <Link key={s} href={href({ kind, sort: s })} aria-current={sort === s ? "page" : undefined}>{SORTS[s]}</Link>
+          ))}
+        </nav>
+      </div>
 
-      {shown.length === 0 ? (
+      {posts.length === 0 ? (
         <p className="muted">Nothing here yet{kind ? " in this category" : ""}. {viewer ? "Be the first!" : ""}</p>
       ) : (
         <div className="wall-grid">
-          {shown.map((p) => <WallCard key={p.id} p={p} viewer={viewer} saved={saved.has(p.id)} />)}
+          {posts.map((p) => <WallCard key={p.id} p={p} viewer={viewer} saved={saved.has(p.id)} />)}
         </div>
       )}
+      {sort === "random" && posts.length > 1 && (
+        // Plain <a>: a full reload guarantees a fresh draw (client nav to the same URL may reuse it).
+        <p><a className="btn btn-quiet" href={href({ kind, sort })}>⟳ Shuffle again</a></p>
+      )}
       {more && (
-        <p><Link className="btn btn-quiet" href={`/wall?${new URLSearchParams({ ...(kind ? { kind } : {}), before: shown[shown.length - 1].createdAt.toISOString() })}`}>Older →</Link></p>
+        <p>
+          <Link className="btn btn-quiet" href={href({ kind, sort, cursor: posts[posts.length - 1].createdAt.toISOString() })}>
+            {sort === "old" ? "Newer →" : "Older →"}
+          </Link>
+        </p>
       )}
     </section>
   );

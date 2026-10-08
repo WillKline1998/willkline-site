@@ -249,12 +249,15 @@ a:hover { text-decoration: underline; }
 .wall-share summary { display: inline-flex; align-items: center; list-style: none; }
 .wall-share summary::-webkit-details-marker { display: none; }
 .wall-form { margin-top: 0.8rem; }
-.wall-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0 1.25rem; }
-.wall-filters a {
+.wall-controls { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.6rem 1.5rem; margin: 1rem 0 1.25rem; }
+.wall-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.wall-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.wall-sort-label { font-family: var(--font-label); font-size: 0.75rem; color: var(--muted); }
+.wall-filters a, .wall-sort a {
   display: inline-flex; align-items: center; min-height: 36px; padding: 0 0.85rem; border-radius: 999px;
   border: 1px solid var(--rule); color: var(--ink); text-decoration: none; font-family: var(--font-label); font-size: 0.8rem;
 }
-.wall-filters a[aria-current="page"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.wall-filters a[aria-current="page"], .wall-sort a[aria-current="page"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .wall-grid { columns: 1; column-gap: 1rem; }
 @media (min-width: 700px) { .wall-grid { columns: 2; } }
 @media (min-width: 1100px) { .wall-grid { columns: 3; } }
@@ -331,7 +334,14 @@ a:hover { text-decoration: underline; }
 }
 .admin-form textarea, .admin-form input:not([type=checkbox]), .admin-form select { width: 100%; max-width: 100%; box-sizing: border-box; }
 .admin-form .inline-form input[type=number] { width: auto; }
-input[type=file] { max-width: 100%; min-height: 40px; }
+input[type=file] { max-width: 100%; min-height: 40px; font: inherit; font-size: 0.9rem; color: var(--muted); }
+/* Make "Choose file" look like the site's other buttons. */
+input[type=file]::file-selector-button {
+  font: inherit; font-size: 0.9rem; margin-right: 0.75rem; min-height: 40px; padding: 0 1rem;
+  border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer;
+}
+input[type=file]::file-selector-button:hover { filter: brightness(1.1); }
+input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--ink); outline-offset: 2px; }
 .admin-note { padding: 0.6rem 0.9rem; border-left: 3px solid var(--accent); background: var(--panel); font-size: 0.9em; }
 
 /* Music */

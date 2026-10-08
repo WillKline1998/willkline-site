@@ -15,7 +15,7 @@ export function PostForm({ post }: { post?: Existing }) {
       {post && <input type="hidden" name="id" value={post.id} />}
       <label>Link<input type="url" name="url" required defaultValue={v?.url} placeholder="YouTube, Spotify, SoundCloud, a museum page, an image…" /></label>
       <label>Title<input type="text" name="title" required maxLength={120} defaultValue={v?.title} placeholder="The piece, the artist, or both" /></label>
-      <label>Why it inspires you (optional)<textarea name="note" rows={2} maxLength={500} defaultValue={v?.note} /></label>
+      <label>Why it inspires you (optional)<textarea name="note" rows={4} maxLength={500} defaultValue={v?.note} /></label>
       <label>
         Image (optional; shown when the link has no player, resized automatically, up to 4 MB)
         <input type="file" name="image" accept="image/*" />
