@@ -16,7 +16,11 @@ const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 // Apple Music URLs reveal the release type ("…/x25-ep/…", "…-single/…").
+// Types Will chose by hand that the store links can't tell us.
+const KIND_OVERRIDE: Record<string, string> = { E: "COMPILATION" };
+
 const kindOf = (r: Release) => {
+  if (KIND_OVERRIDE[r.title]) return KIND_OVERRIDE[r.title];
   if (r.kind === "soundcloud-set") return "ALBUM"; // SoundCloud-only sets (COOKY, Tempted) are albums too (Will, 2026-10-08)
   const apple = r.links.apple ?? "";
   if (r.kind === "EP" || /-ep\//.test(apple)) return "EP";

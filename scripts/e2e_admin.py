@@ -216,6 +216,21 @@ try:
         pg.goto(edit_url); pg.check("input[name=media][value=none]"); save_post(pg)
         check(status(lead_src) == 404, "choosing None deletes the uploaded picture")
 
+        # --- music type filter ---
+        anon.goto(f"{BASE}/music")
+        pills = anon.locator(".music-filters a").all_inner_texts()
+        check(pills[:4] == ["All", "Albums", "EPs", "Compilations"], f"music filter pills follow type order ({pills})")
+        total = anon.locator(".album-card").count()
+        anon.click(".music-filters a:text('Compilations')"); anon.wait_for_url("**kind=COMPILATION**")
+        check(anon.locator(".album-card").count() == 1 and "E" == anon.locator(".album-title").first.inner_text(), "Compilations shows only E")
+        anon.click(".music-filters a:text('EPs')"); anon.wait_for_url("**kind=EP**")
+        eps = anon.locator(".album-kind").all_inner_texts()
+        check(len(eps) > 0 and all(k.startswith("EP") for k in eps), "EPs filter shows only EPs")
+        anon.click(".music-filters a:text('All')"); anon.wait_for_url(f"{BASE}/music")
+        check(anon.locator(".album-card").count() == total, "All restores every release")
+        anon.goto(f"{BASE}/music?kind=BOGUS")
+        check(anon.locator(".album-card").count() == total, "unknown filter falls back to All")
+
         # --- track lists: public numbered list + spreadsheet-style editor ---
         anon.goto(f"{BASE}/music/x25")
         rows = anon.locator("ol.tracklist li")

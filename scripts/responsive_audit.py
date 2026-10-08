@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs/mockups/responsive"; OUT.mkdir(parents=True, exist_ok=True)
 BASE = "http://localhost:3123"
 VIEWPORTS = {"phone": (390, 844), "small-phone": (320, 640), "tablet": (768, 1024), "desktop": (1366, 1000)}
-PUBLIC = ["/", "/music", "/music/becoming", "/bio", "/cv", "/media", "/writing", "/writing?q=bass", "/lab", "/lab/willkline-net", "/wall", "/signup", "/login"]
+PUBLIC = ["/", "/music", "/music?kind=EP", "/music/becoming", "/bio", "/cv", "/media", "/writing", "/writing?q=bass", "/lab", "/lab/willkline-net", "/wall", "/signup", "/login"]
 ADMIN = ["/admin", "/admin/notices", "/admin/documents", "/admin/bio", "/admin/cv", "/admin/music", "/admin/music/" + sql_value("""SELECT id FROM "Album" WHERE slug = 'tempted';"""), "/admin/media", "/admin/writing", "/admin/lab", "/admin/wall"]
 EMAIL, PW = "audit@test.local", secrets.token_urlsafe(18)
 
