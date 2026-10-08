@@ -43,7 +43,7 @@ export default async function CvPage() {
           <p className="cv-summary">{cv.summary}</p>
 
           <h2 className="section-label">Experience</h2>
-          {cv.experience.map((e) => (
+          {cv.experience.filter((e) => e.title || e.org).map((e) => (
             <div key={e.title + e.org} className="cv-entry">
               <div className="cv-row">
                 <h3>{e.title}, <span className="cv-org">{e.org}</span></h3>
@@ -59,7 +59,7 @@ export default async function CvPage() {
           <ul className="cv-list">{cv.music.map((m, i) => <li key={i}>{m}</li>)}</ul>
 
           <h2 className="section-label">Education</h2>
-          {cv.education.map((e) => (
+          {cv.education.filter((e) => e.school).map((e) => (
             <div key={e.school} className="cv-entry">
               <div className="cv-row">
                 <h3>{e.school}</h3>
@@ -71,7 +71,7 @@ export default async function CvPage() {
 
           <h2 className="section-label">Skills</h2>
           <dl className="cv-skills">
-            {cv.skills.map(([k, v]) => (
+            {cv.skills.filter(([, v]) => v).map(([k, v]) => (
               <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
             ))}
           </dl>

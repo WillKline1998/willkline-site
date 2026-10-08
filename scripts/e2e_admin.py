@@ -7,7 +7,8 @@ Run: ~/JobSearch/.venv/bin/python scripts/e2e_admin.py
 import os, secrets, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from testdb import remove_user, sql
+from testdb import remove_user, sql, sql_value
+import json
 
 BASE = "http://localhost:3123"
 ROOT = Path(__file__).resolve().parent.parent
@@ -107,7 +108,7 @@ try:
         pg.goto(f"{BASE}/admin/bio"); pg.fill("textarea[name=bio]", original_bio)
         pg.click("button:text('Save')"); pg.wait_for_selector("text=Saved ✓")
 
-        pg.goto(f"{BASE}/admin/cv")
+        pg.goto(f"{BASE}/admin/cv/raw")
         pg.fill("textarea[name=cv]", "{ not json")
         pg.click("button:text('Save')"); pg.wait_for_selector(".form-error")
         check(pg.locator(".form-error").count() == 1, "invalid CV JSON is rejected")
@@ -128,6 +129,71 @@ try:
         pg.click("button:text('Delete this post')"); pg.wait_for_url("**/admin/notices")
         check(status(src) == 404, "deleting a post deletes its uploaded file")
 
+        # --- media: press link + YouTube video ---
+        pg.goto(f"{BASE}/admin/media")
+        f = pg.locator("form.admin-form")
+        f.locator("select[name=kind]").select_option("VIDEO")
+        f.locator("input[name=url]").fill("https://youtu.be/P4uPK809WlM")
+        f.locator("input[name=title]").fill("E2E Video")
+        f.locator("button").click(); pg.wait_for_selector("input[value='E2E Video']")
+        pg.goto(f"{BASE}/admin/media")  # fresh form (React resets forms after an action)
+        f = pg.locator("form.admin-form")
+        f.locator("select[name=kind]").select_option("PRESS")
+        f.locator("input[name=url]").fill("https://example.com/review")
+        f.locator("input[name=title]").fill("E2E Gazette")
+        f.locator("input[name=caption]").fill("A remarkable bassist.")
+        f.locator("button").click(); pg.wait_for_selector("input[value='E2E Gazette']")
+        pg.goto(f"{BASE}/media")
+        check(pg.locator("iframe[src*='youtube-nocookie.com/embed/P4uPK809WlM']").count() == 1, "media video renders as player")
+        check(pg.get_by_text("A remarkable bassist.").count() == 1, "press quote shows")
+
+        # --- writing: draft private, publish, embed ---
+        pg.goto(f"{BASE}/admin/writing")
+        pg.fill("input[name=title]", "E2E Post"); pg.click("button:text('Start a draft')")
+        pg.wait_for_url("**/admin/writing/*")
+        pg.fill("textarea[name=body]", "Hello **world**.\n\nhttps://www.youtube.com/watch?v=P4uPK809WlM\n\n## Section")
+        pg.click("button:text('Save')")
+        pg.wait_for_function("() => document.querySelector('textarea[name=body]').defaultValue.includes('Section')")
+        pg.reload()
+        anon = b.new_page()
+        check(status("/writing/e2e-post") == 404 and anon.goto(f"{BASE}/writing").ok and anon.get_by_text("E2E Post").count() == 0, "draft is private")
+        pg.check("input[name=published]"); pg.click("button:text('Save')")
+        pg.wait_for_function("() => document.querySelector('input[name=published]').defaultChecked")
+        anon.goto(f"{BASE}/writing/e2e-post")
+        check(anon.locator("strong:text('world')").count() == 1 and anon.locator("h2:text('Section')").count() == 1, "markdown renders")
+        check(anon.locator("iframe[src*='youtube-nocookie.com/embed/P4uPK809WlM']").count() == 1, "bare YouTube link in post becomes player")
+        anon.goto(f"{BASE}/writing")
+        check(anon.get_by_text("E2E Post").count() == 1, "published post listed")
+
+        # --- lab: hidden until made visible ---
+        pg.goto(f"{BASE}/admin/lab")
+        pg.fill("input[name=title]", "E2E Gadget"); pg.click("button:text('Add project')")
+        pg.wait_for_url("**/admin/lab/*")
+        anon.goto(f"{BASE}/lab")
+        check(anon.get_by_text("E2E Gadget").count() == 0, "new lab project starts hidden")
+        pg.select_option("select[name=status]", "BUILDING")
+        pg.fill("input[name=description]", "A test gadget")
+        pg.fill("input[name=tech]", "Max/MSP, Web Audio")
+        pg.check("input[name=published]"); pg.click("button:text('Save')"); pg.wait_for_load_state("networkidle")
+        anon.goto(f"{BASE}/lab")
+        card = anon.locator(".lab-card", has_text="E2E Gadget")
+        check(card.count() == 1 and card.get_by_text("In progress").count() == 1 and card.locator(".chips li").count() == 2, "lab card shows status + tech")
+
+        # --- cv form: round-trip is lossless, add job works ---
+        before = sql_value("""SELECT value FROM "SiteSetting" WHERE key = 'cv';""")
+        pg.goto(f"{BASE}/admin/cv"); pg.click("button:text('Save CV')"); pg.wait_for_url("**/admin/cv?saved=1")
+        after = sql_value("""SELECT value FROM "SiteSetting" WHERE key = 'cv';""")
+        check(json.loads(before) == json.loads(after), "CV form save without edits changes nothing")
+        pg.click("button:text('+ Add a job')"); pg.wait_for_load_state("networkidle")
+        n = len(json.loads(before)["experience"])
+        pg.fill(f"input[name='exp.{n}.title']", "E2E Job"); pg.fill(f"input[name='exp.{n}.org']", "E2E Org")
+        pg.fill(f"textarea[name='exp.{n}.bullets']", "did a thing\ndid another")
+        pg.click("button:text('Save CV')"); pg.wait_for_url("**/admin/cv?saved=1")
+        anon.goto(f"{BASE}/cv")
+        check(anon.get_by_text("E2E Org").count() == 1 and anon.get_by_text("did another").count() == 1, "added job appears on /cv")
+        sql(f"""UPDATE "SiteSetting" SET value = $cv${before}$cv$ WHERE key = 'cv';""")
+        anon.close()
+
         # --- logout ---
         pg.goto(f"{BASE}/admin"); pg.click("button:text('Log out')"); pg.wait_for_url(BASE + "/")
         pg.goto(f"{BASE}/admin")
@@ -136,6 +202,9 @@ try:
 finally:
     # Clean up everything this test created.
     sql("""DELETE FROM "Notice" WHERE title = 'E2E Test Show';""")  # media cascade
+    sql("""DELETE FROM "MediaItem" WHERE title IN ('E2E Video', 'E2E Gazette');""")
+    sql("""DELETE FROM "Post" WHERE title = 'E2E Post';""")
+    sql("""DELETE FROM "LabProject" WHERE title = 'E2E Gadget';""")
     sql("""UPDATE "Album" SET description = '' WHERE description = 'E2E liner notes';""")
     remove_user(EMAIL)
 

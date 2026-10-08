@@ -17,6 +17,11 @@ def sql(q: str) -> None:
     subprocess.run([PSQL, database_url(), "-q", "-v", "ON_ERROR_STOP=1", "-c", q], check=True, capture_output=True)
 
 
+def sql_value(q: str) -> str:
+    r = subprocess.run([PSQL, database_url(), "-tA", "-c", q], check=True, capture_output=True, text=True)
+    return r.stdout.rstrip("\n")
+
+
 def remove_user(email: str) -> None:
     """Delete a test user (sessions cascade)."""
     sql(f"""DELETE FROM "User" WHERE email = '{email}';""")

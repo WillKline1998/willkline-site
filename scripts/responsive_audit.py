@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs/mockups/responsive"; OUT.mkdir(parents=True, exist_ok=True)
 BASE = "http://localhost:3123"
 VIEWPORTS = {"phone": (390, 844), "small-phone": (320, 640), "tablet": (768, 1024), "desktop": (1366, 1000)}
-PUBLIC = ["/", "/music", "/music/becoming", "/bio", "/cv", "/media", "/writing", "/lab", "/wall", "/login"]
-ADMIN = ["/admin", "/admin/notices", "/admin/documents", "/admin/bio", "/admin/music"]
+PUBLIC = ["/", "/music", "/music/becoming", "/bio", "/cv", "/media", "/writing", "/lab", "/lab/willkline-net", "/wall", "/login"]
+ADMIN = ["/admin", "/admin/notices", "/admin/documents", "/admin/bio", "/admin/cv", "/admin/music", "/admin/media", "/admin/writing", "/admin/lab"]
 EMAIL, PW = "audit@test.local", secrets.token_urlsafe(18)
 
 PROBE = """() => {
