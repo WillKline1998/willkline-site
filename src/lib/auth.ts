@@ -57,6 +57,13 @@ export async function currentUser() {
   return s.user;
 }
 
+/** Gate for member features (Wall). Any signed-in user. */
+export async function requireUser(next = "/wall") {
+  const user = await currentUser();
+  if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
+  return user;
+}
+
 /** Gate for admin pages and Server Actions. Sends non-admins to the login page. */
 export async function requireAdmin(next = "/admin") {
   const user = await currentUser();

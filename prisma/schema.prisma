@@ -22,6 +22,7 @@ model User {
   id           String     @id @default(cuid())
   email        String     @unique
   name         String?
+  handle       String?    @unique // public @handle for Wall members (willkline.net/wall/u/<handle>)
   role         String     @default("MEMBER") // "ADMIN" | "MEMBER" (strings, not enums, keep migrations simple)
   passwordHash String?
   createdAt    DateTime   @default(now())
@@ -177,16 +178,21 @@ model NoticeMedia {
 
 // ---------- Inspiration Wall (M4) ----------
 
+// Inspiration Wall: members share links to art/music they love; others save them.
 model WallPost {
   id        String   @id @default(cuid())
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  kind      String   // "ART" | "MUSIC" | "OTHER"
+  kind      String   // "MUSIC" | "VIDEO" | "ART" | "OTHER" (derived from the URL, editable)
   title     String
   url       String
-  note      String   @default("")
+  note      String   @default("") // why it inspires them
+  hidden    Boolean  @default(false) // admin moderation
+  reports   Int      @default(0)
   createdAt DateTime @default(now())
   saves     Save[]
+
+  @@index([createdAt])
 }
 
 // A user's personal collection = the WallPosts they've saved.

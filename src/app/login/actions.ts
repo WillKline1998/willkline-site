@@ -12,7 +12,7 @@ export type LoginState = { error?: string; email?: string };
 export async function login(_prev: LoginState, form: FormData): Promise<LoginState> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
-  const next = String(form.get("next") ?? "/admin");
+  const next = String(form.get("next") ?? "");
 
   const f = failures.get(email);
   if (f && f.until > Date.now()) return { error: "Too many attempts. Try again in a few minutes.", email };
@@ -25,7 +25,8 @@ export async function login(_prev: LoginState, form: FormData): Promise<LoginSta
   }
   failures.delete(email);
   await createSession(user.id);
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/admin");
+  const home = user.role === "ADMIN" ? "/admin" : "/wall";
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : home);
 }
 
 export async function logout() {
