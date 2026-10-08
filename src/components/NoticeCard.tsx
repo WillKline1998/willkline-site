@@ -10,7 +10,7 @@ const LABELS: Record<string, string> = {
 };
 
 const fmt = (d: Date) =>
-  d.toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" });
+  d.toLocaleString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
 
 // One post on the home-page bulletin board.
 export function NoticeCard({ n }: { n: Notice & { media: NoticeMedia[] } }) {
@@ -20,6 +20,9 @@ export function NoticeCard({ n }: { n: Notice & { media: NoticeMedia[] } }) {
       <div className="notice-meta">
         <span className="notice-kind">{LABELS[n.kind] ?? n.kind}</span>
         {n.pinned && <span className="notice-pin">pinned</span>}
+        <time className="notice-posted" dateTime={n.createdAt.toISOString()}>
+          {n.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" })}
+        </time>
       </div>
       {n.eventDate && (
         <div className="notice-date">

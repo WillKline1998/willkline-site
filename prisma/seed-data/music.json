@@ -17,7 +17,8 @@
         "apple": "https://music.apple.com/us/album/x25-ep/1835341313?uo=4",
         "deezer": "https://www.deezer.com/album/809820221"
       },
-      "cover": "/covers/x25.jpg"
+      "cover": "/covers/x25.jpg",
+      "year": 2025
     },
     {
       "title": "Glowing",
@@ -28,7 +29,8 @@
         "apple": "https://music.apple.com/us/album/glowing/1817963432?uo=4",
         "deezer": "https://www.deezer.com/album/765658751"
       },
-      "cover": "/covers/glowing.jpg"
+      "cover": "/covers/glowing.jpg",
+      "year": 2025
     },
     {
       "title": "E",
@@ -39,7 +41,8 @@
         "apple": "https://music.apple.com/us/album/e/1766552038?uo=4",
         "deezer": "https://www.deezer.com/album/637768481"
       },
-      "cover": "/covers/e.jpg"
+      "cover": "/covers/e.jpg",
+      "year": 2024
     },
     {
       "title": "BECOMING",
@@ -50,7 +53,8 @@
         "apple": "https://music.apple.com/us/album/becoming/1757085839?uo=4",
         "deezer": "https://www.deezer.com/album/609147792"
       },
-      "cover": "/covers/becoming.jpg"
+      "cover": "/covers/becoming.jpg",
+      "year": 2024
     },
     {
       "title": "Joyful Noise",
@@ -72,7 +76,8 @@
         "apple": "https://music.apple.com/us/album/in-performance/1694656323?uo=4",
         "deezer": "https://www.deezer.com/album/458626715"
       },
-      "cover": "/covers/in-performance.jpg"
+      "cover": "/covers/in-performance.jpg",
+      "year": 2023
     },
     {
       "title": "Dream Journal",
@@ -83,7 +88,8 @@
         "apple": "https://music.apple.com/us/album/dream-journal/1663415046?uo=4",
         "deezer": "https://www.deezer.com/album/393771477"
       },
-      "cover": "/covers/dream-journal.jpg"
+      "cover": "/covers/dream-journal.jpg",
+      "year": 2023
     },
     {
       "title": "consumption",
@@ -94,7 +100,8 @@
         "apple": "https://music.apple.com/us/album/consumption-ep/1637752280?uo=4",
         "deezer": "https://www.deezer.com/album/342553667"
       },
-      "cover": "/covers/consumption.jpg"
+      "cover": "/covers/consumption.jpg",
+      "year": 2022
     },
     {
       "title": "thoughts in isolation",
@@ -105,7 +112,8 @@
         "apple": "https://music.apple.com/us/album/thoughts-in-isolation-ep/1626218767?uo=4",
         "deezer": "https://www.deezer.com/album/322158297"
       },
-      "cover": "/covers/thoughts-in-isolation.jpg"
+      "cover": "/covers/thoughts-in-isolation.jpg",
+      "year": 2022
     },
     {
       "title": "THE ARTS",
@@ -116,7 +124,8 @@
         "apple": "https://music.apple.com/us/album/the-arts/1624141781?uo=4",
         "deezer": "https://www.deezer.com/album/318668547"
       },
-      "cover": "/covers/the-arts.jpg"
+      "cover": "/covers/the-arts.jpg",
+      "year": 2022
     },
     {
       "title": "Senta: Songs My Mother Taught Me",
@@ -127,7 +136,8 @@
         "apple": "https://music.apple.com/us/album/senta-songs-my-mother-taught-me-single/1543038001?uo=4",
         "deezer": "https://www.deezer.com/album/190418362"
       },
-      "cover": "/covers/senta-songs-my-mother-taught-me.jpg"
+      "cover": "/covers/senta-songs-my-mother-taught-me.jpg",
+      "year": 2020
     },
     {
       "title": "Close Your Eyes.",
@@ -138,7 +148,8 @@
         "apple": "https://music.apple.com/us/album/close-your-eyes/1530072735?uo=4",
         "deezer": "https://www.deezer.com/album/170679312"
       },
-      "cover": "/covers/close-your-eyes.jpg"
+      "cover": "/covers/close-your-eyes.jpg",
+      "year": 2020
     },
     {
       "title": "COOKY",

@@ -9,7 +9,7 @@ import { readFileSync, statSync } from "node:fs";
 import { saveFile } from "../src/lib/storage";
 import { db } from "../src/lib/db";
 
-type Release = { title: string; kind: string; cover?: string; links: Record<string, string> };
+type Release = { title: string; kind: string; cover?: string; year?: number; links: Record<string, string> };
 type Catalog = { releases: Release[] };
 
 const slugify = (s: string) =>
@@ -34,6 +34,7 @@ async function main() {
       kind: kindOf(r),
       links: JSON.stringify(r.links),
       coverUrl: r.cover ?? null, // local file in public/covers (scripts/fetch_catalog.py)
+      year: r.year ?? null, // from Apple's catalog release dates
       sortOrder: i,
       published: true,
     };

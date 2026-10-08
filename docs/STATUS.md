@@ -2,6 +2,15 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (midday) — Writing search/sort + home page pass
+**Done**:
+- /writing has a search box (case-insensitive "contains" on title OR body, `?q=`) and Newest/Oldest pills (`?sort=old`, which keeps `q`). It shows a result count and Clear search, plus a friendly no-match message.
+- **Home** is now two columns at ≥1080px. Left: the bulletin, with a posted date on each card; show times are now included (Eastern). Right: an auto-updating "around the site" rail (`src/components/AroundTheSite.tsx`) with upcoming shows (calendar badge), latest release, newest writing, newest media, the latest 3 Wall finds, and the first Lab project. Empty boxes hide. The rail is sticky on desktop and stacks below the bulletin on phones. The H1 is smaller since the sidebar already shows the name.
+- **Release years** came from Apple's public catalog (iTunes lookup by album ID) and are written into music.json plus the DB (only where the year was null). Joyful Noise is left blank: Apple shows 2002-01-01, likely a DistroKid placeholder. Confirmed X25 (Aug 2025) is the newest release.
+
+**Verified**: e2e_admin passes 40 (adds search title/body/no-match, sort keeps search, home rail shows the newest post). e2e_wall passes 36. The responsive audit (now including /writing?q=) shows 0 issues.
+**For Will**: the seeded bulletin card "New release: BECOMING" predates X25 and Glowing. Edit it or unpin it.
+
 ## 2026-10-08 (morning) — Writing & Media simplified, account corner, readable CV (Will's memo)
 **Done**:
 - **Writing** is an admin-only post maker. The title is required; the body is Markdown. Posts can have one optional lead **picture OR video** (radio picker, `src/components/PictureOrVideo.tsx` + `src/lib/lead-media.ts`; pictures resized to 1600px WebP; video = any web link, embedded when allowlisted). The posting time is stamped on first publish and shown in Eastern time (`src/lib/dates.ts`). Removed `summary` (the list shows an auto excerpt) and the old "insert image into body" uploader. Dropped columns Post.summary and MediaItem.caption (prod had 0 rows).
