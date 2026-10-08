@@ -7,6 +7,15 @@ Newest first. Every work session ends with an entry: what changed, what's verifi
 **Verified**: lint + build; screenshots docs/mockups/demo_*.png (home, music, phone, nav hover 2nd/3rd, normal mode unchanged).
 **Next**: Will reviews on the branch feature/demo-mode.
 
+## 2026-10-08 (night) — Warmer Quiet Studio + demo fixes
+**Why**: Will found the bare white screen harsh ("oppressed by a big white screen") and wanted more substance and a more professional look, staying minimal.
+**Done**:
+- Palette: warm paper page (#f6f2ec), white cards with a hairline edge and soft lift (`--shadow`), tinted sidebar (`--nav-bg`, extended to the window edge on wide screens), warm ink and muted (AA contrast).
+- Sidebar shows the current section with an orange tick (`NavLink`, aria-current).
+- Home rail: padded white cards with an orange top bar. The Lab box shows the newest entry (createdAt), now Headroom.
+- Demo mode: the toggle shimmer loops seamlessly (same color at both ends, 300% tile like h1). Demo neutralises the new vars.
+**Verified**: e2e_admin, e2e_wall ALL PASS; responsive 0 issues; screenshots docs/mockups/warm_*.png.
+
 ## 2026-10-08 (evening) — Site email (Resend)
 **Done**:
 - **Resend:** installed via the Vercel Marketplace (Will accepted the terms). It sets RESEND_API_KEY and RESEND_EMAIL_DOMAIN. `src/lib/email.ts` sends through the Resend REST API. With no key (local and tests), mail is written to `storage/outbox/`.

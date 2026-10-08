@@ -6,12 +6,16 @@
    ================================================================== */
 
 :root {
-  --bg: #ffffff;
-  --panel: #f6f6f4;
-  --ink: #111;
-  --muted: #6b6b6b; /* 5.3:1 on white: passes WCAG AA for small text */
+  /* Warm paper page with white cards on top: softer than a bare white
+     screen, and the cards give each section a clear edge. */
+  --bg: #f6f2ec;
+  --panel: #ffffff;
+  --nav-bg: #efe8de;
+  --ink: #1c1917;
+  --muted: #625a52; /* 5.9:1 on --bg, 6.6:1 on white: WCAG AA for small text */
   --accent: #c2410c;
-  --rule: #ececec;
+  --rule: #e4dcd1;
+  --shadow: 0 1px 2px #3c28140f, 0 6px 20px -10px #3c281429;
   --font-body: var(--font-geist-sans), system-ui, sans-serif;
   --font-display: var(--font-geist-sans), system-ui, sans-serif;
   --font-label: var(--font-geist-mono), ui-monospace, monospace;
@@ -50,7 +54,7 @@ a:hover { text-decoration: underline; }
    >=768px gets the classic artist-site sidebar. */
 .site-nav {
   position: sticky; top: 0; z-index: 20;
-  background: var(--bg);
+  background: var(--nav-bg);
   padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--rule);
 }
 .nav-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -131,7 +135,10 @@ a:hover { text-decoration: underline; }
 @media (min-width: 1080px) { .home-grid { grid-template-columns: minmax(0, 1fr) 280px; gap: 2.5rem; align-items: start; } }
 .rail { display: grid; gap: 1.6rem; align-content: start; }
 @media (min-width: 1080px) { .rail { position: sticky; top: 2rem; margin-top: 2.6rem; } }
-.rail-box { border-top: 2px solid var(--ink); padding-top: 0.6rem; }
+.rail-box {
+  background: var(--panel); border-top: 3px solid var(--accent); border-radius: 4px 4px var(--radius) var(--radius);
+  padding: 0.8rem 1rem 1rem; box-shadow: var(--shadow);
+}
 .rail-label { margin: 0 0 0.6rem; font-family: var(--font-label); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
 .rail-label a { color: inherit; text-decoration: none; }
 .rail-label a:hover { color: var(--accent); }
@@ -471,7 +478,26 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .track-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; }
 
 /* --- Quiet Studio details --- */
-.site-nav { border-right-color: transparent; }
+.site-nav { border-right-color: var(--rule); }
+/* Cards are white paper on the warm page: a hairline edge plus a soft lift. */
+.notice, .lab-card, .wall-card, .press-list li, .admin-tools li, .admin-form { box-shadow: var(--shadow); }
+.album-card img { box-shadow: var(--shadow); }
+/* "You are here" in the sidebar: an orange tick beside the current section. */
+.site-nav li a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+@media (min-width: 768px) {
+  /* The layout is centered, so on wide screens carry the sidebar tint out to
+     the window's left edge instead of leaving a stripe of page color. */
+  .site-nav { position: sticky; }
+  .site-nav::before {
+    content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: 50vw;
+    background: var(--nav-bg); pointer-events: none;
+  }
+  .site-nav li a { position: relative; }
+  .site-nav li a[aria-current="page"]::before {
+    content: ""; position: absolute; left: -0.9rem; top: 50%; width: 3px; height: 1em;
+    transform: translateY(-50%); border-radius: 2px; background: var(--accent);
+  }
+}
 .page-title { font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; }
 .notice { border: 0; }
 .section-label { border-bottom: 0; }
@@ -502,6 +528,8 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   --muted: #f2c9a6;     /* 11:1 on --bg */
   --accent: #ffa13d;    /* 9:1 on --bg: bright tangerine that still reads as text */
   --rule: #ffb86c33;
+  --nav-bg: transparent;
+  --shadow: none;
   background: transparent;
 }
 [data-mode="demo"] ::selection { background: #ff7a18; color: #170804; }
@@ -612,8 +640,10 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 /* The toggle glows with a pulsing halo (opacity-animated pseudo-element). */
 [data-mode="demo"] .demo-toggle {
   position: relative; color: #170804; border-color: transparent;
-  background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62);
-  background-size: 200% 100%;
+  /* Starts and ends on the same color, and 300% wide like the headings, so
+     the shimmer loop wraps without a visible seam. */
+  background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62, #ff9a3c, #ffd54a);
+  background-size: 300% 100%;
   font-weight: 700;
   animation: wk-shimmer 5s linear infinite;
 }

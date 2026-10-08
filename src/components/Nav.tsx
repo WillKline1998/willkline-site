@@ -2,6 +2,7 @@ import Link from "next/link";
 import { sections } from "@/lib/sections";
 import { DemoToggle } from "@/components/DemoMode";
 import { NavShell } from "@/components/NavShell";
+import { NavLink } from "@/components/NavLink";
 import { AccountLinks } from "@/components/AccountLinks";
 
 export function Nav() {
@@ -18,9 +19,9 @@ export function Nav() {
     >
       <nav aria-label="Site">
         <ul>
-          <li><Link href="/">Home</Link></li>
+          <li><NavLink href="/">Home</NavLink></li>
           {sections.map((s) => (
-            <li key={s.href}><Link href={s.href}>{s.label}</Link></li>
+            <li key={s.href}><NavLink href={s.href}>{s.label}</NavLink></li>
           ))}
         </ul>
       </nav>

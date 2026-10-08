@@ -28,7 +28,7 @@ export async function AroundTheSite() {
     db.post.findFirst({ where: { published: true }, orderBy: { publishedAt: "desc" } }),
     db.mediaItem.findFirst({ where: { published: true }, orderBy: { createdAt: "desc" } }),
     db.wallPost.findMany({ where: { hidden: false }, orderBy: { createdAt: "desc" }, take: 3, include: { author: { select: { handle: true } } } }),
-    db.labProject.findFirst({ where: { published: true }, orderBy: [{ sortOrder: "asc" }] }),
+    db.labProject.findFirst({ where: { published: true }, orderBy: { createdAt: "desc" } }),
   ]);
 
   return (
