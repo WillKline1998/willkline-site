@@ -2,6 +2,20 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-08 (late night) — M4: Inspiration Wall (live; sign-ups CLOSED pending Will)
+**Done**:
+- /signup: name, @handle, email, password. Bot traps (honeypot field plus a 3-second minimum) and a site-wide cap of 20 sign-ups/hour. Sign-ups are off unless SiteSetting `wall_signups` = "open". Login sends members to /wall and the admin to /admin.
+- /wall: a masonry feed, filters (Music/Video/Art/Other), and an "Older →" cursor. Members share a link with a title and note; kind is guessed from the URL and can be overridden. Players come from embeds.ts, direct image links render as art (no referrer), and anything else becomes a link card. Members get 10 posts/day. Save/unsave with counts; logged-out Save sends you to login.
+- /wall/u/[handle]: a public member page with Collection (saves) and Shared.
+- Moderation: authors delete their own posts and the admin deletes anything. WallReport allows one report per person per post, and 3 distinct reporters auto-hide a post. /admin/wall has the sign-up open/close switch, posts (hidden and reported first) with hide/unhide/delete, and members with remove (cascades).
+- `vercel-build` (scripts/vercel-build.sh) migrates only when VERCEL_ENV=production. prisma.config.ts uses DATABASE_URL_UNPOOLED, since the advisory lock fails on Neon's pooler.
+
+**Incident**: the first deploy failed with P1002 (advisory lock timeout). An idle pgbouncer session from an earlier migrate run through the pooler still held the lock. I terminated it with pg_terminate_backend and pointed the CLI at the direct URL, and the redeploy succeeded. Also, hand-made migrations need **UTC** timestamps (`date -u`); local time sorted them before init.
+
+**Verified**: e2e_wall passes 22 checks (bot traps, duplicate handle, post plus player, filters, saves and collections, permissions, one-person reports don't hide, admin hide/unhide, owner delete, closed sign-ups). e2e_admin passes 26 twice. The responsive audit shows 0 issues. Live: /wall and /signup return 200, the migration status is up to date, and no advisory locks are held.
+
+**Open questions for Will**: open sign-ups now, or keep them invite-only/closed? No email is wired up yet, so there's no password reset or email verification for members.
+
 ## 2026-10-07 (night) — Media, Writing, Lab, friendly CV editor (all live)
 **Done**:
 - **Media** (/media): photo grid with a pure-CSS lightbox, video and audio players (YouTube, Vimeo, Spotify, SoundCloud, or uploaded files), and press quotes with links. Admin at /admin/media: add by upload or link, title/caption, order, visibility, delete.
