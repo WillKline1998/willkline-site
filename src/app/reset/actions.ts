@@ -4,8 +4,14 @@ import { createHash } from "node:crypto";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
+import { parse, passwordField, textFields } from "@/lib/validation";
+import { z } from "zod";
 
 export type ResetState = { error?: string };
+
+const ResetForm = z
+  .object({ token: z.string(), password: passwordField, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { message: "Those passwords don't match.", path: ["confirm"] });
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
@@ -17,11 +23,9 @@ export async function validReset(token: string) {
 }
 
 export async function resetPassword(_prev: ResetState, form: FormData): Promise<ResetState> {
-  const token = String(form.get("token") ?? "");
-  const password = String(form.get("password") ?? "");
-  const confirm = String(form.get("confirm") ?? "");
-  if (password.length < 10) return { error: "Use a password of at least 10 characters." };
-  if (password !== confirm) return { error: "Those passwords don't match." };
+  const parsed = parse(ResetForm, textFields(form, ["token", "password", "confirm"]));
+  if (parsed.error !== undefined) return { error: parsed.error };
+  const { token, password } = parsed.data;
 
   const row = await validReset(token);
   if (!row) return { error: "This link has expired or was already used. Request a new one." };

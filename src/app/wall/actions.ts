@@ -9,6 +9,8 @@ import { ImageError, saveResizedImage } from "@/lib/images";
 import { deleteFile, keyFromUrl } from "@/lib/storage";
 import { LIMITS, WALL_KINDS, kindFromUrl } from "@/lib/wall";
 import { notifyAdmins } from "@/lib/notify";
+import { parse } from "@/lib/validation";
+import { z } from "zod";
 
 type Values = { url: string; title: string; note: string; kind: string };
 export type PostState = { error?: string; ok?: boolean; values?: Values };
@@ -20,6 +22,13 @@ async function removeImage(url: string | null) {
   if (key) await deleteFile(key);
 }
 
+const PostForm = z.object({
+  url: z.url({ protocol: /^https?$/, error: "Paste a full link that starts with https://" }),
+  title: z.string().min(1, "Give it a title (the piece, the artist, or both).").transform((s) => s.slice(0, LIMITS.title)),
+  note: z.string().transform((s) => s.slice(0, LIMITS.note)),
+  kind: z.string(),
+});
+
 /** Shared validation for create + edit. Returns clean fields or an error. */
 function readPost(form: FormData): { values: Values; error?: string } {
   const values = {
@@ -28,13 +37,8 @@ function readPost(form: FormData): { values: Values; error?: string } {
     note: str(form, "note").slice(0, LIMITS.note),
     kind: str(form, "kind"),
   };
-  try {
-    if (!/^https?:$/.test(new URL(values.url).protocol)) throw new Error();
-  } catch {
-    return { values, error: "Paste a full link that starts with https://" };
-  }
-  if (!values.title) return { values, error: "Give it a title (the piece, the artist, or both)." };
-  return { values };
+  const parsed = parse(PostForm, values);
+  return parsed.error !== undefined ? { values, error: parsed.error } : { values: parsed.data };
 }
 
 const kindOf = (v: Values) => (v.kind in WALL_KINDS ? v.kind : kindFromUrl(v.url));

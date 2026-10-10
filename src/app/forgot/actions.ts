@@ -3,6 +3,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendEmail, SITE_URL } from "@/lib/email";
+import { emailField, parse } from "@/lib/validation";
 
 export type ForgotState = { sent?: boolean; error?: string };
 
@@ -11,8 +12,9 @@ const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
 export async function requestReset(_prev: ForgotState, form: FormData): Promise<ForgotState> {
   if (String(form.get("website") ?? "") !== "") return { sent: true }; // honeypot: pretend it worked
-  const email = String(form.get("email") ?? "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "That email doesn't look right." };
+  const parsed = parse(emailField, form.get("email") ?? "");
+  if (parsed.error !== undefined) return { error: parsed.error };
+  const email = parsed.data;
 
   // Same answer whether or not the account exists, so this can't be used to
   // check who has an account.

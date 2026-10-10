@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-10-09 — License audit + zod
+**Done**: Production dependency license audit (all permissive; sharp's libvips is LGPL but dynamically linked, caniuse-lite is CC-BY data). Adopted zod for signup / reset / forgot / Wall-post validation via `src/lib/validation.ts`. See DECISIONS for rejected candidates.
+**Verified**: lint + build; e2e_admin, e2e_wall, responsive_audit all pass.
+**Next**: DB-backed login/reset rate limiting (current in-memory brake is per-instance).
+
 ## 2026-10-08 (night) — Demo mode goes orange
 **Done**: Demo palette rebuilt around tangerine/amber/coral/hot pink-orange/gold on dark warm brown (AA text). Animated glow-blob backdrop + grain, glowing gradient headings, nav links that slide/glow/underline, warm glass cards that tilt (alternating lean), glowing pulsing Demo button. Reduced motion keeps palette, drops motion. Fixed the white-rectangle hover bug in the sidebar (see DECISIONS).
 **Verified**: lint + build; screenshots docs/mockups/demo_*.png (home, music, phone, nav hover 2nd/3rd, normal mode unchanged).
