@@ -1,5 +1,6 @@
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { MediaBlock } from "@/components/MediaBlock";
 import { toEmbed } from "@/lib/embeds";
@@ -34,10 +35,14 @@ const components: Components = {
   },
 };
 
-export function Markdown({ children }: { children: string }) {
+// Writing turns on `lineBreaks`, so a single Enter in the editor is a real
+// line break (poems keep their lines) and a blank line still starts a new
+// paragraph or stanza. Lab pages keep standard Markdown.
+export function Markdown({ children, lineBreaks = false }: { children: string; lineBreaks?: boolean }) {
+  const plugins = lineBreaks ? [remarkGfm, remarkBreaks] : [remarkGfm];
   return (
     <div className="prose markdown">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{children}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={plugins} components={components}>{children}</ReactMarkdown>
     </div>
   );
 }

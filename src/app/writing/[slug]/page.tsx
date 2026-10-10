@@ -41,7 +41,7 @@ export default async function PostPage(props: PageProps<"/writing/[slug]">) {
       <h1 className="page-title">{post.title}</h1>
       {post.publishedAt && <p className="post-date"><time dateTime={post.publishedAt.toISOString()}>{dateTime(post.publishedAt)}</time></p>}
       <LeadMedia kind={post.mediaKind} url={post.mediaUrl} alt={post.title} />
-      <Markdown>{post.body}</Markdown>
+      <Markdown lineBreaks>{post.body}</Markdown>
     </article>
   );
 }

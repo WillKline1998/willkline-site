@@ -172,12 +172,14 @@ try:
         pg.fill("input[name=title]", "E2E Post"); pg.click("button:text('Start a draft')")
         pg.wait_for_url("**/admin/writing/*")
         edit_url = pg.url.split("?")[0]
-        pg.fill("textarea[name=body]", "Hello **world**.\n\n- one\n- two\n\n## Section")
+        pg.fill("textarea[name=body]", "Hello **world**.\n\nRoses are red\nviolets are blue\n\n- one\n- two\n\n## Section")
         save_post(pg)
         check(status("/writing/e2e-post") == 404 and anon.goto(f"{BASE}/writing").ok and anon.get_by_text("E2E Post").count() == 0, "draft is private")
         pg.check("input[name=published]"); save_post(pg)
         anon.goto(f"{BASE}/writing/e2e-post")
         check(anon.locator("strong:text('world')").count() == 1 and anon.locator("h2:text('Section')").count() == 1, "markdown renders")
+        verse = anon.locator(".markdown p", has_text="Roses are red")
+        check(verse.count() == 1 and verse.locator("br").count() == 1 and "violets" in verse.inner_text(), "single Enter is a line break, blank line a new paragraph (poems)")
         check(anon.locator(".markdown li").first.evaluate("li => getComputedStyle(li).listStyleType") == "disc", "lists show bullets")
         check(":" in anon.locator("p.post-date time").inner_text(), "posting date + time shown")
         # search + sort on /writing

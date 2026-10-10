@@ -7,6 +7,11 @@ Newest first. Every work session ends with an entry: what changed, what's verifi
 **Verified**: lint + build; screenshots docs/mockups/demo_*.png (home, music, phone, nav hover 2nd/3rd, normal mode unchanged).
 **Next**: Will reviews on the branch feature/demo-mode.
 
+## 2026-10-09 — Poems keep their line breaks
+**Why**: Will's poem (four quatrains) rendered as run-on paragraphs.
+**Done**: Writing posts render with `remark-breaks` (`<Markdown lineBreaks>`): one Enter = line break, blank line = new paragraph/stanza. Lab pages keep standard Markdown. The admin formatting tips are now a clear list.
+**Verified**: e2e_admin ALL PASS (new check: single newline renders a `<br>`).
+
 ## 2026-10-08 (night) — Warmer Quiet Studio + demo fixes
 **Why**: Will found the bare white screen harsh ("oppressed by a big white screen") and wanted more substance and a more professional look, staying minimal.
 **Done**:

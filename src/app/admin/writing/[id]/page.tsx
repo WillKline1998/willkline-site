@@ -35,10 +35,14 @@ export default async function EditPost(props: PageProps<"/admin/writing/[id]">) 
         </label>
         <details className="small muted">
           <summary>Formatting tips</summary>
-          <p>
-            Blank line = new paragraph. <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>&gt; quote</code>,{" "}
-            <code>- list item</code>, <code>[link text](https://…)</code>.
-          </p>
+          <ul>
+            <li><strong>Enter</strong> once = new line (poems keep their line breaks).</li>
+            <li><strong>Blank line</strong> = new paragraph or stanza.</li>
+            <li>
+              <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>&gt; quote</code>, <code>- list item</code>,{" "}
+              <code>[link text](https://…)</code>
+            </li>
+          </ul>
         </details>
         <PictureOrVideo kind={p.mediaKind} url={p.mediaUrl} />
         <label>Web address: willkline.net/writing/…<input type="text" name="slug" defaultValue={p.slug} /></label>
