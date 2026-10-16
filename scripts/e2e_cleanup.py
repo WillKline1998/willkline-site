@@ -140,10 +140,10 @@ try:
             return 2 * r * math.asin(math.sqrt(h))
 
         drawn_m = sum(hav(drawn[i - 1], drawn[i]) for i in range(1, len(drawn)))
-        check(trimmed == 150 and bags == 3, f"stored with 150 m hidden at each end and 3 bags (trimmed={trimmed}, bags={bags})")
-        check(abs((drawn_m - stored_m) - 300) < 40, f"about 300 m shorter than drawn: drawn {drawn_m:.0f} m, stored {stored_m} m")
+        check(trimmed == 200 and bags == 3, f"stored with 200 m hidden at each end and 3 bags (trimmed={trimmed}, bags={bags})")
+        check(abs((drawn_m - stored_m) - 400) < 50, f"about 400 m shorter than drawn: drawn {drawn_m:.0f} m, stored {stored_m} m")
         first = json.loads(sql_value("""SELECT route->0 FROM "Cleanup" WHERE title='E2E freehand route'"""))
-        check(hav(first, drawn[0]) > 140, f"the stored line does not start where the drawing did ({hav(first, drawn[0]):.0f} m away)")
+        check(hav(first, drawn[0]) > 190, f"the stored line does not start where the drawing did ({hav(first, drawn[0]):.0f} m away)")
 
         # The public data carries the name people chose and nothing private.
         data = urllib.request.urlopen(f"{BASE}/cleanup/routes").read().decode()
@@ -151,6 +151,49 @@ try:
         page.reload()
         stat = page.locator(".cleanup-stats").inner_text()
         check("bags filled" in stat.lower(), "the totals band shows bags")
+
+        # The snap service: members only, and (network permitting) it returns a real street route.
+        anon = browser.new_context().request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [-81.69, 41.5], "to": [-81.688, 41.501]})
+        check(anon.status == 401, "street snapping refuses a signed-out visitor")
+        walk = page.request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [-81.6944, 41.4993], "to": [-81.6890, 41.5010]})
+        check(walk.status in (200, 502), f"the snap proxy answers a member (HTTP {walk.status})")
+        if walk.status == 200:
+            check(len(walk.json()["line"]) >= 2, "and returns a street route")
+        else:
+            print("NOTE the free router was unavailable just now; the page falls back to a straight line")
+        bad = page.request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [999, 0], "to": [0, 0]})
+        check(bad.status == 400, "bad coordinates are refused")
+
+        # A private clean-up counts in the totals but is never stored as a route or shown.
+        before = int(sql_value("""SELECT coalesce(sum("distanceM"),0) FROM "Cleanup" WHERE hidden = false"""))
+        page.goto(f"{BASE}/cleanup/new")
+        page.wait_for_selector(".drawer-map canvas")
+        page.wait_for_timeout(3000)
+        page.get_by_role("radio", name="Straight lines").click()
+        for x, y in canvas_points(page, ".drawer-map", [(0.2, 0.4), (0.8, 0.4)]):
+            tap(page, x, y)
+        page.fill("input[name=title]", "E2E private walk")
+        page.locator("input[name=isPrivate]").check()
+        page.get_by_role("button", name="Add to the map").click()
+        page.wait_for_url("**/cleanup?added=1", timeout=15000)
+        prow = sql_value("""SELECT "isPrivate" || '|' || jsonb_array_length(route) || '|' || "distanceM" FROM "Cleanup" WHERE title='E2E private walk'""")
+        flag, npts2, dist2 = prow.split("|")
+        check(flag == "true" and npts2 == "0" and int(dist2) > 500, f"a private clean-up keeps its distance but no route ({prow})")
+        feed = urllib.request.urlopen(f"{BASE}/cleanup/routes").read().decode()
+        check("E2E private walk" not in feed, "and it is not in the public map data")
+        check("E2E private walk" not in page.locator(".cleanup-list").inner_text(), "or in the public list")
+        check(int(sql_value("""SELECT coalesce(sum("distanceM"),0) FROM "Cleanup" WHERE hidden = false""")) - before == int(dist2), "but its miles are in the totals")
+
+        # The flat-map toggle.
+        page.get_by_role("button", name="Flat map").click()
+        check(page.get_by_role("button", name="Show the globe").is_visible(), "the flat-map toggle switches the projection")
+
+        # Delete your own.
+        page.goto(f"{BASE}/cleanup/mine")
+        check("private" in page.locator(".cleanup-mine", has_text="E2E private walk").inner_text(), "your clean-ups page lists the private one, marked private")
+        page.locator(".cleanup-mine", has_text="E2E private walk").get_by_role("button", name="Delete").click()
+        page.wait_for_selector("text=Deleted.")
+        check(sql_value("""SELECT count(*) FROM "Cleanup" WHERE title='E2E private walk'""") == "0", "delete removes it")
 
         # A tampered page cannot skip the privacy rule or smuggle in a bad route.
         page.goto(f"{BASE}/cleanup/new")

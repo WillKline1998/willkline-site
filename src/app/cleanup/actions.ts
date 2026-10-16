@@ -12,7 +12,7 @@ import { revalidatePath } from "next/cache";
 
 export type CleanupState = {
   error?: string;
-  values?: { title: string; note: string; bags: string; cleanedOn: string; route: string; hideEnds: boolean };
+  values?: { title: string; note: string; bags: string; cleanedOn: string; route: string; hideEnds: boolean; isPrivate: boolean };
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -32,7 +32,7 @@ export async function createCleanup(_prev: CleanupState, form: FormData): Promis
   const user = await requireUser("/cleanup/new");
   const values = {
     title: str(form, "title"), note: str(form, "note"), bags: str(form, "bags") || "0",
-    cleanedOn: str(form, "cleanedOn"), route: str(form, "route"), hideEnds: checked(form, "hideEnds"),
+    cleanedOn: str(form, "cleanedOn"), route: str(form, "route"), hideEnds: checked(form, "hideEnds"), isPrivate: checked(form, "isPrivate"),
   };
   const fields = parse(Fields, values);
   if (fields.error !== undefined) return { error: fields.error, values };
@@ -50,7 +50,7 @@ export async function createCleanup(_prev: CleanupState, form: FormData): Promis
   // off before anything is stored.
   let line = route.line;
   let trimmedM = 0;
-  if (values.hideEnds) {
+  if (values.hideEnds && !values.isPrivate) {
     const cut = trimEnds(line, HIDE_ENDS_M);
     if (!cut)
       return {
@@ -64,8 +64,11 @@ export async function createCleanup(_prev: CleanupState, form: FormData): Promis
   const lately = await db.cleanup.count({ where: { authorId: user.id, createdAt: { gt: new Date(Date.now() - 864e5) } } });
   if (lately >= CLEANUP_LIMITS.perDay) return { error: `That's ${CLEANUP_LIMITS.perDay} clean-ups in a day. Come back tomorrow!`, values };
 
-  const lngs = line.map((p) => p[0]);
-  const lats = line.map((p) => p[1]);
+  // A private clean-up adds its miles to the totals and nothing else: the route itself is not kept.
+  const distanceM = Math.round(lengthM(line));
+  const kept = values.isPrivate ? [] : line;
+  const lngs = kept.length ? kept.map((p) => p[0]) : [0];
+  const lats = kept.length ? kept.map((p) => p[1]) : [0];
   await db.cleanup.create({
     data: {
       authorId: user.id,
@@ -73,8 +76,9 @@ export async function createCleanup(_prev: CleanupState, form: FormData): Promis
       note: fields.data.note,
       bags: fields.data.bags,
       cleanedOn: new Date(`${fields.data.cleanedOn}T12:00:00Z`),
-      distanceM: Math.round(lengthM(line)),
-      route: line,
+      distanceM,
+      route: kept,
+      isPrivate: values.isPrivate,
       trimmedM,
       minLng: Math.min(...lngs), maxLng: Math.max(...lngs),
       minLat: Math.min(...lats), maxLat: Math.max(...lats),
@@ -82,4 +86,13 @@ export async function createCleanup(_prev: CleanupState, form: FormData): Promis
   });
   revalidatePath("/cleanup", "layout");
   redirect("/cleanup?added=1");
+}
+
+/** Remove one of your own clean-ups (and its miles from the totals). Only the author can. */
+export async function deleteCleanup(form: FormData): Promise<void> {
+  const user = await requireUser("/cleanup/mine");
+  const id = str(form, "id");
+  if (id) await db.cleanup.deleteMany({ where: { id, authorId: user.id } });
+  revalidatePath("/cleanup", "layout");
+  redirect("/cleanup/mine?deleted=1");
 }

@@ -4,7 +4,7 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HIDE_ENDS_M as HIDE_M, formatKm, formatMiles, lengthM, trimEnds, type LngLat } from "@/lib/geo";
-import { ACCENT, FOOT_ROUTER, MAP_STYLE, PLACE_SEARCH } from "@/lib/map";
+import { ACCENT, MAP_STYLE, PLACE_SEARCH } from "@/lib/map";
 import { configureMapWorker } from "@/lib/map-worker";
 
 type Mode = "streets" | "straight" | "free";
@@ -17,6 +17,14 @@ const MODES: { id: Mode; label: string; help: string }[] = [
 ];
 
 /** The route so far: every segment's points joined into one line (each segment starts where the last ended). */
+/** Ask our own server for a street route (it spaces calls out for the free routers behind it and caches them). */
+async function snap(body: object): Promise<LngLat[]> {
+  const res = await fetch("/cleanup/snap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = (await res.json().catch(() => ({}))) as { line?: LngLat[]; error?: string };
+  if (!res.ok || !j.line) throw new Error(j.error ?? "Couldn't reach the street router.");
+  return j.line;
+}
+
 const flatten = (segments: Segment[]): LngLat[] => segments.flatMap((s, i) => (i === 0 ? s.coords : s.coords.slice(1)));
 
 /**
@@ -100,16 +108,11 @@ export function RouteDrawer({ hideEnds, onChange }: { hideEnds: boolean; onChang
       // Follow streets: ask the walking router for the way between the two taps.
       setBusy(true);
       setNote(null);
-      fetch(`${FOOT_ROUTER}/${from[0]},${from[1]};${p[0]},${p[1]}?overview=full&geometries=geojson`)
-        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-        .then((j: { routes?: { geometry: { coordinates: LngLat[] } }[] }) => {
-          const path = j.routes?.[0]?.geometry.coordinates;
-          if (!path || path.length < 2) throw new Error("no route");
-          commit([...segRef.current, { kind: "streets", coords: [from, ...path.slice(1, -1), p].map((c) => [c[0], c[1]] as LngLat) }]);
-        })
-        .catch(() => {
+      snap({ kind: "walk", from, to: p })
+        .then((path) => commit([...segRef.current, { kind: "streets", coords: [from, ...path.slice(1, -1), p] }]))
+        .catch((err: Error) => {
           commit([...segRef.current, { kind: "straight", coords: [from, p] }]);
-          setNote("Couldn't reach the street router, so that piece is a straight line. Undo and try again, or switch to Straight lines or Freehand.");
+          setNote(`${err.message} That piece is a straight line for now. Undo and try again, or switch to Straight lines or Freehand.`);
         })
         .finally(() => setBusy(false));
     });
@@ -196,6 +199,19 @@ export function RouteDrawer({ hideEnds, onChange }: { hideEnds: boolean; onChang
       { timeout: 8000 },
     );
 
+  // Pull the last freehand stroke onto the streets it follows.
+  const snapLast = () => {
+    const segs = segRef.current;
+    const last = segs[segs.length - 1];
+    if (!last || last.kind !== "free") return;
+    setBusy(true);
+    setNote(null);
+    snap({ kind: "match", shape: last.coords })
+      .then((path) => commit([...segRef.current.slice(0, -1), { kind: "streets", coords: [last.coords[0], ...path.slice(1, -1), last.coords[last.coords.length - 1]] }]))
+      .catch((err: Error) => setNote(`${err.message} Your freehand line is unchanged.`))
+      .finally(() => setBusy(false));
+  };
+
   const undo = () => {
     const segs = segRef.current;
     commit(segs.length <= 1 ? [] : segs.slice(0, -1));
@@ -227,6 +243,9 @@ export function RouteDrawer({ hideEnds, onChange }: { hideEnds: boolean; onChang
         </output>
         {busy && <span className="small muted" role="status">Snapping to the street…</span>}
         <span className="drawer-spacer" />
+        {segments[segments.length - 1]?.kind === "free" && (
+          <button type="button" className="btn btn-quiet" onClick={snapLast} disabled={busy}>Snap this stroke to streets</button>
+        )}
         <button type="button" className="btn btn-quiet" onClick={undo} disabled={!segments.length}>Undo</button>
         <button type="button" className="btn btn-quiet" onClick={() => commit([])} disabled={!segments.length}>Clear</button>
       </div>

@@ -4,6 +4,8 @@ import type { LngLat } from "@/lib/geo";
 
 export const CLEANUP_LIMITS = { title: 80, note: 400, bags: 500, perDay: 5 } as const;
 const visible = { hidden: false } as const;
+/** What may be drawn or listed: not hidden by a moderator, and not a private entry. */
+const drawable = { hidden: false, isPrivate: false } as const;
 
 /** What a person is called on the map: their @handle, else their name, never their email. */
 export const displayName = (u: { handle: string | null; name: string | null }) =>
@@ -11,7 +13,7 @@ export const displayName = (u: { handle: string | null; name: string | null }) =
 
 export type CommunityStats = { meters: number; cleanups: number; members: number; bags: number };
 
-/** Totals for the headline numbers. Counts visible clean-ups only, so a hidden one never inflates them. */
+/** Totals for the headline numbers. Counts every clean-up a moderator has not hidden, private ones included (they add to the miles, never to the map). */
 export async function communityStats(): Promise<CommunityStats> {
   const [sum, members] = await Promise.all([
     db.cleanup.aggregate({ where: visible, _sum: { distanceM: true, bags: true }, _count: true }),
@@ -22,7 +24,7 @@ export async function communityStats(): Promise<CommunityStats> {
 
 export async function recentCleanups(take = 12) {
   return db.cleanup.findMany({
-    where: visible,
+    where: drawable,
     orderBy: { cleanedOn: "desc" },
     take,
     select: {
@@ -36,7 +38,7 @@ export async function recentCleanups(take = 12) {
 /** Everything the map draws: one GeoJSON line per clean-up, with just what the popup shows. */
 export async function routeFeatures() {
   const rows = await db.cleanup.findMany({
-    where: visible,
+    where: drawable,
     orderBy: { createdAt: "desc" },
     take: 2000,
     select: { id: true, title: true, cleanedOn: true, distanceM: true, bags: true, route: true, author: { select: { handle: true, name: true } } },
@@ -49,4 +51,13 @@ export async function routeFeatures() {
       geometry: { type: "LineString" as const, coordinates: c.route as LngLat[] },
     })),
   };
+}
+
+/** A member's own clean-ups, private ones included, for the "Your clean-ups" page. */
+export async function myCleanups(userId: string) {
+  return db.cleanup.findMany({
+    where: { authorId: userId },
+    orderBy: { cleanedOn: "desc" },
+    select: { id: true, title: true, cleanedOn: true, distanceM: true, bags: true, isPrivate: true, hidden: true },
+  });
 }

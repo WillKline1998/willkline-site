@@ -260,6 +260,7 @@ model Cleanup {
   maxLng    Float
   maxLat    Float
   hidden    Boolean  @default(false) // admin moderation
+  isPrivate Boolean  @default(false) // counts in the totals only: no route is stored, nothing is drawn
   createdAt DateTime @default(now())
 
   @@index([createdAt])

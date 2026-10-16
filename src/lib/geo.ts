@@ -100,8 +100,8 @@ export function simplify(line: readonly LngLat[], toleranceM: number): LngLat[] 
   return line.filter((_, i) => keep[i]);
 }
 
-/** How much of each end of a route is hidden by default (about two city blocks). */
-export const HIDE_ENDS_M = 150;
+/** How much of each end of a route is hidden by default (a few city blocks). */
+export const HIDE_ENDS_M = 200;
 
 export const LIMITS = {
   /** Points a route may have once simplified. */
@@ -138,4 +138,29 @@ export function formatMiles(m: number): string {
 export function formatKm(m: number): string {
   const km = metersToKm(m);
   return `${km >= 10 ? Math.round(km) : km.toFixed(1)} km`;
+}
+
+/** Decode a Valhalla "encoded polyline" (precision 6) into [lng, lat] pairs. */
+export function decodePolyline6(encoded: string): LngLat[] {
+  const out: LngLat[] = [];
+  let i = 0;
+  let lat = 0;
+  let lng = 0;
+  const next = () => {
+    let shift = 0;
+    let result = 0;
+    let byte: number;
+    do {
+      byte = encoded.charCodeAt(i++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20 && i <= encoded.length);
+    return result & 1 ? ~(result >> 1) : result >> 1;
+  };
+  while (i < encoded.length) {
+    lat += next();
+    lng += next();
+    out.push([lng / 1e6, lat / 1e6]);
+  }
+  return out;
 }

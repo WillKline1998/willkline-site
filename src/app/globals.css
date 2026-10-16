@@ -698,7 +698,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 
 .cleanup-mapwrap { position: relative; margin: 0 0 1rem; }
 .cleanup-map { height: min(68vh, 560px); min-height: 340px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); background: #0f172a; }
-.cleanup-mapbar { position: absolute; left: 0.6rem; bottom: 1.6rem; }
+.cleanup-mapbar { position: absolute; left: 0.6rem; bottom: 1.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .cleanup-mapbar .btn { background: #fffc; backdrop-filter: blur(6px); }
 .cleanup-nomap { padding: 1rem; border: 1px dashed var(--rule); border-radius: var(--radius); }
 .cleanup-popup { display: grid; gap: 0.15rem; font-size: 0.9rem; color: #1c1917; }
@@ -726,3 +726,5 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .drawer-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .drawer-dist { font-weight: 700; font-size: 1.15rem; }
 .drawer-spacer { flex: 1; }
+.cleanup-mine { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.65rem 0.9rem; }
+.cleanup-mine > div { display: grid; gap: 0.1rem; min-width: 0; }

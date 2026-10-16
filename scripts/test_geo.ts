@@ -1,7 +1,7 @@
 // Run: npx tsx --test scripts/test_geo.ts
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checkRoute, haversineM, lengthM, metersToMiles, simplify, slice, trimEnds, formatMiles, type LngLat } from "../src/lib/geo";
+import { decodePolyline6, checkRoute, haversineM, lengthM, metersToMiles, simplify, slice, trimEnds, formatMiles, type LngLat } from "../src/lib/geo";
 
 // A straight walk due north from the equator: 0.001 degrees of latitude is 111.195 m.
 const north = (n: number): LngLat[] => Array.from({ length: n + 1 }, (_, i) => [0, i * 0.001]);
@@ -58,4 +58,16 @@ test("miles read the way people say them", () => {
   assert.equal(formatMiles(1609.344), "1.0 mi");
   assert.equal(formatMiles(160), "0.10 mi");
   assert.equal(formatMiles(32_187), "20 mi");
+});
+
+test("a Valhalla polyline decodes to the points it was made from", () => {
+  const encode = (pts: LngLat[]) => {
+    let pLat = 0, pLng = 0, out = "";
+    const enc = (v: number) => { v = v < 0 ? ~(v << 1) : v << 1; let s = ""; while (v >= 0x20) { s += String.fromCharCode((0x20 | (v & 0x1f)) + 63); v >>= 5; } return s + String.fromCharCode(v + 63); };
+    for (const [lng, lat] of pts) { const la = Math.round(lat * 1e6), lo = Math.round(lng * 1e6); out += enc(la - pLat) + enc(lo - pLng); pLat = la; pLng = lo; }
+    return out;
+  };
+  const pts: LngLat[] = [[-81.69, 41.5], [-81.6872, 41.5031], [-81.69412, 41.49977]];
+  assert.deepEqual(decodePolyline6(encode(pts)), pts);
+  assert.deepEqual(decodePolyline6(""), []);
 });

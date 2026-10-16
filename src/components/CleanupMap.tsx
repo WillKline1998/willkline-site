@@ -22,6 +22,7 @@ export function CleanupMap() {
   const [spinning, setSpinning] = useState(true);
   const spinRef = useRef(true);
   const [failed, setFailed] = useState(false);
+  const [flat, setFlat] = useState(false);
 
   useEffect(() => {
     if (!box.current) return;
@@ -139,6 +140,22 @@ export function CleanupMap() {
           }}
         >
           {spinning ? "Pause spin" : "Spin the globe"}
+        </button>
+        <button
+          type="button"
+          className="btn btn-quiet"
+          aria-pressed={flat}
+          onClick={() => {
+            const next = !flat;
+            setFlat(next);
+            mapRef.current?.setProjection({ type: next ? "mercator" : "globe" });
+            if (next) {
+              spinRef.current = false;
+              setSpinning(false);
+            }
+          }}
+        >
+          {flat ? "Show the globe" : "Flat map"}
         </button>
       </div>
     </div>
