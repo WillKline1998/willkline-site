@@ -31,6 +31,7 @@ model User {
   sessions     Session[]
   reports      WallReport[]
   resets       PasswordReset[]
+  cleanups     Cleanup[]
 }
 
 // One-time "forgot password" links. Only a hash of the token is stored, like
@@ -237,4 +238,30 @@ model Save {
   wallPost   WallPost @relation(fields: [wallPostId], references: [id], onDelete: Cascade)
 
   @@id([userId, wallPostId])
+}
+
+// ---------- Cleanup map (concept) ----------
+
+// One litter pick-up a member drew on the map. The route is stored already trimmed
+// (src/lib/geo.ts#trimEnds), so the exact start, usually someone's front door, is never kept.
+model Cleanup {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  note      String   @default("")
+  cleanedOn DateTime // the day it happened (members can log yesterday's walk)
+  distanceM Int      // metres of the route as published (after trimming)
+  bags      Int      @default(0)
+  route     Json     // [[lng, lat], ...]
+  trimmedM  Int      @default(0) // metres hidden from each end for privacy
+  minLng    Float
+  minLat    Float
+  maxLng    Float
+  maxLat    Float
+  hidden    Boolean  @default(false) // admin moderation
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([authorId])
 }

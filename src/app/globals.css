@@ -682,3 +682,47 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   [data-mode="demo"] .wall-card:hover,
   [data-mode="demo"] .site-nav li a:hover { transform: none; }
 }
+
+
+/* ==================================================================
+   Cleanup Map (concept): the globe, the stats band, the drawing tool.
+   Mobile-first like everything else; widen at 640 / 900.
+   ================================================================== */
+.cleanup-concept { display: inline-block; margin: 0 0 0.6rem; padding: 0.15rem 0.6rem; border: 1px solid var(--rule); border-radius: 999px; font-family: var(--font-label); font-size: 0.75rem; color: var(--muted); }
+.cleanup-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 1.25rem 0; }
+.cleanup-stats > div { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); padding: 0.8rem 1rem; border-top: 3px solid var(--accent); }
+.cleanup-stats dt { font-family: var(--font-label); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.cleanup-stats dd { margin: 0.1rem 0 0; font-size: clamp(1.5rem, 6vw, 2.1rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.cleanup-stats dd small { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+@media (min-width: 640px) { .cleanup-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.cleanup-mapwrap { position: relative; margin: 0 0 1rem; }
+.cleanup-map { height: min(68vh, 560px); min-height: 340px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); background: #0f172a; }
+.cleanup-mapbar { position: absolute; left: 0.6rem; bottom: 1.6rem; }
+.cleanup-mapbar .btn { background: #fffc; backdrop-filter: blur(6px); }
+.cleanup-nomap { padding: 1rem; border: 1px dashed var(--rule); border-radius: var(--radius); }
+.cleanup-popup { display: grid; gap: 0.15rem; font-size: 0.9rem; color: #1c1917; }
+.cleanup-popup span { color: #625a52; }
+
+.cleanup-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.cleanup-fly { display: grid; gap: 0.1rem; width: 100%; text-align: left; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.65rem 0.9rem; min-height: 44px; cursor: pointer; }
+.cleanup-fly:hover { border-color: var(--accent); }
+.cleanup-how { padding-left: 1.2rem; list-style: disc; display: grid; gap: 0.4rem; max-width: 60ch; }
+
+.cleanup-form { max-width: 860px; }
+.cleanup-pair { display: grid; gap: 0.9rem; }
+@media (min-width: 640px) { .cleanup-pair { grid-template-columns: 1fr 1fr; } }
+.cleanup-form input[type=date], .cleanup-form input[type=number] { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink); width: 100%; }
+.form-note { margin: 0; color: #92400e; }
+
+.drawer { display: grid; gap: 0.6rem; }
+.drawer-modes { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.drawer-mode { font: inherit; font-size: 0.9rem; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; }
+.drawer-mode.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.drawer-help { margin: 0; min-height: 2.6em; }
+.drawer-find { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.drawer-find input[type=search] { flex: 1 1 14rem; min-width: 0; font: inherit; font-family: var(--font-body); font-size: 1rem; min-height: 44px; padding: 0 0.8rem; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); color: var(--ink); }
+.drawer-map { height: min(62vh, 520px); min-height: 320px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule); }
+.drawer-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.drawer-dist { font-weight: 700; font-size: 1.15rem; }
+.drawer-spacer { flex: 1; }

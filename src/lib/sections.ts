@@ -15,5 +15,6 @@ export const sections: Section[] = [
   { href: "/media", label: "Media", blurb: "Photos, video, and press.", milestone: "M2" },
   { href: "/writing", label: "Writing", blurb: "Essays, notes, and ideas.", milestone: "M2" },
   { href: "/lab", label: "Lab", blurb: "Small music-software experiments and projects.", milestone: "M5" },
+  { href: "/cleanup", label: "Cleanup Map", blurb: "Where people have picked up litter, drawn on a globe (a concept).", milestone: "Concept" },
   { href: "/wall", label: "Inspiration Wall", blurb: "Share art and music you love; save others' finds.", milestone: "M4" },
 ];
