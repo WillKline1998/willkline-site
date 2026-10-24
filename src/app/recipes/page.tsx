@@ -16,9 +16,19 @@ const SORTS = { new: "Newest", old: "Oldest", random: "Random" } as const;
 type Sort = keyof typeof SORTS;
 
 const select = {
+  hidden: true,
   id: true, name: true, description: true, tags: true, imageUrl: true, createdAt: true,
   ingredients: true, author: { select: { handle: true, name: true } },
 } as const;
+
+/** Recipes whose name or any ingredient line contains `q`, case-insensitively. `%` and `_` in the text are matched literally. */
+async function searchIds(q: string): Promise<string[]> {
+  const like = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const rows = await db.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "Recipe"
+    WHERE name ILIKE ${like} OR EXISTS (SELECT 1 FROM unnest(ingredients) AS line WHERE line ILIKE ${like})`;
+  return rows.map((r) => r.id);
+}
 
 // A fresh sample each visit. Shuffled in memory: the wall is small.
 async function randomRecipes(where: object) {
@@ -38,13 +48,19 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
   const sort: Sort = typeof sp.sort === "string" && sp.sort in SORTS ? (sp.sort as Sort) : "new";
   const chosen = (typeof sp.tag === "string" ? [sp.tag] : Array.isArray(sp.tag) ? sp.tag : []).map((t) => t.toLowerCase()).slice(0, 8);
   const match: TagMatch = sp.match === "all" ? "all" : "any";
+  const q = (typeof sp.q === "string" ? sp.q : "").trim().slice(0, 60);
   const cursor = typeof sp.cursor === "string" && !isNaN(Date.parse(sp.cursor)) ? new Date(sp.cursor) : undefined;
   const viewer = await currentUser();
+  const mineCount = viewer ? await db.recipe.count({ where: { authorId: viewer.id } }) : 0;
+  const mine = sp.mine === "1" && mineCount > 0;
 
   // Choosing tags WIDENS what you see ("any"): vegan + indian = everything vegan plus everything Indian.
   // "all" is there for the other question: only recipes that are both.
   const tagWhere = chosen.length ? { tags: match === "all" ? { hasEvery: chosen } : { hasSome: chosen } } : {};
-  const where = { hidden: false, ...tagWhere };
+  // Search looks at names and ingredient lines only (never the description), ignoring case.
+  const found = q ? { id: { in: await searchIds(q) } } : {};
+  // "Mine" shows everything you have written, including anything hidden while it is reviewed.
+  const where = { ...(mine && viewer ? { authorId: viewer.id } : { hidden: false }), ...tagWhere, ...found };
 
   let recipes;
   let more = false;
@@ -67,14 +83,17 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
   for (const r of tagRows) for (const t of r.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
   const allTags = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
-  const href = (o: { tags?: string[]; sort?: Sort; match?: TagMatch; cursor?: string }) => {
-    const q = new URLSearchParams();
-    for (const t of o.tags ?? chosen) q.append("tag", t);
+  const href = (o: { tags?: string[]; sort?: Sort; match?: TagMatch; cursor?: string; mine?: boolean; q?: string }) => {
+    const params = new URLSearchParams();
+    const text = o.q ?? q;
+    if (text) params.set("q", text);
+    for (const t of o.tags ?? chosen) params.append("tag", t);
     const s = o.sort ?? sort;
-    if (s !== "new") q.set("sort", s);
-    if ((o.match ?? match) === "all" && (o.tags ?? chosen).length > 1) q.set("match", "all");
-    if (o.cursor) q.set("cursor", o.cursor);
-    return q.size ? `/recipes?${q}` : "/recipes";
+    if (s !== "new") params.set("sort", s);
+    if ((o.match ?? match) === "all" && (o.tags ?? chosen).length > 1) params.set("match", "all");
+    if (o.mine ?? mine) params.set("mine", "1");
+    if (o.cursor) params.set("cursor", o.cursor);
+    return params.size ? `/recipes?${params}` : "/recipes";
   };
   const toggle = (t: string) => (chosen.includes(t) ? chosen.filter((c) => c !== t) : [...chosen, t]);
   const open = await signupsOpen();
@@ -96,9 +115,26 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
         )}
       </p>
 
+      <form role="search" action="/recipes" className="search-form recipe-search">
+        <input type="search" name="q" defaultValue={q} placeholder="Search recipes or ingredients: banana, chili…" aria-label="Search recipes and ingredients" maxLength={60} />
+        {chosen.map((t) => <input key={t} type="hidden" name="tag" value={t} />)}
+        {sort !== "new" && <input type="hidden" name="sort" value={sort} />}
+        {mine && <input type="hidden" name="mine" value="1" />}
+        {match === "all" && <input type="hidden" name="match" value="all" />}
+        <button className="btn btn-quiet">Search</button>
+      </form>
+      {q && (
+        <p className="small muted search-status">
+          {recipes.length}{more ? "+" : ""} {recipes.length === 1 ? "recipe" : "recipes"} with “{q}” in the name or ingredients · <Link href={href({ q: "" })}>Clear search</Link>
+        </p>
+      )}
+
       <div className="wall-controls">
         <nav className="wall-filters" aria-label="Filter by tag">
           <Link href={href({ tags: [] })} aria-current={chosen.length === 0 ? "page" : undefined}>All</Link>
+          {mineCount > 0 && (
+            <Link href={href({ mine: !mine, cursor: undefined })} aria-current={mine ? "page" : undefined}>Mine <span className="muted">{mineCount}</span></Link>
+          )}
           {allTags.map(([t, n]) => (
             <Link key={t} href={href({ tags: toggle(t) })} aria-current={chosen.includes(t) ? "page" : undefined} aria-label={`${t} (${n}) ${chosen.includes(t) ? "selected" : ""}`}>
               {t} <span className="muted">{n}</span>
@@ -120,7 +156,7 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
       )}
 
       {recipes.length === 0 ? (
-        <p className="muted">No recipes {chosen.length ? "with those tags " : ""}yet. {viewer ? "Be the first!" : ""}</p>
+        <p className="muted">{q ? "Nothing matches that. Try another ingredient or part of a name." : <>No recipes {chosen.length ? "with those tags " : ""}yet. {viewer ? "Be the first!" : ""}</>}</p>
       ) : (
         <ul className="recipe-grid">
           {recipes.map((r) => (
@@ -130,7 +166,7 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={r.imageUrl} alt="" className="recipe-card-img" loading="lazy" />
                 )}
-                <strong>{r.name}</strong>
+                <strong>{r.name}{r.hidden && <span className="muted small"> (hidden)</span>}</strong>
                 {r.description && <span className="recipe-card-desc">{r.description}</span>}
                 <span className="small muted">
                   {r.author.handle ? `@${r.author.handle}` : r.author.name || "A member"} · {longDate(r.createdAt)} · {r.ingredients.length} ingredient{r.ingredients.length === 1 ? "" : "s"}

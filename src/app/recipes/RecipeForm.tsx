@@ -1,6 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent, type Modifier } from "@dnd-kit/core";
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useActionState, useRef, useState } from "react";
 import { RECIPE_LIMITS as L, TAG_SUGGESTIONS } from "@/lib/recipes";
 import { createRecipe, updateRecipe, type RecipeState, type RecipeValues } from "./actions";
 
@@ -8,6 +11,8 @@ type Existing = RecipeValues & { id: string; imageUrl: string | null };
 type Row = { key: number; text: string };
 
 let nextKey = 1;
+/** Keep a dragged row in its column: it only moves up and down. */
+const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
 const rowsFrom = (lines: string[] | undefined): Row[] => (lines?.length ? lines : [""]).map((text) => ({ key: nextKey++, text }));
 
 /** A textarea that grows with what you type, so nobody has to scroll inside a box. */
@@ -19,44 +24,88 @@ function Grow(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea ref={(el) => { if (el) fit(el); }} {...props} onInput={(e) => fit(e.currentTarget)} />;
 }
 
-/** A list the author adds to and removes from line by line (+ Add, × per row). */
+/** One row in a list: a drag handle, the text, and a minus. Dragging only starts from the handle, so typing and selecting text still work. */
+function SortableRow({ row, index, noun, name, multiline, placeholder, onEdit, onRemove, onEnter }: {
+  row: Row; index: number; noun: string; name: string; multiline?: boolean; placeholder: string;
+  onEdit: (text: string) => void; onRemove: () => void; onEnter: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: row.key });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 5 : undefined };
+  const keys = (e: React.KeyboardEvent) => {
+    // Enter starts the next line (or step); in a step, Shift+Enter still gives a line break.
+    if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) return;
+    e.preventDefault();
+    onEnter();
+  };
+  return (
+    <li ref={setNodeRef} style={style} className={isDragging ? "recipe-row dragging" : "recipe-row"}>
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        className="recipe-handle"
+        aria-label={`Drag to move ${noun.toLowerCase()} ${index + 1}. With the keyboard: press space, use the arrow keys, press space again.`}
+        {...attributes}
+        {...listeners}
+      >
+        <span aria-hidden>⋮⋮</span>
+      </button>
+      {multiline ? (
+        <Grow name={name} rows={3} value={row.text} maxLength={L.step} placeholder={placeholder} aria-label={`${noun} ${index + 1}`} onChange={(e) => onEdit(e.target.value)} onKeyDown={keys} />
+      ) : (
+        <input type="text" name={name} value={row.text} maxLength={L.ingredient} placeholder={placeholder} aria-label={`${noun} ${index + 1}`} onChange={(e) => onEdit(e.target.value)} onKeyDown={keys} />
+      )}
+      <button type="button" className="btn btn-quiet recipe-minus" aria-label={`Remove ${noun.toLowerCase()} ${index + 1}`} onClick={onRemove}>−</button>
+    </li>
+  );
+}
+
+/** A list the author builds line by line: Enter adds the next one right below, the handle reorders, − removes. */
 function Lines({ label, name, noun, rows, setRows, multiline, placeholder, max }: {
   label: string; name: string; noun: string; rows: Row[]; setRows: (r: Row[]) => void; multiline?: boolean; placeholder: string; max: number;
 }) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const listRef = useRef<HTMLOListElement>(null);
   const edit = (key: number, text: string) => setRows(rows.map((r) => (r.key === key ? { ...r, text } : r)));
   const remove = (key: number) => setRows(rows.length > 1 ? rows.filter((r) => r.key !== key) : [{ key, text: "" }]);
-  const add = () => rows.length < max && setRows([...rows, { key: nextKey++, text: "" }]);
+  const focusRow = (i: number) =>
+    requestAnimationFrame(() => (listRef.current?.querySelectorAll<HTMLElement>(multiline ? "textarea" : "input[type=text]")[i])?.focus());
+  const insertAfter = (i: number) => {
+    if (rows.length >= max) return;
+    const next = [...rows];
+    next.splice(i + 1, 0, { key: nextKey++, text: "" });
+    setRows(next);
+    focusRow(i + 1);
+  };
+  const add = () => insertAfter(rows.length - 1);
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over && active.id !== over.id) setRows(arrayMove(rows, rows.findIndex((r) => r.key === active.id), rows.findIndex((r) => r.key === over.id)));
+  };
   return (
     <fieldset className="recipe-lines">
       <legend>{label}</legend>
-      <ol>
-        {rows.map((r, i) => (
-          <li key={r.key}>
-            {multiline ? (
-              <Grow name={name} rows={3} value={r.text} maxLength={L.step} placeholder={placeholder} aria-label={`${noun} ${i + 1}`} onChange={(e) => edit(r.key, e.target.value)} />
-            ) : (
-              <input
-                type="text"
+      <DndContext id={`dnd-${name}`} sensors={sensors} collisionDetection={closestCenter} modifiers={[verticalOnly]} onDragEnd={onDragEnd}>
+        <SortableContext items={rows.map((r) => r.key)} strategy={verticalListSortingStrategy}>
+          <ol ref={listRef}>
+            {rows.map((r, i) => (
+              <SortableRow
+                key={r.key}
+                row={r}
+                index={i}
+                noun={noun}
                 name={name}
-                value={r.text}
-                maxLength={L.ingredient}
+                multiline={multiline}
                 placeholder={placeholder}
-                aria-label={`${noun} ${i + 1}`}
-                onChange={(e) => edit(r.key, e.target.value)}
-                onKeyDown={(e) => {
-                  // Enter adds the next line instead of submitting the whole form.
-                  if (e.key !== "Enter") return;
-                  e.preventDefault();
-                  const list = e.currentTarget.closest("ol"); // read now: the event is gone by the next frame
-                  add();
-                  requestAnimationFrame(() => (list?.querySelectorAll("input")[i + 1] as HTMLInputElement | undefined)?.focus());
-                }}
+                onEdit={(t) => edit(r.key, t)}
+                onRemove={() => remove(r.key)}
+                onEnter={() => insertAfter(i)}
               />
-            )}
-            <button type="button" className="btn btn-quiet recipe-minus" aria-label={`Remove ${noun.toLowerCase()} ${i + 1}`} onClick={() => remove(r.key)}>−</button>
-          </li>
-        ))}
-      </ol>
+            ))}
+          </ol>
+        </SortableContext>
+      </DndContext>
       <button type="button" className="btn btn-quiet" onClick={add} disabled={rows.length >= max}>+ Add {noun.toLowerCase()}</button>
     </fieldset>
   );

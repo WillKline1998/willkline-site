@@ -1,40 +1,10 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { MediaBlock } from "@/components/MediaBlock";
-import type { MediaItem } from "@/generated/prisma/client";
+import { PhotoGallery } from "@/components/PhotoGallery";
 
 export const metadata: Metadata = { title: "Media" };
 export const dynamic = "force-dynamic";
-
-// Photos open in a pure-CSS lightbox (#photo-<id> + :target): no JS, works everywhere.
-function Photos({ items }: { items: MediaItem[] }) {
-  return (
-    <>
-      <ul className="photo-grid">
-        {items.map((p) => (
-          <li key={p.id}>
-            <a href={`#photo-${p.id}`} className="photo-thumb">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.url} alt={p.title || "Photo"} loading="lazy" />
-            </a>
-            {p.title && <p className="media-title">{p.title}</p>}
-          </li>
-        ))}
-      </ul>
-      {items.map((p) => (
-        <div key={p.id} id={`photo-${p.id}`} className="lightbox" role="dialog" aria-label={p.title || "Photo"}>
-          <a href="#photos" className="lightbox-backdrop" aria-label="Close" />
-          <figure>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.url} alt={p.title || "Photo"} loading="lazy" />
-            {p.title && <figcaption>{p.title}</figcaption>}
-            <a href="#photos" className="lightbox-close">Close ✕</a>
-          </figure>
-        </div>
-      ))}
-    </>
-  );
-}
 
 export default async function MediaPage() {
   const items = await db.mediaItem.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] });
@@ -49,7 +19,7 @@ export default async function MediaPage() {
       {photos.length > 0 && (
         <section id="photos">
           <h2 className="section-label">Photos</h2>
-          <Photos items={photos} />
+          <PhotoGallery photos={photos.map((p) => ({ id: p.id, url: p.url, title: p.title }))} />
         </section>
       )}
 

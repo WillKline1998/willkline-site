@@ -109,11 +109,11 @@ try:
         pg.goto(f"{BASE}/admin/bio")
         original_bio = pg.locator("textarea[name=bio]").input_value()
         pg.fill("textarea[name=bio]", original_bio + "\n\nE2E marker paragraph.")
-        pg.click("button:text('Save')"); pg.wait_for_selector("text=Saved ✓")
+        pg.locator("form:has(textarea[name=bio]) button").click(); pg.wait_for_selector("text=Saved ✓")
         pg.goto(f"{BASE}/bio")
         check(pg.get_by_text("E2E marker paragraph.").count() == 1, "bio edit shows on /bio")
         pg.goto(f"{BASE}/admin/bio"); pg.fill("textarea[name=bio]", original_bio)
-        pg.click("button:text('Save')"); pg.wait_for_selector("text=Saved ✓")
+        pg.locator("form:has(textarea[name=bio]) button").click(); pg.wait_for_selector("text=Saved ✓")
 
         pg.goto(f"{BASE}/admin/cv/raw")
         pg.fill("textarea[name=cv]", "{ not json")
