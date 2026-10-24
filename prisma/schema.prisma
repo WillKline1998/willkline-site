@@ -267,6 +267,8 @@ model Cleanup {
 
   @@index([createdAt])
   @@index([authorId])
+}
+
 // ---------- Recipes ----------
 
 // A recipe anyone with an account can share. Ingredients and steps are plain lines of text the author
