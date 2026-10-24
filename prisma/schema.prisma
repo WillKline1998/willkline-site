@@ -304,3 +304,38 @@ model RecipeReport {
 
   @@id([userId, recipeId])
 }
+
+// ---------- Songbook (Will's own arrangements; admin-only uploads, public to read) ----------
+
+// A folder Will makes on the fly ("Gospel", "Originals", "One page"). Folders nest to any depth.
+model SongFolder {
+  id        String       @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    SongFolder?  @relation("SongFolderTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  SongFolder[] @relation("SongFolderTree")
+  songs     Song[]
+  createdAt DateTime     @default(now())
+
+  @@index([parentId])
+}
+
+// One arrangement: a PDF, its page count (read from the file), and where it lives.
+model Song {
+  id        String      @id @default(cuid())
+  slug      String      @unique
+  title     String
+  artist    String      @default("") // who wrote or made it famous
+  notes     String      @default("")
+  fileKey   String      // Upload.key (served from /uploads/<key>)
+  fileName  String
+  size      Int
+  pages     Int         @default(1)
+  folderId  String?
+  folder    SongFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  published Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([folderId])
+}

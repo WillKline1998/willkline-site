@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const TOOLS = [
   { href: "/admin/notices", label: "Bulletin", note: "Post shows, releases, news, notes, with photos, videos, PDFs" },
+  { href: "/admin/songbook", label: "Songbook", note: "Arrangements as PDFs, in folders you make" },
   { href: "/admin/documents", label: "Documents", note: "Résumé, CV, and any other downloads" },
   { href: "/admin/bio", label: "Bio", note: "The text on the Bio page" },
   { href: "/admin/cv", label: "CV text", note: "The CV shown on the CV page" },

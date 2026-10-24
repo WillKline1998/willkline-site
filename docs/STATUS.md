@@ -180,3 +180,8 @@ Ideas not built: "add this recipe's ingredients to Will's grocery list" (Hermes 
 - Media: photo grid shows whole pictures in columns; full-screen viewer with arrows, keyboard, swipe, wrap-around, click-to-zoom (`src/components/PhotoGallery.tsx`).
 - Bio: optional photo (`/admin/bio`, SiteSetting `bio_photo` + `bio_photo_alt`) at the head of the page.
 - Tests: `e2e_recipes.py` (extended), `e2e_media_bio.py` (new), `e2e_admin.py` (bio save selector narrowed).
+
+## Songbook (2026-10-24)
+`/songbook` (public: folder tiles, breadcrumbs, search by title/artist, page-length filter 1 / 2 / 3+), `/songbook/[slug]` (embedded PDF + Open + Download), `/admin/songbook` (admin only: make/rename/move/delete nested folders, bulk-upload PDFs one at a time, edit title/artist/notes/folder/visible, replace PDF, delete). Models `SongFolder` + `Song` (migration `songbook`, additive, applied by the production build). Page counts are read from each PDF with pdf-lib (MIT). Unpublished songs' files 404 at `/uploads/<key>`. Deleting a folder moves its songs and sub-folders up one level. Limit 4 MB per PDF (Vercel's 4.5 MB request cap).
+Tests: `scripts/test_songbook.ts`, `scripts/e2e_songbook.py`.
+Not built: lead-sheet generator (research note in the Brain vault), PDF first-page thumbnails, ordering songs inside a folder by hand.

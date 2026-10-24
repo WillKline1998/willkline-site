@@ -39,3 +39,6 @@ Same shape as ~/JobSearch/resume/*.json so résumé builds and the site share on
 
 ## 2026-10-24: drag-to-reorder uses dnd-kit
 `@dnd-kit/core` 6.3, `@dnd-kit/sortable` 10.0, `@dnd-kit/utilities` 3.2: MIT, github.com/clauderic/dnd-kit (17.7k stars). Chosen over hand-rolled pointer code because it handles touch, keyboard (space + arrows) and screen-reader announcements. The vertical-only modifier is a 1-line local function, so `@dnd-kit/modifiers` is not installed. Photo viewer (zoom, swipe, wrap-around) and the search are hand-written; no dependency.
+
+## 2026-10-24: Songbook uses pdf-lib to count pages
+`pdf-lib` 1.17.1, MIT, github.com/Hopding/pdf-lib (8.7k stars; not actively released since 2021 but stable and dependency-light). Used only server-side to read a PDF's page count at upload. Folder tree, search and filters are plain code.
