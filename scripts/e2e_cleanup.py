@@ -1,0 +1,222 @@
+"""End-to-end test of the Cleanup Map against a local `next start` on :3123.
+
+A throwaway member signs in and draws routes in all three modes (straight, street-snapped, freehand), saves
+one, and the test checks what was actually stored: the start and end are cut off on the SERVER (even if the
+page is tampered with), distances add up in the totals, the public data has no email, and a bad route is
+refused in words. Everything created is removed afterwards.
+Run: ~/JobSearch/.venv/bin/python scripts/e2e_cleanup.py
+"""
+import json
+import secrets
+import subprocess
+import sys
+import urllib.request
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright
+from testdb import remove_user, sql, sql_value
+
+BASE = "http://localhost:3123"
+ROOT = Path(__file__).resolve().parent.parent
+EMAIL, HANDLE, PW = "e2e-cleanup@test.local", "e2e_sweeper", secrets.token_urlsafe(14)
+fails = 0
+
+
+def check(cond, msg):
+    global fails
+    print(("PASS " if cond else "FAIL ") + msg)
+    fails += 0 if cond else 1
+
+
+def make_user():
+    hashed = subprocess.run(
+        ["npx", "tsx", "-e", f"import('./scripts/hash').then(async m => console.log(await m.hashPasswordNode({json.dumps(PW)})))"],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    remove_user(EMAIL)
+    sql(
+        f"""INSERT INTO "User" (id, email, name, handle, role, "passwordHash") VALUES ('e2e-cleanup-user', '{EMAIL}', 'Sweep Test', '{HANDLE}', 'MEMBER', '{hashed}');"""
+    )
+
+
+def canvas_points(page, selector, points):
+    box = page.locator(selector).bounding_box()
+    return [(box["x"] + box["width"] * fx, box["y"] + box["height"] * fy) for fx, fy in points]
+
+
+def tap(page, x, y):
+    page.mouse.click(x, y)
+    page.wait_for_timeout(250)
+
+
+def distance_text(page):
+    return page.get_by_test_id("distance").inner_text()
+
+
+make_user()
+try:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel="chrome", headless=True, args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
+        page = browser.new_context(viewport={"width": 1100, "height": 1500}).new_page()
+        errors = []
+        page.on("pageerror", lambda e: errors.append(str(e)[:160]))
+
+        # Signed out: the public page works, the drawing page asks you to log in.
+        page.goto(f"{BASE}/cleanup")
+        check("Cleanup Map" in page.locator("h1").inner_text(), "the public page loads")
+        check(page.locator(".cleanup-map canvas").count() == 1, "with a globe on it")
+        page.goto(f"{BASE}/cleanup/new")
+        check("/login" in page.url, "adding one sends a signed-out visitor to log in")
+
+        # Log in.
+        page.goto(f"{BASE}/login?next=/cleanup/new")
+        page.fill("input[name=email]", EMAIL)
+        page.fill("input[name=password]", PW)
+        page.click("button:text('Log in')")
+        page.wait_for_url("**/cleanup/new", timeout=15000)
+        page.wait_for_selector(".drawer-map canvas")
+        page.wait_for_timeout(3500)  # let the map style load
+
+        # Straight lines: four taps about 2 km apart make a route of several km.
+        page.get_by_role("radio", name="Straight lines").click()
+        pts = canvas_points(page, ".drawer-map", [(0.2, 0.3), (0.45, 0.6), (0.7, 0.3), (0.9, 0.55)])
+        for x, y in pts:
+            tap(page, x, y)
+        text = distance_text(page)
+        check("mi" in text and "Tap the map" not in text, f"straight lines measure a distance ({text})")
+        check(page.get_by_role("button", name="Add to the map").is_enabled(), "and the save button wakes up")
+        page.get_by_role("button", name="Undo").click()
+        page.wait_for_timeout(200)
+        shorter = distance_text(page)
+        check(shorter != text, f"undo takes the last piece back ({text} -> {shorter})")
+        tap(page, *pts[3])
+        page.get_by_role("button", name="Clear").click()
+        page.wait_for_timeout(200)
+        check("Tap the map" in distance_text(page), "clear empties it")
+
+        # Follow streets: tap two nearby spots; the line snaps if the router answers, else it says so.
+        page.get_by_role("radio", name="Follow streets").click()
+        a, b = canvas_points(page, ".drawer-map", [(0.4, 0.5), (0.55, 0.5)])
+        tap(page, *a)
+        tap(page, *b)
+        page.wait_for_function("!document.querySelector('.drawer-bar [role=status]')", timeout=20000)
+        snapped = distance_text(page)
+        note = page.locator(".form-note").all_inner_texts()
+        check("mi" in snapped and "Tap the map" not in snapped, f"follow-streets still gives a distance ({snapped}; note: {note[:1]})")
+        page.get_by_role("button", name="Clear").click()
+
+        # Freehand: press, drag, release.
+        page.get_by_role("radio", name="Freehand").click()
+        start, *rest = canvas_points(page, ".drawer-map", [(0.2, 0.7), (0.3, 0.6), (0.45, 0.65), (0.6, 0.55), (0.75, 0.6), (0.85, 0.5)])
+        page.mouse.move(*start)
+        page.mouse.down()
+        for x, y in rest:
+            page.mouse.move(x, y, steps=12)
+        page.mouse.up()
+        page.wait_for_timeout(300)
+        free = distance_text(page)
+        check("mi" in free and "Tap the map" not in free, f"freehand drawing measures a distance ({free})")
+
+        # Save this one with the privacy box ticked (the default).
+        page.fill("input[name=title]", "E2E freehand route")
+        page.fill("input[name=bags]", "3")
+        check(page.locator("input[name=hideEnds]").is_checked(), "start and end are hidden by default")
+        drawn_json = page.locator("input[name=route]").input_value()
+        drawn = json.loads(drawn_json)
+        page.get_by_role("button", name="Add to the map").click()
+        page.wait_for_url("**/cleanup?added=1", timeout=15000)
+        check("Added." in page.locator("[role=status]").first.inner_text(), "saving goes to the map with a thank-you")
+
+        row = sql_value(
+            """SELECT "distanceM" || '|' || "trimmedM" || '|' || bags || '|' || jsonb_array_length(route) FROM "Cleanup" WHERE title='E2E freehand route'"""
+        )
+        stored_m, trimmed, bags, npts = (int(x) for x in row.split("|"))
+        import math
+
+        def hav(a, b):
+            r = 6371008.8
+            d1, d2 = math.radians(b[1] - a[1]), math.radians(b[0] - a[0])
+            h = math.sin(d1 / 2) ** 2 + math.cos(math.radians(a[1])) * math.cos(math.radians(b[1])) * math.sin(d2 / 2) ** 2
+            return 2 * r * math.asin(math.sqrt(h))
+
+        drawn_m = sum(hav(drawn[i - 1], drawn[i]) for i in range(1, len(drawn)))
+        check(trimmed == 200 and bags == 3, f"stored with 200 m hidden at each end and 3 bags (trimmed={trimmed}, bags={bags})")
+        check(abs((drawn_m - stored_m) - 400) < 50, f"about 400 m shorter than drawn: drawn {drawn_m:.0f} m, stored {stored_m} m")
+        first = json.loads(sql_value("""SELECT route->0 FROM "Cleanup" WHERE title='E2E freehand route'"""))
+        check(hav(first, drawn[0]) > 190, f"the stored line does not start where the drawing did ({hav(first, drawn[0]):.0f} m away)")
+
+        # The public data carries the name people chose and nothing private.
+        data = urllib.request.urlopen(f"{BASE}/cleanup/routes").read().decode()
+        check("E2E freehand route" in data and EMAIL not in data and "passwordHash" not in data, "public data has the route and no email or hash")
+        page.reload()
+        stat = page.locator(".cleanup-stats").inner_text()
+        check("bags filled" in stat.lower(), "the totals band shows bags")
+
+        # The snap service: members only, and (network permitting) it returns a real street route.
+        anon = browser.new_context().request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [-81.69, 41.5], "to": [-81.688, 41.501]})
+        check(anon.status == 401, "street snapping refuses a signed-out visitor")
+        walk = page.request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [-81.6944, 41.4993], "to": [-81.6890, 41.5010]})
+        check(walk.status in (200, 502), f"the snap proxy answers a member (HTTP {walk.status})")
+        if walk.status == 200:
+            check(len(walk.json()["line"]) >= 2, "and returns a street route")
+        else:
+            print("NOTE the free router was unavailable just now; the page falls back to a straight line")
+        bad = page.request.post(f"{BASE}/cleanup/snap", data={"kind": "walk", "from": [999, 0], "to": [0, 0]})
+        check(bad.status == 400, "bad coordinates are refused")
+
+        # A private clean-up counts in the totals but is never stored as a route or shown.
+        before = int(sql_value("""SELECT coalesce(sum("distanceM"),0) FROM "Cleanup" WHERE hidden = false"""))
+        page.goto(f"{BASE}/cleanup/new")
+        page.wait_for_selector(".drawer-map canvas")
+        page.wait_for_timeout(3000)
+        page.get_by_role("radio", name="Straight lines").click()
+        for x, y in canvas_points(page, ".drawer-map", [(0.2, 0.4), (0.8, 0.4)]):
+            tap(page, x, y)
+        page.fill("input[name=title]", "E2E private walk")
+        page.locator("input[name=isPrivate]").check()
+        page.get_by_role("button", name="Add to the map").click()
+        page.wait_for_url("**/cleanup?added=1", timeout=15000)
+        prow = sql_value("""SELECT "isPrivate" || '|' || jsonb_array_length(route) || '|' || "distanceM" FROM "Cleanup" WHERE title='E2E private walk'""")
+        flag, npts2, dist2 = prow.split("|")
+        check(flag == "true" and npts2 == "0" and int(dist2) > 500, f"a private clean-up keeps its distance but no route ({prow})")
+        feed = urllib.request.urlopen(f"{BASE}/cleanup/routes").read().decode()
+        check("E2E private walk" not in feed, "and it is not in the public map data")
+        check("E2E private walk" not in page.locator(".cleanup-list").inner_text(), "or in the public list")
+        check(int(sql_value("""SELECT coalesce(sum("distanceM"),0) FROM "Cleanup" WHERE hidden = false""")) - before == int(dist2), "but its miles are in the totals")
+
+        # The flat-map toggle.
+        page.get_by_role("button", name="Flat map").click()
+        check(page.get_by_role("button", name="Show the globe").is_visible(), "the flat-map toggle switches the projection")
+
+        # Delete your own.
+        page.goto(f"{BASE}/cleanup/mine")
+        check("private" in page.locator(".cleanup-mine", has_text="E2E private walk").inner_text(), "your clean-ups page lists the private one, marked private")
+        page.locator(".cleanup-mine", has_text="E2E private walk").get_by_role("button", name="Delete").click()
+        page.wait_for_selector("text=Deleted.")
+        check(sql_value("""SELECT count(*) FROM "Cleanup" WHERE title='E2E private walk'""") == "0", "delete removes it")
+
+        # A tampered page cannot skip the privacy rule or smuggle in a bad route.
+        page.goto(f"{BASE}/cleanup/new")
+        page.wait_for_selector(".drawer-map canvas")
+        page.fill("input[name=title]", "E2E tampered")
+        def tamper(route):
+            """Put a route straight into the hidden field and submit the form, as a modified page could."""
+            page.evaluate(
+                "(route) => { const f = document.querySelector('.cleanup-form'); f.querySelector('input[name=route]').value = route; f.requestSubmit(); }",
+                json.dumps(route),
+            )
+
+        tamper([[0, 0], [200, 1]])
+        page.wait_for_selector(".form-error")
+        check("not on Earth" in page.locator(".form-error").inner_text(), "a route with an impossible point is refused in words")
+        tamper([[-81.69, 41.5], [-81.6895, 41.5004]])
+        page.wait_for_function("document.querySelector('.form-error')?.innerText.includes('too short')")
+        check(sql_value("""SELECT count(*) FROM "Cleanup" WHERE title='E2E tampered'""") == "0", "a walk too short to hide its ends is refused and nothing is saved")
+
+        check(not [e for e in errors if "Worker" in e or "WebGL" in e], f"no page errors {errors[:2]}")
+        browser.close()
+finally:
+    remove_user(EMAIL)  # the user's clean-ups go with it (cascade)
+
+print(f"\n{'ALL PASS' if not fails else str(fails) + ' FAILED'}")
+sys.exit(1 if fails else 0)

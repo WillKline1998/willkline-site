@@ -165,6 +165,10 @@ Newest first. Every work session ends with an entry: what changed, what's verifi
 
 **Next**: M1 — design system & real home page. Needs Will's input on visual vibe + bio.
 
+## Cleanup Map (concept) — branch `feature/cleanup-map`, not merged
+`/cleanup` (public globe + totals + recent list), `/cleanup/new` (members draw a route: follow streets / straight / freehand), `/cleanup/routes` (GeoJSON). Model `Cleanup` (migration `cleanup_map`; **must be applied to production before deploy**). Start and end of every route are cut by 150 m server-side. Tests: `scripts/test_geo.ts` (node:test), `scripts/e2e_cleanup.py`. Sample data: `scripts/seed-cleanup-demo.ts` (local DB only; `--remove` undoes).
+Dependencies: maplibre-gl 6.14 (BSD-3-Clause). Free services used, no keys: OpenFreeMap tiles, OSM-Germany foot router (OSRM), Nominatim search. All three are community-run with fair-use limits; fine for a concept, plan a paid/self-hosted router and tiles if it takes off.
+Not built yet: edit/delete own clean-ups, admin hide button (the `hidden` column is there), per-member pages, leaderboards, photos.
 ## Recipes (branch `feature/recipes`, not merged)
 `/recipes` (wall: newest/oldest/random, tag picker), `/recipes/new`, `/recipes/[id]`, `/recipes/[id]/edit`. Models `Recipe` + `RecipeReport` (migration `recipes`, additive; **applied to production automatically by the production build**). Ingredients and steps are plain lines (+/− buttons, Enter adds a line, step boxes grow). Tags are free-form, lower-cased, max 6. Tag filter: choosing tags WIDENS results (any of them); a link switches to "every tag". Three reports hide a recipe (author/admin still see it); admin Hide/Unhide on the recipe page. Same account gate as the Wall (signups closed by default).
 Tests: `scripts/test_recipes.ts`, `scripts/e2e_recipes.py` (use a separate local DB: `createdb willkline_recipes`, `DATABASE_URL=...` for build, server and tests).
