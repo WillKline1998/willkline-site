@@ -688,7 +688,6 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
    Cleanup Map (concept): the globe, the stats band, the drawing tool.
    Mobile-first like everything else; widen at 640 / 900.
    ================================================================== */
-.cleanup-concept { display: inline-block; margin: 0 0 0.6rem; padding: 0.15rem 0.6rem; border: 1px solid var(--rule); border-radius: 999px; font-family: var(--font-label); font-size: 0.75rem; color: var(--muted); }
 .cleanup-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 1.25rem 0; }
 .cleanup-stats > div { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); padding: 0.8rem 1rem; border-top: 3px solid var(--accent); }
 .cleanup-stats dt { font-family: var(--font-label); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -767,3 +766,12 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 @media (min-width: 640px) { .recipe-source { grid-template-columns: 1fr 1fr; } }
 .wall-filters .muted { margin-left: 0.3em; }
 @media (max-width: 639px) { .recipe-tags a { min-height: 44px; padding: 0 0.9rem; } }
+
+.recipe-body { outline: none; scroll-margin-top: 5.5rem; } /* clears the sticky phone header */
+@media (min-width: 900px) { .recipe-body { scroll-margin-top: 1.5rem; } }
+.recipe-about { margin: 2rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--rule); max-width: 62ch; }
+.recipe-about .recipe-hero { margin-bottom: 1rem; }
+.recipe-desc { font-size: 1.05rem; line-height: 1.6; }
+.jump-to-recipe { position: fixed; right: 1rem; bottom: 1rem; z-index: 30; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--ink); background: var(--ink); color: #fff; font: inherit; font-family: var(--font-label); font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px #0003; }
+.jump-to-recipe:hover { background: var(--accent); border-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .jump-to-recipe { animation: jump-in 0.2s ease-out; } @keyframes jump-in { from { opacity: 0; transform: translateY(8px); } } }
