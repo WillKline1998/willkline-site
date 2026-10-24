@@ -31,6 +31,8 @@ model User {
   sessions     Session[]
   reports      WallReport[]
   resets       PasswordReset[]
+  recipes      Recipe[]
+  recipeReports RecipeReport[]
 }
 
 // One-time "forgot password" links. Only a hash of the token is stored, like
@@ -237,4 +239,40 @@ model Save {
   wallPost   WallPost @relation(fields: [wallPostId], references: [id], onDelete: Cascade)
 
   @@id([userId, wallPostId])
+}
+
+// ---------- Recipes ----------
+
+// A recipe anyone with an account can share. Ingredients and steps are plain lines of text the author
+// writes however they like (no units, no dropdowns). Tags are free-form: anyone can invent one.
+model Recipe {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  name        String
+  description String   @default("")
+  ingredients String[] // one line each, in order
+  steps       String[] // one block each, in order (may be several lines)
+  tags        String[] // lower-case, e.g. "vegan", "indian"
+  sourceText  String   @default("") // "Julia Child's shortbread", "my grandmother"
+  sourceUrl   String?  // optional link to where it came from
+  imageUrl    String?  // optional uploaded photo (/uploads/<key>), resized on upload
+  hidden      Boolean  @default(false) // admin moderation, or three reports
+  reports     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  flags       RecipeReport[]
+
+  @@index([createdAt])
+  @@index([tags], type: Gin)
+}
+
+model RecipeReport {
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
 }
