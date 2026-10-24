@@ -2,14 +2,15 @@ import { db } from "@/lib/db";
 import { openStoredFile } from "@/lib/storage";
 
 // Serves uploaded files (documents, bulletin images/PDFs).
-// Files belonging to a hidden Document stay private.
+// Files belonging to a hidden Document or an unpublished Songbook entry stay private.
 export async function GET(_req: Request, ctx: RouteContext<"/uploads/[key]">) {
   const { key } = await ctx.params;
-  const [upload, hiddenDoc] = await Promise.all([
+  const [upload, hiddenDoc, hiddenSong] = await Promise.all([
     db.upload.findUnique({ where: { key } }),
     db.document.findFirst({ where: { fileKey: key, published: false } }),
+    db.song.findFirst({ where: { fileKey: key, published: false } }),
   ]);
-  if (!upload || hiddenDoc) return new Response("Not found", { status: 404 });
+  if (!upload || hiddenDoc || hiddenSong) return new Response("Not found", { status: 404 });
   const body = await openStoredFile(key);
   if (!body) return new Response("Not found", { status: 404 });
   return new Response(body, {

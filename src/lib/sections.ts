@@ -15,6 +15,7 @@ export const sections: Section[] = [
   { href: "/media", label: "Media", blurb: "Photos, video, and press.", milestone: "M2" },
   { href: "/writing", label: "Writing", blurb: "Essays, notes, and ideas.", milestone: "M2" },
   { href: "/lab", label: "Lab", blurb: "Small music-software experiments and projects.", milestone: "M5" },
+  { href: "/songbook", label: "Songbook", blurb: "My arrangements and lead sheets as PDFs, in folders.", milestone: "Live" },
   { href: "/cleanup", label: "Cleanup Map", blurb: "Where people have picked up litter, drawn on a globe.", milestone: "Live" },
   { href: "/recipes", label: "Recipes", blurb: "A wall of recipes people actually cook. Share yours, filter by tag.", milestone: "Live" },
   { href: "/wall", label: "Inspiration Wall", blurb: "Share art and music you love; save others' finds.", milestone: "M4" },
