@@ -164,3 +164,9 @@ Newest first. Every work session ends with an entry: what changed, what's verifi
 **Verified**: `npm run build` and `npm run lint` pass.
 
 **Next**: M1 — design system & real home page. Needs Will's input on visual vibe + bio.
+
+## Recipes (branch `feature/recipes`, not merged)
+`/recipes` (wall: newest/oldest/random, tag picker), `/recipes/new`, `/recipes/[id]`, `/recipes/[id]/edit`. Models `Recipe` + `RecipeReport` (migration `recipes`, additive; **applied to production automatically by the production build**). Ingredients and steps are plain lines (+/− buttons, Enter adds a line, step boxes grow). Tags are free-form, lower-cased, max 6. Tag filter: choosing tags WIDENS results (any of them); a link switches to "every tag". Three reports hide a recipe (author/admin still see it); admin Hide/Unhide on the recipe page. Same account gate as the Wall (signups closed by default).
+Tests: `scripts/test_recipes.ts`, `scripts/e2e_recipes.py` (use a separate local DB: `createdb willkline_recipes`, `DATABASE_URL=...` for build, server and tests).
+Lab: `scripts/add-woodshed-lab.ts` adds the "Woodshed: coming soon" card (status In progress). One-off against production; re-run safe.
+Ideas not built: "add this recipe's ingredients to Will's grocery list" (Hermes can read the Recipe table), per-recipe servings scaler, saved/favorite recipes, search.
