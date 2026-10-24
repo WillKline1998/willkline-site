@@ -174,3 +174,9 @@ Not built yet: edit/delete own clean-ups, admin hide button (the `hidden` column
 Tests: `scripts/test_recipes.ts`, `scripts/e2e_recipes.py` (use a separate local DB: `createdb willkline_recipes`, `DATABASE_URL=...` for build, server and tests).
 Lab: `scripts/add-woodshed-lab.ts` adds the "Woodshed: coming soon" card (status In progress). One-off against production; re-run safe.
 Ideas not built: "add this recipe's ingredients to Will's grocery list" (Hermes can read the Recipe table), per-recipe servings scaler, saved/favorite recipes, search.
+
+## Search, reorder, photo viewer, bio photo (2026-10-24)
+- Recipes: search box (names + ingredient lines, any case, `%`/`_` literal, never the description); "Mine" filter shown only to people with recipes (includes their hidden ones); Enter adds the next ingredient/step right below the current one (Shift+Enter = line break in a step); drag handles (mouse, touch, keyboard) on ingredients and steps. Tags were already stored lower-case.
+- Media: photo grid shows whole pictures in columns; full-screen viewer with arrows, keyboard, swipe, wrap-around, click-to-zoom (`src/components/PhotoGallery.tsx`).
+- Bio: optional photo (`/admin/bio`, SiteSetting `bio_photo` + `bio_photo_alt`) at the head of the page.
+- Tests: `e2e_recipes.py` (extended), `e2e_media_bio.py` (new), `e2e_admin.py` (bio save selector narrowed).
