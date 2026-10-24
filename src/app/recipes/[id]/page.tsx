@@ -5,6 +5,7 @@ import { currentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { longDate } from "@/lib/dates";
 import { openGraph } from "@/lib/seo";
+import { JumpToRecipe } from "@/components/JumpToRecipe";
 import { deleteRecipe, reportRecipe, setRecipeHidden } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -41,13 +42,8 @@ export default async function RecipePage(props: PageProps<"/recipes/[id]">) {
       {recipe.tags.length > 0 && (
         <p className="recipe-tags">{recipe.tags.map((t) => <Link key={t} href={`/recipes?tag=${encodeURIComponent(t)}`}>{t}</Link>)}</p>
       )}
-      {recipe.imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={recipe.imageUrl} alt="" className="recipe-hero" />
-      )}
-      {recipe.description && <p className="lede recipe-desc">{recipe.description}</p>}
-
-      <div className="recipe-body">
+      {/* The recipe comes first. Everything else (the story, the photo, where it came from) is underneath. */}
+      <div id="the-recipe" tabIndex={-1} className="recipe-body">
         <section aria-labelledby="ing">
           <h2 id="ing" className="section-label">Ingredients</h2>
           <ul className="recipe-ingredients">{recipe.ingredients.map((line, i) => <li key={i}>{line}</li>)}</ul>
@@ -58,15 +54,24 @@ export default async function RecipePage(props: PageProps<"/recipes/[id]">) {
         </section>
       </div>
 
-      {(recipe.sourceText || recipe.sourceUrl) && (
-        <p className="small recipe-source-line">
-          <strong>From:</strong>{" "}
-          {recipe.sourceUrl ? (
-            <a href={recipe.sourceUrl} rel="noopener noreferrer nofollow ugc" target="_blank">{recipe.sourceText || recipe.sourceUrl}</a>
-          ) : (
-            recipe.sourceText
+      {(recipe.description || recipe.imageUrl || recipe.sourceText || recipe.sourceUrl) && (
+        <section className="recipe-about" aria-label="About this recipe">
+          {recipe.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={recipe.imageUrl} alt="" className="recipe-hero" />
           )}
-        </p>
+          {recipe.description && <p className="recipe-desc">{recipe.description}</p>}
+          {(recipe.sourceText || recipe.sourceUrl) && (
+            <p className="small recipe-source-line">
+              <strong>From:</strong>{" "}
+              {recipe.sourceUrl ? (
+                <a href={recipe.sourceUrl} rel="noopener noreferrer nofollow ugc" target="_blank">{recipe.sourceText || recipe.sourceUrl}</a>
+              ) : (
+                recipe.sourceText
+              )}
+            </p>
+          )}
+        </section>
       )}
 
       <div className="recipe-actions">
@@ -91,6 +96,7 @@ export default async function RecipePage(props: PageProps<"/recipes/[id]">) {
           </form>
         )}
       </div>
+      <JumpToRecipe targetId="the-recipe" />
     </article>
   );
 }

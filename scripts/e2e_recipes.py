@@ -116,7 +116,7 @@ try:
         check(h1 > h0, f"a step box grows as you type ({h0:.0f}px -> {h1:.0f}px)")
         page.get_by_role("button", name="+ Add step").click()
         page.locator("textarea[name=step]").nth(1).fill("Eat with rice.")
-        page.fill("textarea[name=description]", "Weeknight staple.")
+        page.fill("textarea[name=description]", "Weeknight staple. " + "I make this every week and it never gets old. " * 25)
         page.fill("input[name=tags]", "Vegan, Indian,  Meal Prep, vegan")
         page.fill("input[name=sourceText]", "My grandmother")
         page.fill("input[name=sourceUrl]", "not a link")
@@ -138,6 +138,21 @@ try:
         row = sql_value(f"""SELECT array_to_string(tags, '|') || '#' || to_char("createdAt", 'YYYY-MM-DD') FROM "Recipe" WHERE id='{rid}'""")
         check(row.split("#")[0] == "vegan|indian|meal prep", f"tags are cleaned: lower-case, de-duplicated ({row})")
         check(any(m in body for m in ("October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August", "September")) and "2026" in body, "and the date is shown")
+
+        # The recipe comes first; the story is underneath, and a jump button appears only once you are past it.
+        page.set_viewport_size({"width": 390, "height": 700})
+        page.goto(f"{BASE}/recipes/{rid}")
+        y = lambda sel: page.locator(sel).first.evaluate("e => e.getBoundingClientRect().top + scrollY")
+        check(y("#ing") < y(".recipe-about") and y("#steps") < y(".recipe-about"), "ingredients and steps come before the description")
+        check(y("h1") < y("#ing") and y("#ing") - y("h1") < 300, "and sit right under the title")
+        check(page.locator(".jump-to-recipe").count() == 0, "no jump button while the recipe is on screen")
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_selector(".jump-to-recipe", timeout=5000)
+        check(True, "the jump button appears once you have scrolled past the recipe")
+        page.locator(".jump-to-recipe").click()
+        page.locator(".jump-to-recipe").wait_for(state="detached", timeout=5000)  # the smooth scroll takes a moment
+        check(page.evaluate("window.scrollY") < 400 and page.locator(".jump-to-recipe").count() == 0, "tapping it returns to the recipe and the button goes away")
+        page.set_viewport_size({"width": 1100, "height": 1300})
 
         # Edit.
         page.get_by_role("link", name="Edit").click()

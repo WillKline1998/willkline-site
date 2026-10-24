@@ -24,7 +24,6 @@ export default async function CleanupPage(props: PageProps<"/cleanup">) {
 
   return (
     <section className="page page-wide cleanup">
-      <p className="cleanup-concept">A concept page: what a community clean-up site could look like.</p>
       <h1 className="page-title">Cleanup Map</h1>
       <p className="lede">Everyone who picks up litter, on one map. Draw the street or trail you cleaned and watch the miles add up.</p>
       {sp.added === "1" && <p className="admin-note" role="status">Added. Thank you, that stretch is cleaner because of you.</p>}
