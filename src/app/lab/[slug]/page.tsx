@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { openGraph } from "@/lib/seo";
 import { Markdown } from "@/components/Markdown";
 import { LabStatus, techList } from "@/components/LabStatus";
+import { TechChip } from "@/components/TechChip";
+import { TECH, TechKey } from "@/components/LabTechs";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,14 @@ export default async function LabProjectPage(props: PageProps<"/lab/[slug]">) {
       <LabStatus status={p.status} />
       <h1 className="page-title">{p.title}</h1>
       {p.description && <p className="lede">{p.description}</p>}
-      {techList(p.tech).length > 0 && <ul className="chips">{techList(p.tech).map((t) => <li key={t}>{t}</li>)}</ul>}
+      {techList(p.tech).length > 0 && (
+        <ul className="chips">{techList(p.tech).map((t) => {
+          if (t in TECH) {
+            return <li key={t}><TechChip key={t as TechKey} label={t as TechKey} /></li>;
+          }
+          return null;
+        })}</ul>
+      )}
       <p className="lab-links">
         {p.url && <a href={p.url} target="_blank" rel="noreferrer">Try it ↗</a>}
         {p.repoUrl && <a href={p.repoUrl} target="_blank" rel="noreferrer">Code ↗</a>}

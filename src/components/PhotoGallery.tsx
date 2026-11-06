@@ -12,6 +12,7 @@ export type GalleryPhoto = { id: string; url: string; title: string };
 export function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
   const [open, setOpen] = useState<number | null>(null);
   const [zoomed, setZoomed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(2);
   const opener = useRef<HTMLElement | null>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -59,6 +60,33 @@ export function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
       box.scrollTop = fy * box.scrollHeight - box.clientHeight / 2;
     });
   };
+  // While zoomed: mouse wheel / trackpad pans instead of scrolling the page.
+  const onStageWheel = (e: React.WheelEvent) => {
+    if (zoomed) {
+      e.preventDefault();
+      const step = e.deltaY * 0.45;
+      stage.current!.scrollBy({ top: step, left: 0, behavior: e.shiftKey ? "smooth" : "auto" });
+    }
+  };
+  // Extra zoom via ctrl/meta + scroll, kept centred on the cursor.
+  const onStageWheelExtra = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!zoomed || !e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const rect = stage.current!.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const next = Math.min(800, (zoomLevel ?? 2) * (1 + e.deltaY * 0.004));
+    setZoomLevel(next);
+    if (next > 2) {
+      setZoomed(true);
+      requestAnimationFrame(() => {
+        const w = next * 100;
+        stage.current!.scrollLeft = cx * w / 100 - stage.current!.clientWidth / 2;
+        stage.current!.scrollTop = cy * w / 100 - stage.current!.clientHeight / 2;
+      });
+    }
+  };
+
   const drag = useRef<{ x: number; y: number; l: number; t: number; moved: boolean } | null>(null);
 
   const p = open === null ? null : photos[open];
@@ -111,12 +139,14 @@ export function PhotoGallery({ photos }: { photos: GalleryPhoto[] }) {
               box.scrollTop = d.t - (e.clientY - d.y);
             }}
             onPointerUp={() => setTimeout(() => (drag.current = null), 0)}
+            onWheel={(e) => (e.ctrlKey || e.metaKey ? onStageWheelExtra(e) : onStageWheel(e))}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={p.url}
               alt={p.title || "Photo"}
               className={zoomed ? "zoomed" : undefined}
+              style={{ width: `${zoomLevel * 100}%`, cursor: zoomed ? "grab" : "zoom-in" }}
               draggable={false}
               onClick={(e) => (drag.current?.moved ? undefined : toggleZoom(e))}
             />
