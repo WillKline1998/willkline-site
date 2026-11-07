@@ -45,3 +45,6 @@ Same shape as ~/JobSearch/resume/*.json so résumé builds and the site share on
 
 ## 2026-11-07 — Tech logos: Simple Icons (CC0-1.0)
 Lab tech-card logos are single-colour SVGs from Simple Icons (github.com/simple-icons/simple-icons, 20k+ stars, CC0-1.0), copied into public/tech/. They are not an npm dependency. The marks remain their owners' trademarks and are used only to identify each technology. No new runtime dependencies.
+
+## 2026-11-07 — Demo DVD-bounce layer: hand-rolled, no dependency
+Research: tsParticles (github.com/tsparticles/tsparticles, ~9k stars, MIT) and particles.js (github.com/VincentGarreau/particles.js, ~30k stars, MIT) both use the same approach: a per-frame rAF loop, position += velocity·dt, and the velocity sign flipped at the canvas edges ("bounce" out mode), with capped particle counts. Small DVD-logo repos (e.g. alessiomaddaluno/bouncing-dvd-logo, Apache-2.0; bemxio/dvd-screensaver, MIT) do the same thing with the corner-reflect rule. We reuse the pattern in about 80 lines (DOM spans moved by transform, no canvas) rather than add a ~100 kB library. The homepage picture reuses the SiteSetting + Upload photo-slot pattern from the bio photo, so no migration was needed.

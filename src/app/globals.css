@@ -889,9 +889,11 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .bio-layout { display: grid; gap: 1.25rem; }
 .bio-keep .page-title { margin-bottom: 1rem; }
 .bio-photo { max-height: 58vh; width: 100%; max-width: 420px; height: auto; object-fit: cover; border-radius: var(--radius); display: block; box-shadow: var(--shadow); }
-@media (min-width: 760px) {
+/* The sticky top equals where the column already sits (the .page top padding, 2.5rem from 768px, where
+   the sidebar replaces the phone top bar), so it is pinned from the first scrolled pixel and never drifts. */
+@media (min-width: 768px) {
   .bio-layout.has-photo { grid-template-columns: minmax(200px, 300px) minmax(0, 1fr); gap: 2rem; align-items: start; }
-  .bio-layout.has-photo .bio-keep { position: sticky; top: 1.5rem; }
+  .bio-layout.has-photo .bio-keep { position: sticky; top: 2.5rem; }
   .bio-layout.has-photo .bio-photo { max-height: calc(100vh - 9rem); }
   .bio-layout.has-photo .bio-prose { padding-top: 0.6rem; }
 }
@@ -927,7 +929,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 
 /* Lab tech chips: a Wikipedia-style preview card. Portalled to <body> and absolutely
    positioned, so it never reflows the page or nudges the other chips. */
-.tech-chip { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; text-decoration: underline dotted 1px; text-underline-offset: 3px; }
+.tech-chip { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help; text-decoration: none; }
 .tech-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 @media (pointer: coarse) { .chips li:has(.tech-chip) { padding: 0; } .tech-chip { min-height: 32px; padding: 0.1rem 0.6rem; } }
 .tech-card { position: absolute; z-index: 70; width: min(320px, calc(100vw - 16px)); box-sizing: border-box; padding: 0.8rem 0.9rem; display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 0.75rem; align-items: center; background: var(--panel, #fff); background-color: #fff; color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 10px 28px #0003; font-size: 0.86rem; line-height: 1.45; text-align: left; }
@@ -936,3 +938,47 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .tech-card-blurb { grid-column: 1 / -1; margin: 0; }
 .tech-card-name:only-child, .tech-card.no-logo .tech-card-name { grid-column: 1 / -1; }
 @media (prefers-reduced-motion: no-preference) { .tech-card { animation: tech-in 0.14s ease-out; } @keyframes tech-in { from { opacity: 0; transform: translateY(4px); } } }
+
+/* Homepage picture above the first bulletin post (optional; nothing renders without one). Scrolls with the page. */
+.home-photo { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: cover; border-radius: var(--radius); box-shadow: var(--shadow); margin: 0 0 0.5rem; }
+
+/* Demo mode: the Lab's rotating backdrop, peppered onto a few more pages (lab project pages, bio photo,
+   media photo grid). Same recipe as .lab-card::before: one spinning conic pseudo-element behind the content,
+   low opacity so text stays readable. */
+[data-mode="demo"] .lab-detail,
+[data-mode="demo"] .bio-keep,
+[data-mode="demo"] .photo-grid,
+[data-mode="demo"] .home-photo-wrap { position: relative; isolation: isolate; }
+[data-mode="demo"] .lab-detail::before,
+[data-mode="demo"] .bio-keep::before,
+[data-mode="demo"] .photo-grid::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none; border-radius: 18px;
+  background: conic-gradient(from 0deg, #ffb02e26, #ff7a1826, #ff5e6226, #ffb02e26);
+  border: 1px solid #ffb02e30;
+  animation: wk-spin 40s linear infinite;
+}
+[data-mode="demo"] .lab-detail::before { inset: 1rem 8% auto 8%; height: min(70vh, 520px); opacity: 0.45; }
+[data-mode="demo"] .bio-keep::before { inset: 2.5rem -0.75rem -0.75rem; opacity: 0.5; animation-duration: 34s; }
+[data-mode="demo"] .photo-grid::before { inset: 10% 15%; opacity: 0.35; animation-direction: reverse; animation-duration: 50s; }
+/* A second, slower tilting card behind lab project pages. */
+[data-mode="demo"] .lab-detail::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none; inset: 4rem 18% auto 14%; height: min(50vh, 380px);
+  border-radius: 22px; border: 1px solid #ff5e6230; background: linear-gradient(135deg, #ff5e6218, #ffd54a12);
+  animation: wk-tilt 18s ease-in-out infinite alternate;
+}
+@keyframes wk-tilt { from { transform: rotate(-6deg) translateY(0); } to { transform: rotate(7deg) translateY(24px); } }
+
+/* Recipe filters: DemoBounce.tsx's DVD-screensaver back shapes. One fixed layer behind everything. */
+.wk-bounce { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; contain: strict; }
+.wk-bounce-shape {
+  position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform;
+  border-radius: 999px; border: 1px solid currentColor; opacity: 0.5;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, currentColor 45%, transparent);
+}
+.wk-floater { border-radius: 40% 60% 55% 45%; opacity: 0.22; filter: blur(1.5px); }
+@media (prefers-reduced-motion: reduce) {
+  [data-mode="demo"] .lab-detail::before, [data-mode="demo"] .lab-detail::after,
+  [data-mode="demo"] .bio-keep::before, [data-mode="demo"] .photo-grid::before { animation: none; }
+  .wk-bounce { display: none; }
+}
