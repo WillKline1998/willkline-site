@@ -57,11 +57,13 @@ export function DemoBounce({
       w: number,
       h: number,
       floater: boolean,
+      radius?: string,
     ) => {
       const el = document.createElement("span");
       el.className = floater ? "wk-bounce-shape wk-floater" : "wk-bounce-shape";
       el.style.width = `${w}px`;
       el.style.height = `${h}px`;
+      if (radius) el.style.borderRadius = radius; // mirror the source's corners (pill, chip, cover)
       el.style.color = COLORS[(Math.random() * COLORS.length) | 0];
       layer.appendChild(el);
       const speed = floater ? rnd(12, 30) : rnd(40, 90); // px per second
@@ -81,9 +83,19 @@ export function DemoBounce({
     for (const b of Array.from(
       document.querySelectorAll<HTMLElement>(selector),
     ).slice(0, MAX_BUTTONS)) {
+      // Ghost = the element's own silhouette: same box (aspect) and same corner radius, so a cover reads as a
+      // cover, a chip as a chip, a pill button as a pill. Square-cornered sources get a slight rounding.
       const box = b.getBoundingClientRect();
-      if (box.width)
-        add(box.left - 3, box.top - 3, box.width + 6, box.height + 6, false);
+      if (!box.width || !box.height) continue;
+      const cs = getComputedStyle(b);
+      const px = parseFloat(cs.borderTopLeftRadius) || 0;
+      const pill = px >= Math.min(box.width, box.height) / 2;
+      const radius = cs.borderTopLeftRadius.endsWith("%")
+        ? cs.borderTopLeftRadius
+        : pill
+          ? "999px"
+          : `${Math.max(4, px + 2)}px`;
+      add(box.left - 2, box.top - 2, box.width + 4, box.height + 4, false, radius);
     }
     let raf = 0;
     let last = performance.now();
