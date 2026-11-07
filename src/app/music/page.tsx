@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { DemoBounce } from "@/components/DemoBounce";
 import { db } from "@/lib/db";
 import { KIND_LABEL, KIND_PLURAL } from "@/lib/music";
 
@@ -18,6 +19,7 @@ export default async function MusicPage(props: PageProps<"/music">) {
   return (
     <section className="page">
       <h1 className="page-title">Music</h1>
+      <DemoBounce selector=".music-filters a, .album-cover" />
       <p className="lede">Everything I&apos;ve released: written, performed, recorded, mixed, and mastered at home.</p>
       {kinds.length > 1 && (
         <nav className="wall-filters music-filters" aria-label="Filter by type">

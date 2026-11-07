@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DemoBounce } from "@/components/DemoBounce";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -60,7 +61,8 @@ export default async function WallPage(props: PageProps<"/wall">) {
   };
 
   return (
-    <section className="page page-wide">
+    <section className="page page-wide wall-page">
+      <DemoBounce selector=".wall-filters a, .wall-sort a, .wall-share > summary" />
       <h1 className="page-title">Inspiration Wall</h1>
       <p className="lede">Art and music that moves people. Share what inspires you, and save what inspires you here.</p>
       {sp.welcome === "1" && <p className="admin-note">Welcome{viewer?.name ? `, ${viewer.name}` : ""}! Share your first find below.</p>}

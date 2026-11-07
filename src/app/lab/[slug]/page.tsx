@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { openGraph } from "@/lib/seo";
 import { Markdown } from "@/components/Markdown";
 import { LabStatus, techList } from "@/components/LabStatus";
+import { DemoBounce } from "@/components/DemoBounce";
 import { TechChip } from "@/components/TechChip";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export default async function LabProjectPage(props: PageProps<"/lab/[slug]">) {
   if (!p) notFound();
   return (
     <article className="page lab-detail">
+      <DemoBounce selector=".lab-detail .tech-chip" />
       <p className="small">
         <Link href="/lab">← Lab</Link>
       </p>

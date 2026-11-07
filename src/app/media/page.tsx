@@ -12,7 +12,7 @@ export default async function MediaPage() {
   const videos = items.filter((i) => i.kind === "VIDEO");
 
   return (
-    <section className="page page-wide">
+    <section className="page page-wide media-page">
       <h1 className="page-title">Media</h1>
       {items.length === 0 && <p className="lede">Photos and video are on the way.</p>}
 
