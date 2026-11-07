@@ -32,7 +32,7 @@ export default async function LabProjectPage(props: PageProps<"/lab/[slug]">) {
   const p = await load((await props.params).slug);
   if (!p) notFound();
   return (
-    <article className="page">
+    <article className="page lab-detail">
       <p className="small">
         <Link href="/lab">← Lab</Link>
       </p>

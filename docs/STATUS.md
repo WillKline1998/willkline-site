@@ -2,6 +2,16 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-07 — Bio freeze, demo backdrops + DVD bounce, homepage picture (branch demo-chaos-homephoto)
+**Done**:
+- Bio: the sticky `top` now equals the column's resting offset (2.5rem page padding, from 768px), so the heading and photo never move. Before, top was 1.5rem against 2.5rem padding, so it drifted about 16px, and the old 760px breakpoint sat below the 768px padding change.
+- Demo mode: the Lab's rotating conic backdrop now also appears on lab project pages (plus a slow tilting card), behind the Bio heading and photo, and behind the Media photo grid.
+- Lab chips: removed the dotted underline (the help cursor stays).
+- Demo mode on /recipes: DemoBounce.tsx is a DVD-screensaver layer. Each filter and sort button spawns a back shape that bounces off the viewport walls. A faint "floater" joins every 6s (capped), and speed slowly builds. Fixed, z-index -1, pointer-events none. Uses rAF, pauses when the tab is hidden, and is off under reduced motion.
+- Homepage: optional picture between the intro and the first bulletin post (SiteSetting `home_photo`/`home_photo_alt`, file in Upload). It is managed at /admin/home and shares the bio photo's save/replace/remove action. It renders nothing when empty. No schema change was needed.
+**Verified**: tsc, lint, build. e2e_media_bio ALL PASS (41 checks; sticky tolerance tightened to <1px, plus homepage-slot checks). Demo screenshots checked. Clicks on recipe sort buttons still work with the bounce layer.
+**Next**: Will checks on iPhone Safari.
+
 ## 2026-11-07 — Polish: Bio, photo viewer, Lab chips, demo cursor (branch polish/bio-media-lab-demo)
 **Done**:
 - Bio: the entire left column (the "Bio" heading and the photo) is sticky on wide screens; only the text scrolls. Phones get one column, with nothing sticky.

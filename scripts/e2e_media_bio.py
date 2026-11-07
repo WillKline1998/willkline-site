@@ -200,7 +200,7 @@ try:
         h1 = page.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
         p1 = photo.evaluate("e => e.getBoundingClientRect().top")
         t1 = page.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
-        check(t0 - t1 > 1000 and abs(p1 - h1 - (p0 - h0)) < 1 and h1 >= 0 and abs(h1 - h0) < 60, f"the heading and photo stay frozen together while the text scrolls (heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
+        check(t0 - t1 > 1000 and abs(p1 - h1 - (p0 - h0)) < 1 and h1 >= 0 and abs(h1 - h0) < 1, f"the heading and photo stay frozen together while the text scrolls (heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
         first_url = photo.get_attribute("src")
         page.goto(f"{BASE}/admin/bio")
         page.locator("input[name=image]").set_input_files(str(tmp / "wide.png"))
@@ -219,6 +219,34 @@ try:
         phone.goto(f"{BASE}/bio")
         check(phone.evaluate("document.documentElement.scrollWidth - innerWidth") == 0, "the bio has no sideways scroll on a phone")
 
+        # Homepage picture slot (same pattern as the bio photo).
+        page.goto(f"{BASE}/")
+        check(page.locator(".home-photo").count() == 0, "the homepage shows no picture (and no empty box) until one is added")
+        page.goto(f"{BASE}/admin/home")
+        page.locator("input[name=image]").set_input_files(str(tmp / "wide.png"))
+        page.fill("input[name=alt]", "E2E home")
+        page.get_by_role("button", name="Save photo").click()
+        page.wait_for_selector("text=Saved ✓")
+        page.goto(f"{BASE}/")
+        hp = page.locator(".home-photo")
+        check(hp.count() == 1 and hp.get_attribute("alt") == "E2E home", "the homepage picture appears with its description")
+        hb, mb = hp.bounding_box(), page.locator(".home-main").bounding_box()
+        lede = page.locator(".home-header .lede").bounding_box()
+        first = page.locator(".notices > *").first.bounding_box()
+        check(abs(hb["width"] - mb["width"]) < 1, "as wide as the bulletin column")
+        check(lede["y"] + lede["height"] <= hb["y"] and (first is None or hb["y"] + hb["height"] <= first["y"]), "between the intro and the first post")
+        y0 = hb["y"]
+        page.mouse.wheel(0, 300)
+        page.wait_for_timeout(300)
+        check(hp.bounding_box()["y"] < y0 - 100, "and scrolls with the page")
+        page.goto(f"{BASE}/admin/home")
+        page.locator("input[name=remove]").check()
+        page.get_by_role("button", name="Save photo").click()
+        page.wait_for_selector("text=Saved ✓")
+        page.goto(f"{BASE}/")
+        check(page.locator(".home-photo").count() == 0, "removing it takes it off the homepage")
+        check(sql_value('SELECT count(*) FROM "Upload"') == uploads_before, "and its file is cleaned up")
+
         # Clean up through the admin page, as a person would.
         page.goto(f"{BASE}/admin/media")
         while page.get_by_role("button", name="Delete").count():
@@ -232,7 +260,7 @@ try:
         browser.close()
 finally:
     sql("""DELETE FROM "MediaItem" WHERE title LIKE 'E2E photo %'""")
-    sql("""DELETE FROM "SiteSetting" WHERE key IN ('bio_photo', 'bio_photo_alt')""")
+    sql("""DELETE FROM "SiteSetting" WHERE key IN ('bio_photo', 'bio_photo_alt', 'home_photo', 'home_photo_alt')""")
     remove_user(EMAIL)
 
 print(f"\n{'ALL PASS' if not fails else str(fails) + ' FAILED'}")

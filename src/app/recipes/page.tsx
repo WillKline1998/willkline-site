@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DemoBounce } from "@/components/DemoBounce";
 import { currentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { longDate } from "@/lib/dates";
@@ -130,6 +131,7 @@ export default async function RecipesPage(props: PageProps<"/recipes">) {
       )}
 
       <div className="wall-controls">
+        <DemoBounce />
         <nav className="wall-filters" aria-label="Filter by tag">
           <Link href={href({ tags: [] })} aria-current={chosen.length === 0 ? "page" : undefined}>All</Link>
           {mineCount > 0 && (
