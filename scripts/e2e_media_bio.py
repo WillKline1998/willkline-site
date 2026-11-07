@@ -1,8 +1,8 @@
 """End-to-end test of the Media photo viewer and the Bio photo against a local `next start` on :3123.
 
 A throwaway admin uploads four photos (different shapes) and a bio picture; the test then checks thumbnails show
-the whole picture, the viewer opens, arrows and keys move through the set and wrap around, clicking zooms in
-and out, Escape closes and puts focus back, and the bio photo can be set, replaced and removed.
+the whole picture, the viewer opens, arrows and keys move through the set and wrap around, the photo opens fully in frame,
+the wheel zooms smoothly (no click-to-zoom), Escape closes and puts focus back, and the bio photo can be set, replaced and removed.
 Run: ~/JobSearch/.venv/bin/python scripts/e2e_media_bio.py
 """
 import json
@@ -79,6 +79,8 @@ try:
         ok = True
         for i in range(thumbs.count()):
             d = thumbs.nth(i).evaluate("e => [e.getBoundingClientRect().width, e.getBoundingClientRect().height, e.naturalWidth, e.naturalHeight]")
+            if not d[3]:
+                continue  # lazy image below the fold, not loaded yet
             ok &= abs(d[0] / d[1] - d[2] / d[3]) < 0.03
         check(ok, "thumbnails show the whole picture, not a crop")
         w0 = thumbs.first.evaluate("e => e.getBoundingClientRect().width")
@@ -104,25 +106,55 @@ try:
             page.get_by_role("button", name="Next photo").click()
         check(True, "a full lap of next ends where it started")
 
-        # Zoom in and out.
+        # Opens "full size": the whole picture fits with breathing room. No click-to-zoom; the wheel zooms smoothly.
         img = page.locator(".viewer-stage img")
-        before = img.evaluate("e => e.getBoundingClientRect().width")
+        page.wait_for_function("() => { const i = document.querySelector('.viewer-stage img'); return i && i.style.visibility === 'visible'; }")
+        r = img.evaluate("e => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom, b.width]; }")
+        check(r[0] >= 8 and r[1] >= 8 and r[2] <= 1100 - 8 and r[3] <= 800 - 8, f"the whole photo is in frame with room to spare ({[round(v) for v in r]})")
+        check(r[4] > 600 or r[3] - r[1] > 500, "and it is shown large, not tiny")
+        before = r[4]
         img.click()
-        page.wait_for_selector(".viewer-stage.zoomed")
+        page.wait_for_timeout(300)
+        check(abs(img.evaluate("e => e.getBoundingClientRect().width") - before) < 2 and page.locator(".viewer").count() == 1, "clicking the photo does not zoom (or close)")
+        page.mouse.move(550, 400)
+        steps = []
+        for _ in range(4):
+            page.mouse.wheel(0, -120)
+            page.wait_for_timeout(60)
+            steps.append(img.evaluate("e => e.getBoundingClientRect().width"))
+        page.wait_for_timeout(500)
         after = img.evaluate("e => e.getBoundingClientRect().width")
-        check(after > before * 1.5, f"clicking the photo zooms in ({before:.0f}px -> {after:.0f}px)")
-        page.mouse.click(550, 400)  # the middle of the screen, away from the arrow buttons
-        page.wait_for_selector(".viewer-stage:not(.zoomed)")
-        check(abs(img.evaluate("e => e.getBoundingClientRect().width") - before) < 3, "clicking again zooms out")
+        check(after > before * 1.5 and steps == sorted(steps) and len(set(round(s) for s in steps)) >= 3, f"the scroll wheel zooms in gradually ({before:.0f} -> {[round(s) for s in steps]} -> {after:.0f}px)")
+        for _ in range(12):
+            page.mouse.wheel(0, 240)
+            page.wait_for_timeout(30)
+        page.wait_for_timeout(600)
+        check(abs(img.evaluate("e => e.getBoundingClientRect().width") - before) < 2, "scrolling the other way zooms back out to the full picture (no further)")
+        for _ in range(15):
+            page.mouse.wheel(0, -200)
+            page.wait_for_timeout(20)
+        page.wait_for_timeout(600)
+        check(page.locator(".viewer-stage.zoomed").count() == 1, "zoomed in far")
+        page.get_by_role("button", name="Close").click()
+        page.wait_for_selector(".viewer", state="detached")
+        check(True, "the X closes the viewer even when zoomed in far")
+        page.get_by_role("button", name="Open E2E photo wide", exact=False).click()
+        page.wait_for_selector(".viewer-stage img")
         page.keyboard.press("ArrowRight")
-        check(page.locator(".viewer-stage.zoomed").count() == 0, "moving to another photo starts zoomed out")
+        check(page.locator(".viewer-stage.zoomed").count() == 0, "moving to another photo starts at full size")
 
         # Close.
         page.keyboard.press("Escape")
         page.wait_for_selector(".viewer", state="detached")
         check(page.evaluate("document.activeElement?.className") == "photo-thumb", "Escape closes it and focus returns to the thumbnail")
         page.get_by_role("button", name="Open E2E photo wide", exact=False).click()
-        page.locator(".viewer-backdrop").click(position={"x": 5, "y": 400})
+        page.wait_for_timeout(300)
+        page.mouse.click(550, 20)  # off the picture, above it
+        page.wait_for_selector(".viewer", state="detached")
+        check(True, "clicking outside the photo closes it")
+        page.get_by_role("button", name="Open E2E photo wide", exact=False).click()
+        page.wait_for_timeout(300)
+        page.mouse.click(5, 400)
         page.wait_for_selector(".viewer", state="detached")
         check(True, "clicking outside the photo closes it")
 
@@ -138,8 +170,8 @@ try:
         c0 = int(phone.locator(".viewer-count").inner_text().split("/")[0])
         phone.evaluate(
             """() => { const s = document.querySelector('.viewer-stage');
-               const t = (type, x) => s.dispatchEvent(new TouchEvent(type, { bubbles: true, touches: type === 'touchend' ? [] : [new Touch({ identifier: 1, target: s, clientX: x, clientY: 300 })], changedTouches: [new Touch({ identifier: 1, target: s, clientX: x, clientY: 300 })] }));
-               t('touchstart', 300); t('touchend', 80); }"""
+               const t = (type, x) => s.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, pointerType: 'touch', isPrimary: true, button: 0, clientX: x, clientY: 300 }));
+               t('pointerdown', 300); t('pointermove', 200); t('pointermove', 80); t('pointerup', 80); }"""
         )
         phone.wait_for_timeout(200)
         check(int(phone.locator(".viewer-count").inner_text().split("/")[0]) != c0, "swiping left moves to the next photo")
@@ -158,7 +190,17 @@ try:
         check(photo.count() == 1 and photo.get_attribute("alt") == "E2E portrait", "the photo appears on the Bio page with its description")
         y_photo = photo.evaluate("e => e.getBoundingClientRect().top")
         y_text = page.locator(".prose p").first.evaluate("e => e.getBoundingClientRect().top")
-        check(abs(y_photo - y_text) < 80, "beside the text on a wide screen")
+        check(abs(y_photo - y_text) < 160, "beside the text on a wide screen")
+        page.evaluate("document.querySelector('.bio-prose').insertAdjacentHTML('beforeend', '<p>filler</p>'.repeat(120))")
+        h0 = page.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
+        p0 = photo.evaluate("e => e.getBoundingClientRect().top")
+        t0 = page.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
+        page.mouse.wheel(0, 1500)
+        page.wait_for_timeout(400)
+        h1 = page.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
+        p1 = photo.evaluate("e => e.getBoundingClientRect().top")
+        t1 = page.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
+        check(t0 - t1 > 1000 and abs(p1 - h1 - (p0 - h0)) < 1 and h1 >= 0 and abs(h1 - h0) < 60, f"the heading and photo stay frozen together while the text scrolls (heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
         first_url = photo.get_attribute("src")
         page.goto(f"{BASE}/admin/bio")
         page.locator("input[name=image]").set_input_files(str(tmp / "wide.png"))

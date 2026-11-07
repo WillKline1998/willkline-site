@@ -1,38 +1,121 @@
-// Lab tech chip tooltips.
+// Lab tech chips: the registry behind the Wikipedia-style preview cards (TechChip.tsx).
 //
-// A fixed, programmatic registry of one-line explanations for every technology the Lab cards cite.
-// Words are user-editable (e.g. "GitHub" describes a product); prose is terse so it fits under a
-// 4-second read. Descriptions are kept to 1-2 sentences and never read as a spec sheet.
-//
-// Stack (all permissive, MIT/Apache):
-//   - MIT: react-markdown, Playwright, pdf-lib, dnd-kit, @dnd-kit/*
-//   - Apache-2.0: Prisma, Vercel
-//   - ISC: ESLint
-//   - 0BSD: Lighthouse, sharp, @prisma/client
-//   - CC-BY: Lighthouse favicon
-export const TECH = {
-  "Next.js": "The React framework Next.js powers this site. It renders pages on the server, which keeps load times short, and lets pages hold private forms like the admin area and the wall.",
-  "React": "The component library the whole site is built on. Every page, form and widget is a small module that React stitches together into one page.",
-  TypeScript: "A version of JavaScript that requires you to name the types of your data. It catches a lot of mistakes before the code ever runs.",
-  "Tailwind CSS": "A utility CSS toolkit. Instead of writing custom styles, small class names are assembled into the layout and colours, so the design ships fast and stays consistent.",
-  PostgreSQL: "The database that holds the site's content. One shared database backs the wall, recipes, songbook and everything else, so the public and admin pages see the same data.",
-  Prisma: "The query tool that sits between this app and the database. It turns each model into typed functions, so reading a landing page or a user's posts is one line of code.",
-  Neon: "The database host that runs the PostgreSQL database. It keeps the connection mostly open, so the site can scale without moving the database.",
-  Vercel: "The host that runs the app online. A push to GitHub updates the live site, so there is no build step to manage.",
-  "Vercel Blob": "The file store that keeps uploads. Photos, PDFs and other pieces of content live here, and the site only keeps a reference to them.",
-  sharp: "The image tool that resized uploaded photos to thumbnails on upload. A single large picture is stored once, and small versions are made on the fly.",
-  "react-markdown": "Turns the Markdown in posts and lab pages into real HTML. Bold, links and lists are just typed as text.",
-  Playwright: "The browser test tool. It drives a real browser through the site to check that pages and forms behave the way they should.",
-  Python: "The scripting language used where fast shell tools are needed. The lead-sheet spike and the content import are both written in Python, not the main app.",
-  Lighthouse: "The page audit tool that scores load speed, accessibility and best practice. A score is taken from the live site before each push.",
-  ESLint: "The code checker that raises style and mistake warnings as code is written. Everything on the site clears it before a push.",
-  GitHub: "The code store where the site's files live. Pushes go here, branches are made for each feature, and the work lives in small, reviewable pieces.",
-  Tauri: "The framework the Headroom app is built on. A tiny Rust binary wraps a small React widget, so it opens fast and stays out of the way.",
-  Rust: "The systems language Tauri uses for the wrapper app. It handles the window and the file access, while the display lives in React.",
-  SQLite: "The tiny file database the widget keeps in local storage. All the run data sits in one small file on your disk.",
-  Vite: "The build tool that turns the widget's source into a fast-loaded page. It is used for the React part of the app.",
-  Vitest: "The test runner that checks the widget's code as it changes. A small amount of unit coverage keeps a refactor from breaking the widget.",
-  "GitHub Actions": "The automation that runs on GitHub. A workflow is triggered when you push code and it runs the tests and the build for you.",
+// THE STANDARD for every Lab entry: each technology listed on a project needs an entry here with a 2–3 sentence
+// plain-English blurb (what it is + what it does in this project) and, where one exists, a logo.
+// Logos are from Simple Icons (CC0-1.0, https://simpleicons.org) saved in public/tech/; the marks themselves
+// are their owners' trademarks, used only to identify the technology. Entries without a logo show text only.
+
+export type TechInfo = { logo?: string; blurb: string };
+
+export const TECH: Record<string, TechInfo> = {
+  "Next.js": {
+    logo: "/tech/nextdotjs.svg",
+    blurb:
+      "The React framework this site runs on. It renders each page on the server so it loads fast, and handles routing, forms and the admin area in one codebase.",
+  },
+  React: {
+    logo: "/tech/react.svg",
+    blurb:
+      "A JavaScript library for building interfaces out of small reusable components. Every page, form and widget here (and the Headroom widget's UI) is made of React components.",
+  },
+  TypeScript: {
+    logo: "/tech/typescript.svg",
+    blurb:
+      "JavaScript with types: you declare what shape your data has. It catches whole classes of mistakes before the code ever runs, which matters on a site with logins and uploads.",
+  },
+  "Tailwind CSS": {
+    logo: "/tech/tailwindcss.svg",
+    blurb:
+      "A CSS toolkit of small utility classes. Here it supplies the base styles and reset, with the site's own design layered on top in plain CSS.",
+  },
+  PostgreSQL: {
+    logo: "/tech/postgresql.svg",
+    blurb:
+      "A widely used open-source database. It stores everything on the site that changes: posts, the wall, recipes, the songbook, photos and accounts.",
+  },
+  Prisma: {
+    logo: "/tech/prisma.svg",
+    blurb:
+      "A database toolkit that turns the data model into typed code. The app reads and writes PostgreSQL through it, and it manages database migrations.",
+  },
+  Neon: {
+    blurb:
+      "A hosted, serverless PostgreSQL service. The live site's database runs on Neon, connected through Vercel.",
+  },
+  Vercel: {
+    logo: "/tech/vercel.svg",
+    blurb:
+      "The hosting platform that builds and serves the site. Every push to GitHub becomes a new deploy, and branches get their own preview links.",
+  },
+  "Vercel Blob": {
+    logo: "/tech/vercel.svg",
+    blurb:
+      "Vercel's file storage. Uploaded photos, PDFs and other files live here, while the database just keeps a pointer to each one.",
+  },
+  sharp: {
+    logo: "/tech/sharp.svg",
+    blurb:
+      "A fast image-processing library for Node.js. It resizes and compresses uploaded photos so pages stay quick.",
+  },
+  "react-markdown": {
+    logo: "/tech/markdown.svg",
+    blurb:
+      "Renders Markdown, the plain-text formatting style, as HTML inside React. Posts and Lab write-ups are typed as Markdown and shown with it.",
+  },
+  Playwright: {
+    blurb:
+      "A tool that drives real browsers automatically. The site's end-to-end tests use it to click through pages and forms like a visitor would.",
+  },
+  Python: {
+    logo: "/tech/python.svg",
+    blurb:
+      "A popular general-purpose programming language. Here it runs the test scripts and helper tools around the site, not the site itself.",
+  },
+  Lighthouse: {
+    logo: "/tech/lighthouse.svg",
+    blurb:
+      "Google's open-source page auditor. It scores speed, accessibility and best practices, and is used to check the live site.",
+  },
+  ESLint: {
+    logo: "/tech/eslint.svg",
+    blurb:
+      "A code checker for JavaScript and TypeScript. It flags bugs and risky patterns; the code has to pass it before it ships.",
+  },
+  GitHub: {
+    logo: "/tech/github.svg",
+    blurb:
+      "The service that hosts the project's code and its history. Work happens on branches there, and pushes trigger deploys.",
+  },
+  Tauri: {
+    logo: "/tech/tauri.svg",
+    blurb:
+      "A framework for small, fast desktop apps that use a web page for their interface. Headroom is a Tauri app: a Rust core with a React front end.",
+  },
+  Rust: {
+    logo: "/tech/rust.svg",
+    blurb:
+      "A fast, memory-safe systems programming language. In Headroom it handles the native side: the window, files and talking to the operating system.",
+  },
+  SQLite: {
+    logo: "/tech/sqlite.svg",
+    blurb:
+      "A tiny database that lives in a single file, with no server. Headroom keeps its local data in one.",
+  },
+  Vite: {
+    logo: "/tech/vite.svg",
+    blurb:
+      "A build tool and dev server for front-end code. It bundles Headroom's React interface and reloads instantly during development.",
+  },
+  Vitest: {
+    logo: "/tech/vitest.svg",
+    blurb:
+      "A test runner built for Vite projects. It runs Headroom's unit tests so changes don't quietly break things.",
+  },
+  "GitHub Actions": {
+    logo: "/tech/githubactions.svg",
+    blurb:
+      "GitHub's built-in automation. Each push runs the tests and builds automatically in the cloud.",
+  },
 };
 
 export type TechKey = keyof typeof TECH;

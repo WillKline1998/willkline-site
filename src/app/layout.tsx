@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DemoModeProvider } from "@/components/DemoMode";
+import { DemoCursor } from "@/components/DemoCursor";
 import { Nav } from "@/components/Nav";
 import { openGraph } from "@/lib/seo";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
-const DESCRIPTION = "Bassist, composer, and software engineer. Music, CV, media, writing, and experiments.";
+const DESCRIPTION =
+  "Bassist, composer, and software engineer. Music, CV, media, writing, and experiments.";
 
 // metadataBase makes every relative image/URL in link previews absolute.
 export const metadata: Metadata = {
@@ -29,12 +34,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body>
         <DemoModeProvider>
+          <DemoCursor />
           <div className="site-shell">
             <Nav />
             <div className="site-main">
               <main>{children}</main>
               <footer className="site-footer">
-                © {new Date().getFullYear()} Will Kline · <span className="last-updated">last updated October 2026</span>
+                © {new Date().getFullYear()} Will Kline ·{" "}
+                <span className="last-updated">last updated October 2026</span>
               </footer>
             </div>
           </div>
