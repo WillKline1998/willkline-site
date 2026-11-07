@@ -2,6 +2,15 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-07 — Polish: Bio, photo viewer, Lab chips, demo cursor (branch polish/bio-media-lab-demo)
+**Done**:
+- Bio: the entire left column (the "Bio" heading and the photo) is sticky on wide screens; only the text scrolls. Phones get one column, with nothing sticky.
+- Photo viewer: the photo opens as large as fits the screen with breathing room, all four corners in frame. Click-to-zoom is gone. The scroll wheel zooms smoothly toward the pointer with no modifier key, eased per frame. Pinch zooms on touch, drag pans, and swipe changes photos when not zoomed. Clicking off the picture, the ✕ or Escape closes it at any zoom.
+- Lab chips: rebuilt as Wikipedia-style preview cards (logo, name and a 2–3 sentence blurb). The card is portalled to <body> and absolutely positioned, so there's no reflow and the chips don't move. This fixes the bug where the page body flashed over itself. Opens on hover/keyboard focus/tap; closes on leave, outside click or Escape. The TECH registry now has a blurb for all 22 techs (the standard for every Lab entry), and unknown techs render as plain labels instead of disappearing. Logos come from Simple Icons (CC0), stored in public/tech/; Neon and Playwright have none there, so their cards are text-only.
+- Demo mode: removed `cursor: none`, so the system cursor is always visible. Added a working sparkle trail (DemoCursor.tsx: one fixed, click-through layer, mouse/pen only, capped, off under reduced motion). Removed the old cursor/overlay pseudo-elements that were overriding the backdrop. Fixed a duplicate `@keyframes wk-drift` that was silently replacing the backdrop drift. The psychedelic styling is otherwise unchanged.
+**Verified**: tsc, lint and `next build` clean. e2e_media_bio ALL PASS (34 checks, updated for wheel zoom, fit-in-frame and sticky heading+photo), run against a throwaway migrated DB. An ad-hoc Playwright chip/cursor check passed: 22 chips in normal and demo mode, with one card each, no chip movement, Escape/focus, phone tap inside the viewport, sparkles render with pointer-events none, and links stay clickable in demo mode.
+**Next**: Will reviews the Vercel preview, on iPhone Safari too (pinch and tap paths were only emulated).
+
 ## 2026-10-09 — License audit + zod
 **Done**: Production dependency license audit (all permissive; sharp's libvips is LGPL but dynamically linked, caniuse-lite is CC-BY data). Adopted zod for signup / reset / forgot / Wall-post validation via `src/lib/validation.ts`. See DECISIONS for rejected candidates.
 **Verified**: lint + build; e2e_admin, e2e_wall, responsive_audit all pass.

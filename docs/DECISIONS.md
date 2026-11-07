@@ -42,3 +42,6 @@ Same shape as ~/JobSearch/resume/*.json so résumé builds and the site share on
 
 ## 2026-10-24: Songbook uses pdf-lib to count pages
 `pdf-lib` 1.17.1, MIT, github.com/Hopding/pdf-lib (8.7k stars; not actively released since 2021 but stable and dependency-light). Used only server-side to read a PDF's page count at upload. Folder tree, search and filters are plain code.
+
+## 2026-11-07 — Tech logos: Simple Icons (CC0-1.0)
+Lab tech-card logos are single-colour SVGs from Simple Icons (github.com/simple-icons/simple-icons, 20k+ stars, CC0-1.0), copied into public/tech/. They are not an npm dependency. The marks remain their owners' trademarks and are used only to identify each technology. No new runtime dependencies.
