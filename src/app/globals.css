@@ -1017,3 +1017,31 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   [data-mode="demo"] .cleanup::before, [data-mode="demo"] .cleanup::after, [data-mode="demo"] .wall-page::before,
   [data-mode="demo"] .media-page::before, [data-mode="demo"] .media-page::after { animation: none; }
 }
+
+/* ------------------------------------------------------------------
+   Ding Dong (/dingdong): a quiet life feed, newest day first.
+   ------------------------------------------------------------------ */
+.dd-about { margin: 0 0 1.5rem; padding: 0.75rem 1rem; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.dd-about summary { cursor: pointer; font-family: var(--font-label); font-size: 0.9rem; min-height: 32px; display: flex; align-items: center; }
+.dd-about p { margin: 0.6rem 0 0; color: var(--muted); }
+.dd-now { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0 0 1.25rem; }
+.dd-badge { font-family: var(--font-label); font-size: 0.8rem; padding: 0.2rem 0.7rem; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; white-space: nowrap; }
+.dd-badge-small { font-size: 0.72rem; padding: 0.1rem 0.55rem; border-color: var(--rule); color: var(--muted); }
+.dd-feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.dd-day { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem 1.1rem 1.1rem; }
+.dd-day-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.75rem; }
+.dd-day-num { font-family: var(--font-label); font-size: 0.85rem; }
+.dd-diary { font-size: 1.15em; line-height: 1.55; margin: 0.6rem 0 0.4rem; }
+.dd-taste { margin: 0 0 0.75rem; font-size: 0.85em; font-style: italic; color: var(--muted); }
+.dd-player { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.75rem; }
+.dd-play { min-width: 92px; min-height: 44px; border-radius: 999px; }
+.dd-grid { flex: 1 1 160px; display: grid; gap: 2px; height: 36px; }
+.dd-cell { position: relative; background: var(--bg); border-radius: 3px; }
+.dd-cell.dd-beat { background: var(--nav-bg); }
+.dd-cell i { position: absolute; left: 15%; right: 15%; height: 5px; margin-bottom: -2px; border-radius: 3px; background: var(--ink); }
+.dd-cell.dd-now-cell { background: #f3d9c8; }
+.dd-cell.dd-now-cell i { background: var(--accent); }
+.dd-meta { white-space: nowrap; }
+.dd-error { flex-basis: 100%; margin: 0; color: #b91c1c; }
+.dd-nosound { margin: 0; }
+@media (prefers-reduced-motion: reduce) { .dd-cell { transition: none; } }

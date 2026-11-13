@@ -339,3 +339,19 @@ model Song {
 
   @@index([folderId])
 }
+
+// ---------- Ding Dong (a small creature who learns music, one day at a time) ----------
+
+// One day of his life, written by the daily cron (scripts/import-dingdong-day.ts). Read-only on the site.
+model DingDongDay {
+  id        String   @id @default(cuid())
+  day       Int      @unique // 1, 2, 3...
+  stage     String // ear stage that day: pulse, pitch, intervals...
+  diary     String
+  tasteNote String   @default("")
+  likedIt   Boolean?
+  pattern   Json // { tempo, beats, instrument, notes: [{ beat, pitch?, dur? }] }; validated on read
+  fallback  Boolean  @default(false) // a "sleepy" day when the model failed
+  dayDate   String   @default("") // the spike's date label, e.g. "2026-11-12"
+  createdAt DateTime @default(now()) // when that day was generated
+}
