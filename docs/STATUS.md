@@ -2,6 +2,14 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-12 — Ding Dong Phase 1: public /dingdong life feed (branch dingdong-phase1)
+**Done**:
+- `DingDongDay` model + additive migration. `scripts/import-dingdong-day.ts` upserts the spike's day JSON files by day number (idempotent). The 9 spike days are backfilled to production.
+- /dingdong: a feed with the newest day first. Each day shows its diary line, a stage badge, the taste note (subtle, italic), a Play button and a small step grid that lights up as it plays. Above the feed sit the current ear stage and a "What is this?" explainer. Tone.js 15.1.22 (MIT) comes from the jsDelivr CDN. Notes are scheduled directly on the audio clock, with no shared Transport. Tone.start() runs inside the tap, for iOS. `readPattern()` validates the stored JSON; a broken pattern shows the diary with "This day's tune got lost". The page is read-only and never calls the AI. The nav, home cards and sitemap get it through sections.ts.
+- Cron: `~/Projects/dingdong-spike/scripts/daily.sh` runs the importer over all day files after each morning's run, against `~/.config/dingdong/prod.env` (chmod 600, holds only the DATABASE_URL vars from `vercel env pull`). An import failure is logged and gets retried the next day; the local JSON files stay as the backup.
+**Verified**: tsc, lint, build. `scripts/e2e_dingdong.py` ALL PASS on a throwaway DB: 9 days newest first, diary and badge text, the Tone notes, pitches and timing for every day match the stored pattern, the audio is non-silent, a malformed-pattern day still renders, no page errors or 5xx, and at 390px there's no sideways scroll and the Play button is 44px. Screenshots: docs/mockups/dingdong-{desktop,phone}.png.
+**Next**: Will listens on a real iPhone (silent-switch behaviour is untested).
+
 ## 2026-11-07 — Bio freeze, demo backdrops + DVD bounce, homepage picture (branch demo-chaos-homephoto)
 **Done**:
 - Bio: the sticky `top` now equals the column's resting offset (2.5rem page padding, from 768px), so the heading and photo never move. Before, top was 1.5rem against 2.5rem padding, so it drifted about 16px, and the old 760px breakpoint sat below the 768px padding change.
