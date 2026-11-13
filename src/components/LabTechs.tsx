@@ -116,6 +116,14 @@ export const TECH: Record<string, TechInfo> = {
     blurb:
       "GitHub's built-in automation. Each push runs the tests and builds automatically in the cloud.",
   },
+  "Tone.js": {
+    blurb:
+      "A JavaScript library for making music in the browser. Ding Dong's Studio uses it to play his daily tunes out loud, and only when a visitor presses play.",
+  },
+  "Hermes Agent": {
+    blurb:
+      "An open-source AI agent from Nous Research that runs on Will's computer. Every morning it wakes Ding Dong up, hands his day to a language model (GLM 5.3), and saves what he wrote.",
+  },
 };
 
 export type TechKey = keyof typeof TECH;
