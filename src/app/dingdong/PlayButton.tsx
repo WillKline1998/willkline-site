@@ -8,14 +8,21 @@ type ToneLib = any;
 declare global {
   interface Window {
     Tone?: ToneLib;
-    __dingdong?: { events: { day: number; beat: number; pitch: string; time: number }[]; playing: number | null };
+    __dingdong?: { events: { day: number; beat: number; pitch: string; time: number; pass?: number }[]; playing: number | null };
   }
 }
 
-// One player for the whole page: starting a day stops whichever one was playing.
+// One player for the whole page: starting a day (or the studio loop) stops whichever one was playing.
 let stopCurrent: (() => void) | null = null;
+export function claimPlayer(stop: () => void) {
+  if (stopCurrent && stopCurrent !== stop) stopCurrent();
+  stopCurrent = stop;
+}
+export function releasePlayer(stop: () => void) {
+  if (stopCurrent === stop) stopCurrent = null;
+}
 
-function makeSynth(Tone: ToneLib, name: string) {
+export function makeSynth(Tone: ToneLib, name: string) {
   const env = { attack: 0.005, decay: 0.5, sustain: 0, release: 0.9 };
   const presets: Record<string, () => any> = {
     basic: () => new Tone.Synth({ oscillator: { type: "sine" }, envelope: env }),

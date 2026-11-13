@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { db } from "@/lib/db";
 import { longDate } from "@/lib/dates";
-import { readPattern, STAGE_BLURBS } from "@/lib/dingdong";
+import { readPattern, STAGE_BLURBS, studioMood } from "@/lib/dingdong";
 import { openGraph } from "@/lib/seo";
 import { PlayButton } from "./PlayButton";
+import { Studio } from "./Studio";
 
 const DESCRIPTION =
   "A tiny creature learning music from nothing, one day at a time. He writes a diary line and a little tune every morning.";
@@ -19,6 +20,8 @@ export const dynamic = "force-dynamic";
 export default async function DingDongPage() {
   const days = await db.dingDongDay.findMany({ orderBy: { day: "desc" }, take: 400 });
   const stage = days[0]?.stage;
+  const today = days[0] ?? null;
+  const todayTune = today ? readPattern(today.pattern) : null;
 
   return (
     <section className="page dingdong">
@@ -26,6 +29,7 @@ export default async function DingDongPage() {
       <Script src="https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.js" strategy="lazyOnload" />
       <h1 className="page-title">Ding Dong</h1>
       <p className="lede">A little guy who is learning music from scratch. One day at a time.</p>
+      <Studio day={today?.day ?? null} pattern={todayTune} mood={studioMood(today, !!todayTune)} />
 
       <details className="dd-about">
         <summary>What is this?</summary>

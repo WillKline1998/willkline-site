@@ -41,3 +41,20 @@ export const STAGE_BLURBS: Record<string, string> = {
   instruments: "He has found other sounds besides the plain ding.",
   genre: "His ears are all grown up. Anything goes.",
 };
+
+// Which of the owner's face drawings (public/dingdong/dingdong-<face>.svg) Ding Dong wears in the studio.
+export const FACES = ["happy", "sad", "angry", "confused", "disgusted", "scared", "surprised", "neutral", "singing"] as const;
+export type Face = (typeof FACES)[number];
+export type StudioMood = { face: Face; asleep: boolean; why: string };
+
+// The resting mood for the newest day. Deliberately tiny and deterministic (docs/RESEARCH-dingdong-studio.md):
+//   no day / broken tune / a "sleepy" fallback day -> asleep (neutral face, no wandering, no sound)
+//   likedIt true -> happy · likedIt false -> confused · likedIt unknown -> neutral
+// "singing" is never stored: the studio puts it on only while his tune is actually playing.
+// Hook for later: if the cron starts writing a `mood` field, map it here and nowhere else.
+export function studioMood(day: { likedIt: boolean | null; fallback: boolean } | null | undefined, hasTune: boolean): StudioMood {
+  if (!day || !hasTune || day.fallback) return { face: "neutral", asleep: true, why: "no tune today" };
+  if (day.likedIt === true) return { face: "happy", asleep: false, why: "he liked what he made" };
+  if (day.likedIt === false) return { face: "confused", asleep: false, why: "he isn't sure about it" };
+  return { face: "neutral", asleep: false, why: "no feelings logged" };
+}

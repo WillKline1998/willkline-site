@@ -2,6 +2,11 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-12 — Ding Dong studio viewer (branch dingdong-studio)
+**Done**: a "window into his studio" at the top of /dingdong (src/app/dingdong/Studio.tsx). The owner's 9 face SVGs are in public/dingdong/, unchanged. Ding Dong wanders a small dark room on one rAF-driven transform. The loop pauses when the tab is hidden or the room is offscreen; under reduced motion he holds a static pose. He hops on each note. His face comes from `studioMood()`: liked → happy, disliked → confused, unknown → neutral, broken/fallback/no day → asleep (neutral). While "Listen in" loops today's tune the face is "singing". Sound is muted by default, Tone.start runs inside the tap, and notes use look-ahead scheduling on the audio clock. Research with citations: docs/RESEARCH-dingdong-studio.md (zero new deps; compared against PixiJS, Lottie, Rive and GSAP).
+**Verified**: tsc, lint, build, prettier (140 cols). e2e_dingdong.py ALL PASS (31 checks). Covered: asleep when the newest day is broken, the happy mood face, face SVGs return 200, he moves, sound muted by default, singing on Listen in, a second pass of all 8 notes exactly one bar later, the audio isn't silent, back to happy on stop, static under reduced motion, no sideways scroll at 390px, 44px tap targets, no layout shift, no JS errors. Screenshots: docs/mockups/dingdong-studio-{desktop,phone}.png.
+**Not verified**: real iOS Safari (silent switch, audio unlock), frame cost on low-end phones, loop drift over long runs (only a few passes tested).
+
 ## 2026-11-12 — Ding Dong Phase 1: public /dingdong life feed (branch dingdong-phase1)
 **Done**:
 - `DingDongDay` model + additive migration. `scripts/import-dingdong-day.ts` upserts the spike's day JSON files by day number (idempotent). The 9 spike days are backfilled to production.
