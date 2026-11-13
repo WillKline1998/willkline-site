@@ -1045,3 +1045,30 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .dd-error { flex-basis: 100%; margin: 0; color: #b91c1c; }
 .dd-nosound { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .dd-cell { transition: none; } }
+
+/* Ding Dong's studio: a fixed-ratio window (no layout shift), one composited element moving inside it. */
+.dd-studio { margin: 0 0 1.5rem; border-radius: var(--radius); overflow: hidden; background: #1b1714; box-shadow: var(--shadow); border: 1px solid #3a322a; }
+.dd-room { position: relative; aspect-ratio: 16 / 9; overflow: hidden; contain: layout paint; }
+.dd-room-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Static pose (no JS, reduced motion, asleep): standing on the rug. The rAF loop takes over via [data-anim]. */
+.dd-guy { position: absolute; left: 50%; bottom: 14%; width: clamp(56px, 17%, 112px); transform: translateX(-50%); transform-origin: 50% 100%; }
+.dd-room[data-anim="on"] .dd-guy { left: 0; will-change: transform; }
+.dd-face { display: block; width: 100%; height: auto; }
+.dd-face[hidden] { display: none; }
+.dd-legs { display: flex; justify-content: center; gap: 22%; margin-top: -8%; }
+.dd-legs i { width: 8%; aspect-ratio: 1 / 2.2; background: #c4bca8; border-radius: 0 0 40% 40%; }
+.dd-guy[data-walking="1"] .dd-legs i:first-child { animation: dd-step 0.5s ease-in-out infinite alternate; }
+.dd-guy[data-walking="1"] .dd-legs i:last-child { animation: dd-step 0.5s ease-in-out infinite alternate-reverse; }
+@keyframes dd-step { to { transform: translateY(-30%); } }
+.dd-zzz, .dd-notes { position: absolute; top: -12%; right: -6%; font-family: var(--font-label); color: #e9e1cf; font-size: clamp(0.8rem, 2.4vw, 1.1rem); opacity: 0.8; }
+.dd-notes { color: #39ff7a; animation: dd-float 1.6s ease-out infinite; }
+@keyframes dd-float { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(-60%); opacity: 0; } }
+.dd-studio-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 0.75rem; padding: 0.6rem 0.8rem; background: #221d19; color: #e9e1cf; border-top: 1px solid #3a322a; }
+.dd-studio-caption .muted { color: #b9ad9c; }
+.dd-listen { min-height: 44px; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.45rem; }
+.dd-live { width: 8px; height: 8px; border-radius: 50%; background: #39ff7a; box-shadow: 0 0 6px #39ff7a; animation: dd-pulse 1.2s ease-in-out infinite; }
+@keyframes dd-pulse { 50% { opacity: 0.35; } }
+.dd-studio .dd-error { color: #fca5a5; }
+@media (prefers-reduced-motion: reduce) {
+  .dd-guy[data-walking="1"] .dd-legs i, .dd-notes, .dd-live { animation: none; }
+}
