@@ -1019,10 +1019,21 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 }
 
 /* ------------------------------------------------------------------
-   Ding Dong (/dingdong): a quiet life feed, newest day first.
+   DingDong (/dingdong): a quiet life feed, newest day first.
    ------------------------------------------------------------------ */
 .dd-about { margin: 0 0 1.5rem; padding: 0.75rem 1rem; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
-.dd-about summary { cursor: pointer; font-family: var(--font-label); font-size: 0.9rem; min-height: 32px; display: flex; align-items: center; }
+.dd-about summary { cursor: pointer; font-family: var(--font-label); font-size: 0.9rem; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; list-style: none; }
+.dd-about summary::-webkit-details-marker { display: none; } /* iOS Safari still draws its own triangle without this */
+/* A plus that turns into a minus when open: two bars, the vertical one rotates flat. */
+.dd-about-icon { position: relative; flex: none; width: 14px; height: 14px; color: var(--muted); }
+.dd-about-icon::before, .dd-about-icon::after { content: ""; position: absolute; left: 0; top: 6px; width: 14px; height: 2px; border-radius: 1px; background: currentColor; transition: transform 0.2s ease; }
+.dd-about-icon::after { transform: rotate(90deg); }
+.dd-about[open] .dd-about-icon::after { transform: rotate(0deg); }
+.dd-about summary:hover .dd-about-icon { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .dd-about-icon::before, .dd-about-icon::after { transition: none; } }
+.dd-skills { margin: 0 0 0.75rem; }
+@media (max-width: 639px) { .dd-skills a { min-height: 44px; } }
+.dd-skill-status { margin: 0 0 1rem; }
 .dd-about p { margin: 0.6rem 0 0; color: var(--muted); }
 .dd-now { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0 0 1.25rem; }
 .dd-badge { font-family: var(--font-label); font-size: 0.8rem; padding: 0.2rem 0.7rem; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; white-space: nowrap; }
@@ -1046,7 +1057,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .dd-nosound { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .dd-cell { transition: none; } }
 
-/* Ding Dong's studio: a fixed-ratio window (no layout shift), one composited element moving inside it. */
+/* DingDong's studio: a fixed-ratio window (no layout shift), one composited element moving inside it. */
 .dd-studio { margin: 0 0 1.5rem; border-radius: var(--radius); overflow: hidden; background: #1b1714; box-shadow: var(--shadow); border: 1px solid #3a322a; }
 .dd-room { position: relative; aspect-ratio: 16 / 9; overflow: hidden; contain: layout paint; }
 .dd-room-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }

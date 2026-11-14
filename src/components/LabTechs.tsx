@@ -118,11 +118,11 @@ export const TECH: Record<string, TechInfo> = {
   },
   "Tone.js": {
     blurb:
-      "A JavaScript library for making music in the browser. Ding Dong's Studio uses it to play his daily tunes out loud, and only when a visitor presses play.",
+      "A JavaScript library for making music in the browser. DingDong's Studio uses it to play his daily tunes out loud, and only when a visitor presses play.",
   },
   "Hermes Agent": {
     blurb:
-      "An open-source AI agent from Nous Research that runs on Will's computer. Every morning it wakes Ding Dong up, hands his day to a language model (GLM 5.3), and saves what he wrote.",
+      "An open-source AI agent from Nous Research that runs on Will's computer. Every morning it wakes DingDong up, hands his day to a language model (GLM 5.3), and saves what he wrote.",
   },
 };
 

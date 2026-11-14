@@ -6,8 +6,10 @@ broken pattern still shows its diary (no Play button, no crash); no 500s or page
 desktop and phone widths go to docs/mockups/dingdong-*.png. The broken test day is removed afterwards.
 Studio (top of the page): renders awake with the mood face (newest day), sound is off by default (no notes fire),
 "Listen in" swaps the face to 'singing' and loops the pattern (a second pass of notes observed, timed one bar
-later), stopping returns the mood face; Ding Dong actually moves; reduced motion gives a static pose; a newest day
+later), stopping returns the mood face; DingDong actually moves; reduced motion gives a static pose; a newest day
 with a broken tune shows him asleep (neutral face, no Listen button).
+Naming + filter: no "Ding Dong" (with a space) in the rendered /dingdong, /lab, /lab/dingdong; skill chips filter the feed
+to one stage with correct counts ("N days of dings"); the "What is this?" plus/minus indicator turns on click.
 Run: ~/JobSearch/.venv/bin/python scripts/e2e_dingdong.py
 """
 import json
@@ -124,6 +126,46 @@ try:
         pg.screenshot(path=str(out / "dingdong-desktop.png"), full_page=True)
         pg.locator(".dd-studio").screenshot(path=str(out / "dingdong-studio-desktop.png"))
         pg.locator(".dd-listen").click()
+        # --- Name: only "DingDong" in what visitors see (text + titles/alt/aria), on every page that shows him.
+        import re, urllib.request
+        for path in ["/dingdong", "/lab", "/lab/dingdong", "/"]:
+            html = re.sub(r"<!-- -->", "", urllib.request.urlopen(BASE + path).read().decode())
+            check("Ding Dong" not in html and "DingDong" in html, f"{path}: no 'Ding Dong' with a space, 'DingDong' present")
+        # --- Skill filter: chips per stage, counts match the DB, selecting one shows only that stage's days.
+        from collections import Counter
+        counts = Counter(r["stage"] for r in rows)
+        chips = pg.eval_on_selector_all(".dd-skills a[data-skill]", "els => els.map(e => [e.dataset.skill, e.querySelector('.muted').textContent])")
+        check({k: int(v) for k, v in chips} == dict(counts), f"skill chips + counts {chips} == DB {dict(counts)}")
+        check(pg.locator(".dd-skills a[aria-current=page]").inner_text().startswith("All days"), "default: All days selected, newest first")
+        for st_name, n in counts.items():
+            pg.locator(f".dd-skills a[data-skill='{st_name}']").click()
+            pg.wait_for_url(f"**/dingdong?skill={st_name}")
+            pg.wait_for_selector(f".dd-skills a[data-skill='{st_name}'][aria-current=page]")
+            got = pg.eval_on_selector_all(".dd-day", "els => els.map(e => [+e.dataset.day, e.querySelector('.dd-badge').textContent])")
+            want_days = [r["day"] for r in rows if r["stage"] == st_name]
+            status = pg.locator(".dd-skill-status").inner_text()
+            noun = "dings" if st_name == "pulse" else st_name
+            check([d for d, _ in got] == want_days and all(t == f"ear stage: {st_name}" for _, t in got) and f"{n} day{'s' if n != 1 else ''} of {noun}" in status,
+                  f"filter {st_name}: days {[d for d, _ in got]} (want {want_days}); status '{status[:40]}'")
+        pg.locator(".dd-skills a", has_text="All days").click()
+        pg.wait_for_function(f"() => document.querySelectorAll('.dd-day').length === {len(rows)}")
+        check(pg.locator(".dd-skill-status").count() == 0, "All days: full feed back, no status line")
+        bogus = pg.goto(BASE + "/dingdong?skill=nope")
+        check(bogus.status == 200 and pg.locator(".dd-day").count() == len(rows), "unknown ?skill= falls back to all days")
+        # --- Expander indicator: a plus that rotates to a minus when opened.
+        rot = "() => getComputedStyle(document.querySelector('.dd-about-icon'), '::after').transform"
+        closed = pg.evaluate(rot)
+        pg.locator(".dd-about summary").click()
+        pg.wait_for_timeout(400)
+        opened = pg.evaluate(rot)
+        check(pg.locator(".dd-about").get_attribute("open") is not None and closed != opened and opened in ("none", "matrix(1, 0, 0, 1, 0, 0)"),
+              f"expander: plus ({closed}) -> minus ({opened}) on open")
+        pg.locator(".dd-about").screenshot(path=str(out / "dingdong-about-open.png"))
+        pg.locator(".dd-about summary").click()
+        pg.wait_for_timeout(400)
+        check(pg.evaluate(rot) == closed and pg.locator(".dd-about").get_attribute("open") is None, "expander: back to plus on close")
+        pg.goto(BASE + f"/dingdong?skill={rows[-1]['stage']}")
+        pg.screenshot(path=str(out / "dingdong-filter-desktop.png"), full_page=True)
         rm = b.new_page(viewport={"width": 1366, "height": 900}, reduced_motion="reduce")
         rm.on("pageerror", lambda e: errors.append(str(e)))
         rm.goto(BASE + "/dingdong")
@@ -147,6 +189,11 @@ try:
         h2 = phone.eval_on_selector(".dd-feed", "e => e.getBoundingClientRect().top")
         check(h1 == h2, f"phone: no layout shift while he wanders (feed top {h1} -> {h2})")
         phone.screenshot(path=str(out / "dingdong-phone.png"), full_page=True)
+        phone.goto(BASE + f"/dingdong?skill={rows[-1]['stage']}")
+        phone.locator(".dd-about summary").tap()
+        cb = phone.locator(".dd-skills a").first.bounding_box()
+        check(phone.evaluate("document.documentElement.scrollWidth") <= 390 and cb["height"] >= 44, f"phone: filter chips fit, {cb['height']:.0f}px tall")
+        phone.screenshot(path=str(out / "dingdong-filter-phone.png"), full_page=True)
         phone.locator(".dd-studio").screenshot(path=str(out / "dingdong-studio-phone.png"))
         check(not errors, f"page errors: {errors or 'none'}")
         check(not bad, f"5xx responses: {bad or 'none'}")

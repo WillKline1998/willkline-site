@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { DingPattern, Face, StudioMood } from "@/lib/dingdong";
 import { claimPlayer, makeSynth, releasePlayer } from "./PlayButton";
 
-// A window into Ding Dong's studio. Hand-rolled on purpose (see docs/RESEARCH-dingdong-studio.md): one rAF loop
+// A window into DingDong's studio. Hand-rolled on purpose (see docs/RESEARCH-dingdong-studio.md): one rAF loop
 // that only writes a CSS transform to one element, so the browser can composite it without re-layout. The loop
 // sleeps when the tab is hidden or the studio is scrolled away, and never starts under prefers-reduced-motion.
 // Sound is off until the visitor taps "Listen in"; then today's pattern loops on the audio clock.
@@ -181,8 +181,8 @@ export function Studio({ day, pattern, mood }: { day: number | null; pattern: Di
         role="img"
         aria-label={
           asleep
-            ? "Ding Dong, a little creature with a screen for a face, asleep in his small dark music room."
-            : `Ding Dong, a little creature with a screen for a face, wandering his small dark music room looking ${face}.`
+            ? "DingDong, a little creature with a screen for a face, asleep in his small dark music room."
+            : `DingDong, a little creature with a screen for a face, wandering his small dark music room looking ${face}.`
         }
       >
         <RoomArt />
@@ -211,7 +211,7 @@ export function Studio({ day, pattern, mood }: { day: number | null; pattern: Di
       <figcaption className="dd-studio-bar">
         <span className="dd-studio-caption small">
           {asleep ? (
-            <>Ding Dong is asleep in his studio.</>
+            <>DingDong is asleep in his studio.</>
           ) : (
             <>
               Day {day} in the studio · <span className="muted">{on ? "you're listening in" : mood.why}</span>
