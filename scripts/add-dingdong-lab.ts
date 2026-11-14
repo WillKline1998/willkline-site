@@ -7,7 +7,7 @@ const entry = {
   title: "DingDong",
   status: "BUILDING",
   description:
-    "A small AI creature who lives on this site. He wakes up every morning, works on his ears a little, and is slowly figuring out what music he likes.",
+    "A small AI creature who lives on this site. He wakes up every morning, works on his ears a little, reads the words visitors leave him, and sometimes asks for things.",
   body: `## What it is
 
 DingDong is an AI creature who lives at [willkline.net/dingdong](/dingdong). Every morning at 9 he wakes up, practises one thing about listening, writes in his diary, and makes a small tune.
@@ -17,6 +17,10 @@ He starts with almost nothing. First he only hears pulse, then pitch, then inter
 ## Where to see him
 
 His life feed and his Studio are public. In the Studio he wanders around, his mood shows, and you can press play to hear what he made that day.
+
+## Leaving him a word
+
+Visitors can leave him up to three words from a short list (instruments, sounds, moods, genres). Each morning he reads a few and usually shrugs. When the same word keeps catching his attention, a program counts it, the count fades over time, and past a set line he asks for it in his "DingDong asks for…" trough. I decide what he gets.
 
 ## How it's built
 

@@ -1083,3 +1083,31 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 @media (prefers-reduced-motion: reduce) {
   .dd-guy[data-walking="1"] .dd-legs i, .dd-notes, .dd-live { animation: none; }
 }
+
+/* DingDong: the gift box (visitors leave a word from a fixed list) and the requests trough. */
+.dd-gift, .dd-trough { margin: 0 0 1.5rem; padding: 0.9rem 1rem 1rem; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.dd-gift-title, .dd-trough-title { font-family: var(--font-label); font-size: 0.9rem; font-weight: 600; margin: 0; }
+.dd-gift-note { margin: 0.3rem 0 0.75rem; }
+.dd-gift-tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0 0 0.6rem; border-bottom: 1px solid var(--rule); }
+.dd-gift-tab { font: inherit; font-family: var(--font-label); font-size: 0.78rem; min-height: 44px; padding: 0 0.7rem; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); cursor: pointer; }
+.dd-gift-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.dd-words { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.dd-words[hidden] { display: none; }
+.dd-word { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.85rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--bg); font-family: var(--font-label); font-size: 0.8rem; color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+.dd-word input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.dd-word:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dd-word[data-on] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dd-word[data-off] { opacity: 0.45; cursor: default; }
+@media (min-width: 640px) { .dd-word, .dd-gift-tab { min-height: 36px; } }
+.dd-gift-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 0.75rem; margin: 0.85rem 0 0.3rem; }
+.dd-gift-picked { font-family: var(--font-label); min-width: 0; overflow-wrap: anywhere; }
+.dd-gift-send { min-height: 44px; border-radius: 999px; }
+.dd-gift-send:disabled { opacity: 0.5; cursor: default; }
+.dd-gift-ok { margin: 0.3rem 0 0; color: var(--ink); }
+.dd-wants { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.6rem; }
+.dd-want { display: grid; gap: 0.15rem; padding: 0.6rem 0.75rem; border-left: 3px solid var(--accent); background: var(--bg); border-radius: 0 6px 6px 0; }
+.dd-want[data-status="granted"] { border-left-color: var(--rule); }
+.dd-want-word { font-family: var(--font-label); font-size: 0.85rem; font-weight: 600; }
+.dd-want-reason { margin: 0; line-height: 1.5; }
+.dd-want-got { color: var(--accent); font-weight: 600; }
+

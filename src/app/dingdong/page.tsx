@@ -4,9 +4,12 @@ import Script from "next/script";
 import { db } from "@/lib/db";
 import { longDate } from "@/lib/dates";
 import { readPattern, STAGE_BLURBS, studioMood } from "@/lib/dingdong";
+import { dingDongWantsAndGifts } from "@/lib/dingdong-gifts";
+import { GiftBox } from "./GiftBox";
 import { openGraph } from "@/lib/seo";
 import { PlayButton } from "./PlayButton";
 import { Studio } from "./Studio";
+import { Trough } from "./Trough";
 
 const DESCRIPTION =
   "A tiny creature learning music from nothing, one day at a time. He writes a diary line and a little tune every morning.";
@@ -24,7 +27,10 @@ const STAGE_ORDER = Object.keys(STAGE_BLURBS);
 
 export default async function DingDongPage(props: { searchParams: Promise<{ skill?: string | string[] }> }) {
   const sp = await props.searchParams;
-  const allDays = await db.dingDongDay.findMany({ orderBy: { day: "desc" }, take: 400 });
+  const [allDays, { wants, waiting }] = await Promise.all([
+    db.dingDongDay.findMany({ orderBy: { day: "desc" }, take: 400 }),
+    dingDongWantsAndGifts(),
+  ]);
   const stage = allDays[0]?.stage;
   const today = allDays[0] ?? null;
   // Skills he has actually reached, in the order his ears grew (first day seen at each stage).
@@ -62,6 +68,11 @@ export default async function DingDongPage(props: { searchParams: Promise<{ skil
           He&apos;s written by an AI model and a small program I made, which decides when his ears grow, so he can&apos;t skip ahead. Press
           Play on any day to hear what he made. Nobody edits him.
         </p>
+        <p>
+          You can leave him a word from a short list. He doesn&apos;t really hear anything: he reads the words, and if one keeps coming up
+          he may start asking for it. A program counts how often he notices things, so he can&apos;t talk himself into wanting stuff. I
+          decide what he gets.
+        </p>
       </details>
 
       {stage && (
@@ -70,6 +81,9 @@ export default async function DingDongPage(props: { searchParams: Promise<{ skil
           {STAGE_BLURBS[stage] && <span className="small muted">{STAGE_BLURBS[stage]}</span>}
         </p>
       )}
+
+      <Trough wants={wants} />
+      <GiftBox waiting={waiting} />
 
       {skillList.length > 1 && (
         <nav className="wall-filters dd-skills" aria-label="Filter days by ear skill">
@@ -117,6 +131,7 @@ export default async function DingDongPage(props: { searchParams: Promise<{ skil
                 </header>
                 <p className="dd-diary">{d.diary}</p>
                 {d.tasteNote && <p className="dd-taste">noticed: {d.tasteNote}</p>}
+                {d.giftNote && <p className="dd-taste dd-giftnote">about your gifts: {d.giftNote}</p>}
                 {pattern ? (
                   <PlayButton day={d.day} pattern={pattern} />
                 ) : (
