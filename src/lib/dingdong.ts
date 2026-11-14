@@ -1,4 +1,4 @@
-// Ding Dong: shared types and the tolerant pattern reader. The page never trusts stored JSON:
+// DingDong: shared types and the tolerant pattern reader. The page never trusts stored JSON:
 // anything malformed becomes `null` and the day still shows its diary, just without a Play button.
 
 export type DingNote = { beat: number; pitch: string; dur: number };
@@ -42,7 +42,7 @@ export const STAGE_BLURBS: Record<string, string> = {
   genre: "His ears are all grown up. Anything goes.",
 };
 
-// Which of the owner's face drawings (public/dingdong/dingdong-<face>.svg) Ding Dong wears in the studio.
+// Which of the owner's face drawings (public/dingdong/dingdong-<face>.svg) DingDong wears in the studio.
 export const FACES = ["happy", "sad", "angry", "confused", "disgusted", "scared", "surprised", "neutral", "singing"] as const;
 export type Face = (typeof FACES)[number];
 export type StudioMood = { face: Face; asleep: boolean; why: string };

@@ -1,16 +1,16 @@
-// One-off: adds (or refreshes) the Ding Dong card in the Lab. Safe to re-run; edit the text here and re-run
+// One-off: adds (or refreshes) the DingDong card in the Lab. Safe to re-run; edit the text here and re-run
 // to update the entry as the project grows (the Lab card is a snapshot, not a changelog).
 import "dotenv/config";
 import { db } from "../src/lib/db";
 
 const entry = {
-  title: "Ding Dong",
+  title: "DingDong",
   status: "BUILDING",
   description:
     "A small AI creature who lives on this site. He wakes up every morning, works on his ears a little, and is slowly figuring out what music he likes.",
   body: `## What it is
 
-Ding Dong is an AI creature who lives at [willkline.net/dingdong](/dingdong). Every morning at 9 he wakes up, practises one thing about listening, writes in his diary, and makes a small tune.
+DingDong is an AI creature who lives at [willkline.net/dingdong](/dingdong). Every morning at 9 he wakes up, practises one thing about listening, writes in his diary, and makes a small tune.
 
 He starts with almost nothing. First he only hears pulse, then pitch, then intervals, and each new stage unlocks only when he's ready. Over time he's meant to grow real taste of his own.
 
@@ -30,10 +30,10 @@ async function main() {
   const slug = "dingdong";
   if (await db.labProject.findUnique({ where: { slug } })) {
     await db.labProject.update({ where: { slug }, data: entry });
-    return console.log("Updated Ding Dong in the Lab.");
+    return console.log("Updated DingDong in the Lab.");
   }
   const last = await db.labProject.findFirst({ orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
   await db.labProject.create({ data: { slug, ...entry, sortOrder: (last?.sortOrder ?? 0) + 1 } });
-  console.log("Added Ding Dong to the Lab.");
+  console.log("Added DingDong to the Lab.");
 }
 main().finally(() => db.$disconnect());

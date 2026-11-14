@@ -1,4 +1,4 @@
-// Import Ding Dong day files (the spike's out/days/day-NNN.json) into the DingDongDay table.
+// Import DingDong day files (the spike's out/days/day-NNN.json) into the DingDongDay table.
 // Idempotent: a day number that already exists is updated in place.
 //   npx tsx scripts/import-dingdong-day.ts ~/Projects/dingdong-spike/out/days/day-*.json   (backfill)
 //   npx tsx scripts/import-dingdong-day.ts path/to/day-010.json                         (daily cron)
