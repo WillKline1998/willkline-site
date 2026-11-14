@@ -353,5 +353,36 @@ model DingDongDay {
   pattern   Json // { tempo, beats, instrument, notes: [{ beat, pitch?, dur? }] }; validated on read
   fallback  Boolean  @default(false) // a "sleepy" day when the model failed
   dayDate   String   @default("") // the spike's date label, e.g. "2026-11-12"
+  giftNote  String   @default("") // his one line about visitors' gifts that morning (empty most days)
   createdAt DateTime @default(now()) // when that day was generated
+}
+
+// A visitor's gift: 1-3 words from the fixed vocabulary (src/lib/dingdong-vocabulary.json), never free text.
+// The 9 AM engine reads a few pending ones (scripts/dingdong-sync.ts pull) and marks each one ignored or
+// processed after he has had a look. Anything it can't digest stays pending.
+model DingDongGift {
+  id          String    @id @default(cuid())
+  words       String[]
+  visitorHash String // sha256 of the visitor's IP + salt; only used for the per-visitor daily limit
+  status      String    @default("pending") // "pending" | "ignored" | "processed"
+  importance  Int? // how much he cared, 1-10 (set by the engine, budget-capped in code)
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([visitorHash, createdAt])
+}
+
+// Something DingDong asks for, in his own words. Created by the engine when a word's notice score crosses
+// a threshold in code (never model-decided). The owner grants or declines it (/admin/dingdong or
+// scripts/dingdong-want.ts). Pending and granted ones show in the trough on /dingdong.
+model DingDongWant {
+  id        String    @id @default(cuid())
+  word      String
+  reason    String // his ask, in his voice
+  status    String    @default("pending") // "pending" | "granted" | "declined"
+  createdAt DateTime  @default(now())
+  grantedAt DateTime? // when it was granted (or declined)
+
+  @@index([status, createdAt])
 }

@@ -51,3 +51,7 @@ Research: tsParticles (github.com/tsparticles/tsparticles, ~9k stars, MIT) and p
 
 ## 2026-11-12 — Ding Dong: Tone.js from CDN, cron writes Postgres
 Tone.js 15.1.22 (github.com/Tonejs/Tone.js, ~14k stars, MIT) is loaded from jsDelivr with next/script (lazyOnload), the same build the Phase 0 spike was verified with. It is not an npm dependency. The site only reads `DingDongDay`; the morning cron on Will's Mac generates a day and upserts it straight into Neon. Visitors cost one small DB read and no AI calls. Stored pattern JSON is untrusted and validated on every read.
+
+## 2026-11-13 — DingDong gifts: allow-listed words, desire counted in code
+Spec: Brain `Projects/Ding-Dong-research-and-plan.md` §6. v0 accepts only words from a fixed vocabulary (src/lib/dingdong-vocabulary.json), re-checked on the server, in the pull script and in the engine. There's no free text, so the daily prompt never sees anything a visitor typed. The "wanting" follows the Generative Agents reflection pattern (github.com/joonspk-research/generative_agents, Apache-2.0, ~22k★; AI Town, MIT, ~10.8k★ reuses it): the model scores importance, and code sums, decays and thresholds. The model can't decide to want something; it only words the ask. The notice scores live in the spike's state.json, not the DB (the DB holds only gifts, wants and their statuses). The rate limit uses a daily-rotating salted IP hash, so no raw IPs are kept. No new dependencies.
+

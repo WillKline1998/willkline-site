@@ -17,6 +17,7 @@ const TOOLS = [
   { href: "/admin/media", label: "Media", note: "Photos, videos, audio, press" },
   { href: "/admin/writing", label: "Writing", note: "Posts and essays (drafts stay private)" },
   { href: "/admin/lab", label: "Lab", note: "Projects and experiments" },
+  { href: "/admin/dingdong", label: "DingDong", note: "Grant or decline what he asks for; see visitors' gifts" },
   { href: "/admin/wall", label: "Inspiration Wall", note: "Sign-ups on/off, moderation, members" },
 ];
 
