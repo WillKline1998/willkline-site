@@ -32,7 +32,8 @@ export default async function SongPage(props: PageProps<"/songbook/[slug]">) {
         ))}
       </nav>
       <h1 className="page-title">{song.title}</h1>
-      <p className="small muted">{song.artist ? `${song.artist} · ` : ""}{pagesLabel(song.pages)} · PDF, {formatBytes(song.size)}</p>
+      {song.artist && <p className="song-by">{song.artist}</p>}
+      <p className="small muted">{pagesLabel(song.pages)} · PDF, {formatBytes(song.size)}</p>
       {song.notes && <p className="song-notes">{song.notes}</p>}
       <p className="song-actions">
         <a className="btn" href={url} target="_blank" rel="noreferrer">Open PDF</a>

@@ -67,3 +67,64 @@ export const matchesPages = (pages: number, f: PageFilter | undefined) =>
 export const pagesLabel = (n: number) => (n === 1 ? "1 page" : `${n} pages`);
 
 export const SONG_LIMITS = { title: 120, artist: 120, notes: 1000, name: 60, bytes: 4 * 1024 * 1024 } as const;
+
+/** What an empty artist reads as (hymns, traditional tunes). */
+export const NO_ARTIST = "No artist";
+export const artistLabel = (artist: string) => artist.trim() || NO_ARTIST;
+
+/**
+ * Title and artist from a file name. "Radiohead - No Surprises.pdf" -> { artist: "Radiohead", title: "No Surprises" }.
+ * A credit in brackets on the artist side moves to the title: "Nina Simone (The Beatles) - Here Comes The Sun" ->
+ * { artist: "Nina Simone", title: "Here Comes The Sun (The Beatles)" }. No " - " -> no artist, the whole name is the title.
+ */
+export function splitArtist(name: string): { title: string; artist: string } {
+  const base = prettyTitle(name);
+  const at = base.indexOf(" - ");
+  if (at <= 0) return { title: base, artist: "" };
+  let artist = base.slice(0, at).trim();
+  let title = base.slice(at + 3).trim();
+  const credit = artist.match(/^(.+?)\s*\(([^)]+)\)$/);
+  if (credit) {
+    artist = credit[1].trim();
+    title = `${title} (${credit[2].trim()})`;
+  }
+  return title && artist ? { title, artist } : { title: base, artist: "" };
+}
+
+export type ArtistCluster = { name: string; count: number; none?: boolean; rest?: boolean };
+
+/**
+ * One bubble per artist for demo mode, biggest first. Past `cap`, the smallest artists fold into one
+ * "+N more" bubble so the screen never holds more than `cap` circles. Songs with no artist always get their
+ * own bubble — that's a distinct, meaningful group (hymns, traditional tunes), not an overflow leftover — so
+ * it's exempted from the count-based cap that folds small NAMED artists together.
+ */
+export function artistClusters(artists: string[], cap = 20): ArtistCluster[] {
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const a of artists) {
+    const name = a.trim();
+    const key = name.toLowerCase();
+    const c = counts.get(key) ?? { name, count: 0 };
+    c.count++;
+    counts.set(key, c);
+  }
+  const noneCount = counts.get("")?.count;
+  const none: ArtistCluster | null = noneCount ? { name: NO_ARTIST, count: noneCount, none: true } : null;
+  const named: ArtistCluster[] = [...counts.entries()]
+    .filter(([key]) => key !== "")
+    .map(([, c]) => c)
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+  const budget = cap - (none ? 1 : 0); // reserve a slot for "No artist" so it's never squeezed out by the cap
+  if (named.length <= budget) return none ? [...named, none] : named;
+  const keep = named.slice(0, budget - 1);
+  const rest = named.slice(budget - 1);
+  const restCluster: ArtistCluster = { name: `+${rest.length} more`, count: rest.reduce((n, c) => n + c.count, 0), rest: true };
+  return none ? [...keep, restCluster, none] : [...keep, restCluster];
+}
+
+/** Circle radius for a cluster: area grows with the song count, clamped so no artist is too small or too big. */
+export function clusterRadius(count: number, maxCount: number, minR: number, maxR: number): number {
+  if (maxCount <= 1) return minR;
+  const t = Math.sqrt((count - 1) / (maxCount - 1));
+  return Math.round(minR + (maxR - minR) * Math.min(1, Math.max(0, t)));
+}

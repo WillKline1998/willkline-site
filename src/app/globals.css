@@ -912,6 +912,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .song-row:hover { border-color: var(--accent); }
 .song-title { font-weight: 700; }
 .song-artist { grid-column: 1; font-size: 0.9rem; }
+.song-by { margin: -0.25rem 0 0.35rem; font-size: 1.1rem; color: var(--muted); }
 .song-meta { grid-row: 1; grid-column: 2; text-align: right; }
 @media (max-width: 559px) { .song-meta { grid-row: auto; grid-column: 1; text-align: left; } }
 .song-notes { max-width: 62ch; white-space: pre-line; }
@@ -924,8 +925,23 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .song-newfolder { max-width: 520px; }
 .song-admin-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
 .song-admin-list > li { padding: 0.75rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--panel); display: grid; gap: 0.4rem; }
-.song-admin-form { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-.song-admin-form input[type=text] { flex: 1 1 11rem; min-width: 0; }
+.song-admin-head { margin: 0; }
+/* Song editor: labelled fields in a grid (one column on phones), a Save button that reports what happened. */
+.song-editor { display: grid; gap: 0.5rem 0.75rem; grid-template-columns: 1fr; min-width: 0; }
+@media (min-width: 760px) { .song-editor { grid-template-columns: 1fr 1fr; } .song-editor-notes, .song-editor-actions { grid-column: 1 / -1; } }
+.song-editor label { display: grid; gap: 0.2rem; font-family: var(--font-label); font-size: 0.75em; color: var(--muted); min-width: 0; }
+.song-editor :is(input[type=text], select) { font: inherit; font-family: var(--font-body); font-size: 1rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); width: 100%; max-width: 100%; box-sizing: border-box; min-height: 40px; }
+.song-editor input[type=text]:disabled { background: var(--panel); }
+.song-editor .song-editor-check { display: flex; align-items: center; gap: 0.45rem; font-family: var(--font-body); font-size: 0.9rem; color: var(--ink); min-height: 36px; }
+.song-editor input[type=checkbox] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); flex: none; }
+.song-editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.song-editor-actions .btn { min-width: 7.5rem; min-height: 44px; }
+.song-editor-actions .btn:disabled { opacity: 0.55; cursor: default; }
+.song-editor-actions .btn[data-state=saved] { background: #1f7a3f; border-color: #1f7a3f; color: #fff; opacity: 1; }
+.song-editor-status { min-width: 0; }
+.song-saved { color: #1f7a3f; font-weight: 600; }
+.song-editor[data-dirty="1"] { box-shadow: inset 3px 0 0 var(--accent); padding-left: 0.6rem; }
+.song-just-moved { color: #1f7a3f; font-weight: 600; background: #1f7a3f1a; border: 1px solid #1f7a3f55; border-radius: 6px; padding: 0.3rem 0.6rem; margin: 0 0 0.4rem; display: inline-block; }
 
 /* Lab tech chips: a Wikipedia-style preview card. Portalled to <body> and absolutely
    positioned, so it never reflows the page or nudges the other chips. */
@@ -977,6 +993,21 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   box-shadow: 0 0 18px color-mix(in srgb, currentColor 45%, transparent);
 }
 .wk-floater { border-radius: 40% 60% 55% 45%; opacity: 0.22; filter: blur(1.5px); }
+/* Songbook: ArtistBubbles.tsx, one drifting circle per artist (same fixed, click-through layer as above). */
+.wk-artist-bubble {
+  position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; border-radius: 50%;
+  display: grid; place-content: center; text-align: center; gap: 0.1em; padding: 0.6em; box-sizing: border-box;
+  border: 1.5px solid currentColor; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, currentColor 34%, transparent), color-mix(in srgb, currentColor 12%, transparent) 70%);
+  box-shadow: 0 0 22px color-mix(in srgb, currentColor 40%, transparent); opacity: 0.62; font-family: var(--font-label); line-height: 1.1;
+}
+.wk-artist-name { color: var(--ink); font-weight: 700; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.wk-artist-count { color: var(--ink); opacity: 0.7; font-size: 0.8em; }
+.wk-artist-none { border-style: dashed; }
+.wk-artist-rest { opacity: 0.45; }
+.artist-legend { display: none; }
+[data-mode="demo"] .artist-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; padding: 0; margin: 0 0 1rem; font-family: var(--font-label); font-size: 0.8rem; }
+.artist-legend li { padding: 0.2rem 0.6rem; border: 1px solid var(--accent); border-radius: 999px; }
+.artist-legend-none { border-style: dashed !important; }
 @media (prefers-reduced-motion: reduce) {
   [data-mode="demo"] .lab-detail::before, [data-mode="demo"] .lab-detail::after,
   [data-mode="demo"] .bio-keep::before, [data-mode="demo"] .photo-grid::before { animation: none; }
