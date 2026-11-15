@@ -3,7 +3,11 @@
 A throwaway admin makes nested folders, uploads PDFs of 1, 2 and 3 pages in one batch (one bad file mixed in),
 moves and unpublishes songs, and deletes a folder. The test then checks what a visitor sees: folder browsing,
 breadcrumbs, search, the page-length filter, the PDF page and its file; and that a member cannot reach the admin.
-Run: ~/JobSearch/.venv/bin/python scripts/e2e_songbook.py
+It also runs scripts/songbook-flatten-root.ts on a fixture tree and checks the demo-mode artist circles.
+It deletes EVERY song and folder when it finishes, so it only runs against a throwaway database:
+  createdb willkline_songbook_e2e && DATABASE_URL=postgresql://$USER@localhost:5432/willkline_songbook_e2e npx prisma migrate deploy
+  (same DATABASE_URL for `npm run build`, `INSECURE_COOKIES=1 npx next start -p 3123` and this script)
+Run: DATABASE_URL=... ~/JobSearch/.venv/bin/python scripts/e2e_songbook.py
 """
 import json
 import secrets
@@ -14,7 +18,11 @@ import urllib.request
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
-from testdb import remove_user, sql, sql_value
+from testdb import database_url, remove_user, sql, sql_value
+
+# The clean-up below wipes the Song table; refuse to point it at the dev or production database.
+if not database_url().rstrip("/").split("/")[-1].split("?")[0].endswith("_e2e"):
+    sys.exit("Refusing to run: DATABASE_URL must name a throwaway database ending in _e2e (see the docstring).")
 
 BASE = "http://localhost:3123"
 ROOT = Path(__file__).resolve().parent.parent
@@ -58,14 +66,43 @@ def login(page, email, nxt):
     page.click("button:text('Log in')")
 
 
+def migration_checks():
+    """scripts/songbook-flatten-root.ts on a copy of production's shape: Will Standards > Covers > Hymns, > Originals."""
+    sql("""INSERT INTO "SongFolder"(id, name, "parentId") VALUES ('mg-ws','Will Standards',NULL),('mg-cv','Covers','mg-ws'),
+           ('mg-hy','Hymns','mg-cv'),('mg-or','Originals','mg-ws')""")
+    rows = [("mg-1", "Radiohead - Airbag", "mg-cv"), ("mg-2", "Amazing Grace", "mg-hy"), ("mg-3", "Old Man", "mg-or"), ("mg-4", "Loose One", "mg-ws"), ("mg-5", "Unfiled", None)]
+    for i, t, f in rows:
+        fv = f"'{f}'" if f else "NULL"
+        sql(f"""INSERT INTO "Song"(id, slug, title, "fileKey", "fileName", size, "folderId", "updatedAt") VALUES ('{i}','{i}','{t}','k-{i}','x.pdf',1,{fv},now())""")
+    q = """SELECT count(*) FROM "Song" WHERE id LIKE 'mg-%'"""
+    run = lambda *a: subprocess.run(["npx", "tsx", "scripts/songbook-flatten-root.ts", *a], cwd=ROOT, capture_output=True, text=True)
+    before = sql_value(q)
+    dry = run()
+    check("Dry run" in dry.stdout and sql_value("""SELECT count(*) FROM "SongFolder" WHERE id='mg-ws'""") == "1", "migration: the dry run prints a plan and changes nothing")
+    print("    " + "\n    ".join(dry.stdout.strip().splitlines()))
+    out = run("--apply")
+    print("    " + "\n    ".join(out.stdout.strip().splitlines()[-8:]))
+    tree = sql_value("""SELECT string_agg(f.name || '<' || coalesce(p.name, 'ROOT'), ',' ORDER BY f.name) FROM "SongFolder" f LEFT JOIN "SongFolder" p ON p.id = f."parentId" WHERE f.id LIKE 'mg-%'""")
+    check(tree == "Covers<ROOT,Hymns<Covers,Originals<ROOT", f"migration: Covers and Originals at the root, Hymns still inside Covers, Will Standards gone ({tree})")
+    check(sql_value(q) == before == "5", f"migration: song count identical ({before} -> {sql_value(q)})")
+    check(sql_value("""SELECT "folderId" FROM "Song" WHERE id='mg-4'""") == "mg-cv" and "Loose One" in out.stdout, "migration: a song loose in Will Standards lands in Covers and is named in the output")
+    check(sql_value("""SELECT string_agg(coalesce("folderId", '-'), ',' ORDER BY id) FROM "Song" WHERE id IN ('mg-1','mg-2','mg-3','mg-5')""") == "mg-cv,mg-hy,mg-or,-", "migration: every other song stays in its own folder")
+    again = run("--apply")
+    check(again.returncode == 0 and "already migrated" in again.stdout and sql_value(q) == "5", "migration: running it again is a no-op")
+    sql("""DELETE FROM "Song" WHERE id LIKE 'mg-%'""")
+    sql("""DELETE FROM "SongFolder" WHERE id LIKE 'mg-%'""")
+
+
 user("e2e-sb-admin", ADMIN, "e2e_sb_admin", "ADMIN")
 user("e2e-sb-member", MEMBER, "e2e_sb_member", "MEMBER")
 tmp = Path(tempfile.mkdtemp())
 make_pdf(tmp / "Amazing_Grace.pdf", 1)
 make_pdf(tmp / "Blue Moon (piano).pdf", 2)
 make_pdf(tmp / "Long_Medley.pdf", 3)
+make_pdf(tmp / "Radiohead - Airbag.pdf", 2)
 (tmp / "notes.pdf").write_text("this is not really a pdf")
 try:
+    migration_checks()
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="chrome", headless=True)
         errors = []
@@ -111,6 +148,14 @@ try:
         check("isn't a PDF" in page.locator(".song-upload-list li[data-state=failed]").inner_text(), "with a plain-words reason")
         rows = sql_value("""SELECT string_agg(title || ':' || pages, ',' ORDER BY title) FROM "Song" """)
         check(rows == "Amazing Grace:1,Blue Moon (piano):2,Long Medley:3", f"titles come from the file names and pages from the PDFs ({rows})")
+        check(sql_value("""SELECT count(*) FROM "Song" WHERE artist = '' """) == "3", "file names without ' - ' get no artist")
+        page.goto(f"{BASE}/admin/songbook")
+        page.locator("input[type=file][multiple]").set_input_files([str(tmp / "Radiohead - Airbag.pdf")])
+        page.locator("select").first.select_option(label="Originals")
+        page.get_by_role("button", name="Upload", exact=True).click()
+        page.wait_for_function("document.querySelectorAll('.song-upload-list li[data-state=done]').length === 1", timeout=30000)
+        got = sql_value("""SELECT title || '|' || artist FROM "Song" WHERE "fileName" = 'Radiohead - Airbag.pdf'""")
+        check(got == "Airbag|Radiohead", f"'Artist - Title.pdf' fills in both the title and the artist ({got})")
 
         # Sort them into the sub-folders from the admin list.
         page.goto(f"{BASE}/admin/songbook")
@@ -118,14 +163,31 @@ try:
             row = page.locator(".song-admin-list > li", has=page.locator(f"input[name=title][value='{title}']"))
             row.locator("select[name=folderId]").select_option(label=folder)
             row.get_by_role("button", name="Save").click()
-            page.wait_for_timeout(900)
+            row.locator("button:text('Saved ✓')").wait_for(timeout=10000)
             page.goto(f"{BASE}/admin/songbook")
         move("Amazing Grace", "Gospel / One page")
         move("Long Medley", "Gospel / Longer")
         row = page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']"))
+        check(row.locator("input[name=artist]").is_disabled(), "an upload with no artist starts as 'No artist' (artist box locked)")
+        row.locator("input[name=noArtist]").uncheck()
         row.locator("input[name=artist]").fill("Rodgers and Hart")
         row.get_by_role("button", name="Save").click()
-        page.wait_for_timeout(900)
+        row.locator("button:text('Saved ✓')").wait_for(timeout=10000)
+        check("Changes saved" in row.locator(".song-editor-status").inner_text(), "saving an artist flips the button to Saved ✓ with a note")
+        check(sql_value("""SELECT artist FROM "Song" WHERE title = 'Blue Moon (piano)'""") == "Rodgers and Hart", "and the artist is stored")
+        # Rename a title; "No artist" for a hymn.
+        row = page.locator(".song-admin-list > li", has=page.locator("a", has_text="Long_Medley.pdf"))
+        row.locator("input[name=title]").fill("Long Medley (Hymns)")
+        row.locator("input[name=noArtist]").uncheck()
+        row.locator("input[name=artist]").fill("Somebody")
+        row.locator("input[name=noArtist]").check()
+        check(row.locator("input[name=artist]").is_disabled(), "ticking No artist clears and locks the artist box")
+        row.get_by_role("button", name="Save").click()
+        row.locator("button:text('Saved ✓')").wait_for(timeout=10000)
+        check(sql_value("""SELECT title || '|' || artist FROM "Song" WHERE "fileName" = 'Long_Medley.pdf'""") == "Long Medley (Hymns)|", "a title edit saves and No artist stores an empty artist")
+        page.goto(f"{BASE}/admin/songbook")
+        check("No artist" in page.locator(".song-admin-list > li", has_text="Long Medley (Hymns)").locator(".song-admin-head").inner_text(), "the admin list says 'No artist' for it")
+        check("Radiohead" in page.locator(".song-admin-list > li", has_text="Airbag").locator(".song-admin-head").inner_text(), "and shows the artist for the others")
         check(sql_value("""SELECT count(*) FROM "Song" s JOIN "SongFolder" f ON f.id = s."folderId" WHERE f.name IN ('One page','Longer')""") == "2", "songs move between folders")
 
         # What a visitor sees.
@@ -143,6 +205,7 @@ try:
         check("One page" in v.locator(".song-folders").inner_text() and "Longer" in v.locator(".song-folders").inner_text(), "opening Gospel shows its sub-folders")
         check(v.locator(".song-crumbs").inner_text().replace("\n", " ").startswith("All songs / Gospel"), "with a breadcrumb")
         v.locator(".song-folders a", has_text="One page").click()
+        v.wait_for_function("document.querySelector('.song-crumbs').innerText.includes('One page')")
         v.wait_for_selector(".song-row")
         check(v.locator(".song-row").count() == 1 and "Amazing Grace" in v.locator(".song-row").inner_text(), "and the sub-folder lists just its songs")
 
@@ -151,8 +214,15 @@ try:
         check(v.locator(".song-row").count() == 1 and "Gospel" in v.locator(".song-row").inner_text() or v.locator(".song-row", has_text="Blue Moon").count() == 1, "search finds a song in any case")
         v.goto(f"{BASE}/songbook?q=rodgers")
         check(v.locator(".song-row", has_text="Blue Moon").count() == 1, "and by artist")
+        v.goto(f"{BASE}/songbook?q=radiohead")
+        check([t.strip() for t in v.locator(".song-title").all_inner_texts()] == ["Airbag"], "the 'Search a title or artist' box finds a song by its artist alone")
+        check("Rodgers and Hart" in browser.new_context().new_page().goto(f"{BASE}/songbook/blue-moon-piano").text(), "the song page shows the artist")
+        v.goto(f"{BASE}/songbook?q=moon")
+        check("Rodgers and Hart" in v.locator(".song-row").inner_text(), "and so does the song list")
+        v.goto(f"{BASE}/songbook/long-medley")
+        check(v.locator(".song-by").count() == 0 and v.locator("h1").inner_text() == "Long Medley (Hymns)", "a song with no artist shows no artist line, and the new title shows publicly")
         v.goto(f"{BASE}/songbook?pages=3")
-        check([t.strip() for t in v.locator(".song-title").all_inner_texts()] == ["Long Medley"], "the 3+ pages filter finds the long one, wherever it is")
+        check([t.strip() for t in v.locator(".song-title").all_inner_texts()] == ["Long Medley (Hymns)"], "the 3+ pages filter finds the long one, wherever it is")
         v.goto(f"{BASE}/songbook?pages=1")
         check([t.strip() for t in v.locator(".song-title").all_inner_texts()] == ["Amazing Grace"], "the 1 page filter finds the short one")
         v.goto(f"{BASE}/songbook?q=zzzz")
@@ -171,12 +241,52 @@ try:
         check(body[:5] == b"%PDF-", "Open PDF serves the real file")
         check(v.locator("a:text('Download')").get_attribute("download") == "Amazing_Grace.pdf", "Download keeps the file name")
 
+        # The owner's bug: open a folder, move a song out of it, Save. It must say so, and really move.
+        gospel = sql_value("""SELECT id FROM "SongFolder" WHERE name='Gospel'""")
+        originals = sql_value("""SELECT id FROM "SongFolder" WHERE name='Originals'""")
+        page.goto(f"{BASE}/admin/songbook?folder={gospel}")
+        row = page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']"))
+        check(row.get_by_role("button", name="Save").is_disabled(), "Save is greyed out until something changes")
+        row.locator("select[name=folderId]").select_option(label="Originals")
+        check("Unsaved changes" in row.locator(".song-editor-status").inner_text(), "a change shows 'Unsaved changes'")
+        row.get_by_role("button", name="Save").click()
+        page.wait_for_url(lambda u: f"folder={originals}" in u and "moved=" in u, timeout=10000)
+        check(page.locator(".song-just-moved").count() == 1, "moving a song out of the open folder lands you where it went, with a flash")
+        row = page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']"))
+        check(row.locator("select[name=folderId]").input_value() == originals, "and the folder picker shows the NEW folder (it used to snap back)")
+        page.screenshot(path=str(ROOT / "docs/mockups/songbook-admin-saved.png"))
+        page.goto(f"{BASE}/admin/songbook?folder={gospel}")
+        check(page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']")).count() == 0, "and it's gone from Gospel")
+        page.goto(f"{BASE}/admin/songbook?folder={originals}")
+        check(page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']")).count() == 1, "and it's in Originals")
+        check(sql_value("""SELECT "folderId" FROM "Song" WHERE title='Blue Moon (piano)'""") == originals, "the database agrees")
+        # A failure is shown, not swallowed: delete the chosen folder behind the editor's back, then save.
+        sql("""INSERT INTO "SongFolder"(id, name) VALUES ('e2e-doomed', 'Doomed')""")
+        page.goto(f"{BASE}/admin/songbook?folder={originals}")
+        row = page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Blue Moon (piano)']"))
+        row.locator("select[name=folderId]").select_option(label="Doomed")
+        sql("""DELETE FROM "SongFolder" WHERE id='e2e-doomed'""")
+        row.get_by_role("button", name="Save").click()
+        row.locator(".song-editor-status .form-error").wait_for(timeout=10000)
+        check("folder was deleted" in row.locator(".song-editor-status").inner_text() and sql_value("""SELECT "folderId" FROM "Song" WHERE title='Blue Moon (piano)'""") == originals, "a failed save says why in red, and nothing changes")
+        # Phone: the editor stacks and fits.
+        php = browser.new_context(viewport={"width": 390, "height": 844}, storage_state=page.context.storage_state()).new_page()
+        php.goto(f"{BASE}/admin/songbook?folder={originals}")
+        prow = php.locator(".song-admin-list > li").first
+        prow.locator("input[name=notes]").fill("Phone note")
+        prow.get_by_role("button", name="Save").click()
+        prow.locator("button:text('Saved ✓')").wait_for(timeout=10000)
+        check(php.evaluate("document.documentElement.scrollWidth - innerWidth") == 0, "the song editor fits a phone, and saves there")
+        prow.scroll_into_view_if_needed()
+        php.screenshot(path=str(ROOT / "docs/mockups/songbook-admin-phone.png"))
+        php.context.close()
+
         # Unpublish hides the page AND the file.
         page.goto(f"{BASE}/admin/songbook")
         row = page.locator(".song-admin-list > li", has=page.locator("input[name=title][value='Amazing Grace']"))
         row.locator("input[name=published]").uncheck()
         row.get_by_role("button", name="Save").click()
-        page.wait_for_timeout(900)
+        row.locator("button:text('Saved ✓')").wait_for(timeout=10000)
         v.goto(f"{BASE}/songbook?q=grace")
         check(v.locator(".song-row").count() == 0, "an unpublished song disappears from the Songbook")
         resp = browser.new_context().request.get(BASE + href)
@@ -189,13 +299,73 @@ try:
         li.get_by_role("button", name="Delete folder").click()
         page.wait_for_timeout(900)
         page.goto(f"{BASE}/admin/songbook")
-        where = sql_value("""SELECT f.name FROM "Song" s JOIN "SongFolder" f ON f.id = s."folderId" WHERE s.title = 'Long Medley'""")
+        where = sql_value("""SELECT f.name FROM "Song" s JOIN "SongFolder" f ON f.id = s."folderId" WHERE s."fileName" = 'Long_Medley.pdf'""")
         check(where == "Gospel" and sql_value("""SELECT count(*) FROM "SongFolder" WHERE name='Longer'""") == "0", f"deleting a folder moves its songs up one level (now in {where})")
 
         # A folder can't be moved into itself.
         li = page.locator(".song-folder-admin > li", has=page.locator("input[name=name][value='Gospel']"))
         opts = li.locator("select[name=parentId] option").all_inner_texts()
         check(not any(o.strip() == "Gospel" for o in opts), "the folder picker doesn't offer a folder itself as its parent")
+
+        # Demo mode: artist circles. Add 24 more artists (fixture rows, removed in finally) so there's a crowd to cap.
+        for i in range(24):
+            n = 1 + (i % 3) + (30 if i == 0 else 0)
+            for k in range(n):
+                sql(f"""INSERT INTO "Song"(id, slug, title, artist, "fileKey", "fileName", size, "updatedAt") VALUES ('e2e-bb-{i}-{k}','e2e-bb-{i}-{k}','Song {k}','Artist {i:02d}','k','x.pdf',1,now())""")
+        def demo_page(vw, vh, **kw):
+            ctx = browser.new_context(viewport={"width": vw, "height": vh}, **kw)
+            ctx.add_init_script("localStorage.setItem('wk-demo-mode','on')")
+            pg = ctx.new_page()
+            pg.on("pageerror", lambda e: errors.append(str(e)[:160]))
+            pg.goto(f"{BASE}/songbook")
+            return pg
+        d = demo_page(1100, 800)
+        d.wait_for_selector(".wk-artist-bubble")
+        n = d.locator(".wk-artist-bubble").count()
+        names = d.locator(".wk-artist-name").all_inner_texts()
+        check(n == 20 and any(t.startswith("+") and "more" in t for t in names), f"demo: one circle per artist, capped at 20 with a '+N more' circle ({n})")
+        check("No artist" in names, "demo: songs with no artist get their own 'No artist' circle")
+        sizes = d.locator(".wk-artist-bubble").evaluate_all("els => els.map(e => e.getBoundingClientRect().width)")
+        check(min(sizes) >= 60 and max(sizes) <= 240 and max(sizes) > min(sizes), f"demo: sizes follow song counts, clamped ({min(sizes):.0f}–{max(sizes):.0f}px)")
+        big = d.locator(".wk-artist-bubble", has_text="Artist 00")
+        check(big.evaluate("e => e.getBoundingClientRect().width") == max(sizes), "demo: the artist with the most songs is the biggest circle")
+        p1 = d.locator(".wk-artist-bubble").first.evaluate("e => e.style.transform")
+        d.wait_for_timeout(4000)
+        p2 = d.locator(".wk-artist-bubble").first.evaluate("e => e.style.transform")
+        hits = int(d.locator(".wk-artist-bubbles").get_attribute("data-hits") or "0")
+        check(p1 != p2 and hits > 0, f"demo: circles move and bounce off each other ({hits} collisions in 4s)")
+        inside = d.evaluate("""() => [...document.querySelectorAll('.wk-artist-bubble')].every(e => { const r = e.getBoundingClientRect(); return r.left >= -1 && r.top >= -1 && r.right <= innerWidth + 1 && r.bottom <= innerHeight + 1; })""")
+        check(inside, "demo: every circle stays inside the window (wall bounce)")
+        worst = d.evaluate("""() => { const c = [...document.querySelectorAll('.wk-artist-bubble')].map(e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 }; });
+            let w = 0; for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) w = Math.max(w, (c[i].r + c[j].r - Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)) / Math.min(c[i].r, c[j].r)); return w; }""")
+        check(worst < 0.35, f"demo: circles push apart instead of sitting on top of each other (worst overlap {worst:.2f} of a radius)")
+        layer = d.locator(".wk-artist-bubbles")
+        check(layer.evaluate("e => getComputedStyle(e).pointerEvents") == "none" and layer.get_attribute("aria-hidden") == "true", "demo: the circle layer is click-through and hidden from screen readers")
+        under = d.evaluate("""() => { const a = document.querySelector('.song-folders a'); const r = a.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!el && a.contains(el); }""")
+        check(under, "demo: a folder card is still what you hit at its centre")
+        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-circles.png"))
+        d.locator(".song-folders a", has_text="Gospel").click()
+        d.wait_for_url("**folder=*", timeout=10000)
+        check("Gospel" in d.locator(".song-crumbs").inner_text(), "demo: clicking a folder through the circles still opens it")
+        d.context.close()
+        d = demo_page(390, 844)
+        d.wait_for_selector(".wk-artist-bubble")
+        n = d.locator(".wk-artist-bubble").count()
+        sizes = d.locator(".wk-artist-bubble").evaluate_all("els => els.map(e => e.getBoundingClientRect().width)")
+        check(n == 12 and max(sizes) <= 144 and d.evaluate("document.documentElement.scrollWidth - innerWidth") == 0, f"demo phone: fewer, smaller circles ({n}, max {max(sizes):.0f}px), no sideways scroll")
+        d.wait_for_timeout(1500)
+        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-circles-phone.png"))
+        d.context.close()
+        d = demo_page(1100, 800, reduced_motion="reduce")
+        d.wait_for_selector(".artist-legend")
+        check(d.locator(".wk-artist-bubble").count() == 0 and d.locator(".artist-legend li").count() == 20, "demo + reduced motion: nothing moves; a static artist legend instead")
+        d.context.close()
+        plain = browser.new_context(viewport={"width": 1100, "height": 800}).new_page()
+        plain.goto(f"{BASE}/songbook")
+        plain.wait_for_timeout(800)
+        check(plain.locator(".wk-artist-bubble, .artist-legend").count() == 0, "normal mode: no circles, no legend")
+        plain.context.close()
+        sql("""DELETE FROM "Song" WHERE id LIKE 'e2e-bb-%'""")
 
         # Phone layout.
         ph = browser.new_context(viewport={"width": 390, "height": 800}).new_page()

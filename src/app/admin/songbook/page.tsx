@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { flatten, pagesLabel } from "@/lib/songbook";
+import { artistLabel, flatten, pagesLabel } from "@/lib/songbook";
 import { fileUrl, formatBytes } from "@/lib/storage";
 import { BulkUpload } from "./BulkUpload";
-import { createFolder, deleteFolder, deleteSong, replaceSongFile, updateFolder, updateSong } from "./actions";
+import { SongEditor } from "./SongEditor";
+import { createFolder, deleteFolder, deleteSong, replaceSongFile, updateFolder } from "./actions";
 
 export const metadata: Metadata = { title: "Songbook · Admin" };
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export default async function AdminSongbook(props: PageProps<"/admin/songbook">)
   await requireAdmin("/admin/songbook");
   const sp = await props.searchParams;
   const only = typeof sp.folder === "string" ? sp.folder : "";
+  const justMoved = typeof sp.moved === "string" ? sp.moved : "";
   const [folders, songs] = await Promise.all([
     db.songFolder.findMany({ select: { id: true, name: true, parentId: true } }),
     db.song.findMany({ where: only === "none" ? { folderId: null } : only ? { folderId: only } : {}, orderBy: { title: "asc" } }),
@@ -75,16 +77,17 @@ export default async function AdminSongbook(props: PageProps<"/admin/songbook">)
       {songs.length === 0 && <p className="muted">Nothing here yet.</p>}
       <ul className="song-admin-list">
         {songs.map((s) => (
-          <li key={s.id}>
-            <form action={updateSong} className="song-admin-form">
-              <input type="hidden" name="id" value={s.id} />
-              <input type="text" name="title" defaultValue={s.title} aria-label="Title" required maxLength={120} />
-              <input type="text" name="artist" defaultValue={s.artist} aria-label="Artist" placeholder="Artist (optional)" maxLength={120} />
-              {folderSelect("folderId", s.folderId)}
-              <input type="text" name="notes" defaultValue={s.notes} aria-label="Notes" placeholder="Notes (optional)" maxLength={1000} />
-              <label className="small"><input type="checkbox" name="published" defaultChecked={s.published} /> visible</label>
-              <button className="btn btn-quiet">Save</button>
-            </form>
+          <li key={s.id} id={`song-${s.id}`}>
+            {s.id === justMoved && <p className="song-just-moved">✓ Moved here.</p>}
+            <p className="song-admin-head">
+              <strong>{s.title}</strong> <span className={s.artist ? "" : "muted"}>· {artistLabel(s.artist)}</span>
+              {!s.published && <span className="small muted"> · hidden</span>}
+            </p>
+            <SongEditor
+              song={{ id: s.id, title: s.title, artist: s.artist, notes: s.notes, folderId: s.folderId, published: s.published }}
+              folders={options}
+              view={only}
+            />
             <div className="small muted">
               <a href={fileUrl(s.fileKey)} target="_blank" rel="noreferrer">{s.fileName}</a> · {pagesLabel(s.pages)} · {formatBytes(s.size)}
             </div>

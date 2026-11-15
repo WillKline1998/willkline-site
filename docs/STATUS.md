@@ -2,6 +2,17 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-15 — Songbook: artist editing, save feedback, flat root, demo artist circles (branch songbook-artist-move, NOT merged)
+**Done (code)**:
+- Artist + title per song: uploads take the title from the file name, and "Artist - Title.pdf" also fills the artist (a checkbox turns that off). `src/app/admin/songbook/SongEditor.tsx` edits title / artist / "No artist" / folder / notes / visible. The admin list says "No artist" when it's blank. The public song page shows the artist under the title. Search already matched artist.
+- Save bug: the old uncontrolled form reset after the server action, so the folder `<select>` snapped back to the old folder with no message, and the move looked like it had failed. The editor is now controlled. `updateSong` returns the saved values, Save goes Saving… → Saved ✓, a move says "Moved to X" with a link, and errors show in red.
+- `scripts/songbook-flatten-root.ts`: dry run by default, `--apply` in one transaction. Covers and Originals move to the root (Hymns rides inside Covers), loose songs go into Covers, and the empty "Will Standards" node is deleted. Rolls back if the song count or any song's folder path changes. Re-running is a no-op.
+- `scripts/songbook-split-artists.ts`: optional one-off that splits "Artist - Title" titles on existing songs. Never run.
+- Demo mode: `src/components/ArtistBubbles.tsx`, one circle per artist (area ∝ songs, radius clamped 40–120px, or 30–72 on phones), wall bounce + elastic disc-disc collisions, ≤20 circles (≤12 on phones; extras fold into "+N more"), click-through, paused on hidden tabs, static legend under reduced motion.
+- `e2e_songbook.py` extended for all of the above. It now refuses to run unless DATABASE_URL names a `*_e2e` database, because its clean-up wipes the Song table.
+**Not verified**: in this session nothing could be executed (tsc, lint, build, prettier, unit tests, e2e, screenshots were all blocked by tool permissions). Not merged, not pushed, production migration NOT run.
+**Next**: run tsc / lint / build / prettier / `scripts/test_songbook.ts` / `e2e_songbook.py` (throwaway DB) / responsive audit. Then merge, push, run `songbook-flatten-root.ts` against prod (dry run first, record counts), and curl-check /songbook.
+
 ## 2026-11-13 — DingDong gift box + requests trough (branch dingdong-gifts)
 **Done**:
 - Schema (additive): `DingDongGift` (words[], visitorHash, status pending/ignored/processed, importance), `DingDongWant` (word, reason, status pending/granted/declined, grantedAt), `DingDongDay.giftNote`.

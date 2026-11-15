@@ -13,6 +13,7 @@ export function BulkUpload({ folders }: { folders: { id: string; label: string }
   const [folderId, setFolderId] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
+  const [split, setSplit] = useState(true);
 
   const start = async () => {
     const files = Array.from(input.current?.files ?? []);
@@ -25,13 +26,14 @@ export function BulkUpload({ folders }: { folders: { id: string; label: string }
       const form = new FormData();
       form.set("file", files[i]);
       form.set("folderId", folderId);
+      form.set("split", split ? "on" : "off");
       let res: UploadResult;
       try {
         res = await uploadSong(form);
       } catch {
         res = { ok: false, error: "The upload didn't go through. Check your connection and try again." };
       }
-      set(i, res.ok ? { state: "done", note: `${res.pages} page${res.pages === 1 ? "" : "s"}` } : { state: "failed", note: res.error });
+      set(i, res.ok ? { state: "done", note: `${res.title} · ${res.artist || "No artist"} · ${res.pages} page${res.pages === 1 ? "" : "s"}` } : { state: "failed", note: res.error });
     }
     if (input.current) input.current.value = "";
     setBusy(false);
@@ -51,6 +53,10 @@ export function BulkUpload({ folders }: { folders: { id: string; label: string }
           {folders.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
         </select>
       </label>
+      <label>
+        <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} disabled={busy} /> Read “Artist - Title.pdf” names as artist + title
+      </label>
+      <p className="small muted">The title comes from the file name. Without a “ - ” there&apos;s no artist (good for hymns). You can change either below after uploading.</p>
       <button type="button" className="btn" onClick={start} disabled={busy}>{busy ? "Uploading…" : "Upload"}</button>
       {rows.length > 0 && (
         <ul className="song-upload-list" aria-live="polite">

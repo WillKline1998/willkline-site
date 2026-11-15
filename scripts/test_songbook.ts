@@ -53,3 +53,25 @@ test("page filters", () => {
   assert.equal(pagesLabel(1), "1 page");
   assert.equal(pagesLabel(3), "3 pages");
 });
+
+test("file names split into artist and title", async () => {
+  const { splitArtist } = await import("../src/lib/songbook");
+  assert.deepEqual(splitArtist("Radiohead - No Surprises.pdf"), { artist: "Radiohead", title: "No Surprises" });
+  assert.deepEqual(splitArtist("Nina Simone (The Beatles) - Her Comes The Sun.pdf"), { artist: "Nina Simone", title: "Her Comes The Sun (The Beatles)" });
+  assert.deepEqual(splitArtist("King Gizzard & The Lizard Wizard - Time = $$$.pdf"), { artist: "King Gizzard & The Lizard Wizard", title: "Time = $$$" });
+  assert.deepEqual(splitArtist("Amazing_Grace.pdf"), { artist: "", title: "Amazing Grace" });
+  assert.deepEqual(splitArtist(" - Odd.pdf"), { artist: "", title: "- Odd" });
+});
+
+test("artist clusters: one per artist, no-artist bubble, capped", async () => {
+  const { artistClusters, clusterRadius } = await import("../src/lib/songbook");
+  const c = artistClusters(["Radiohead", "radiohead", "", "Geese", "", ""]);
+  assert.deepEqual(c.map((x) => [x.name, x.count]), [["No artist", 3], ["Radiohead", 2], ["Geese", 1]]);
+  const many = artistClusters(Array.from({ length: 30 }, (_, i) => `A${i}`), 20);
+  assert.equal(many.length, 20);
+  assert.equal(many[19].name, "+11 more");
+  assert.equal(many.reduce((n, x) => n + x.count, 0), 30);
+  assert.equal(clusterRadius(1, 40, 30, 120), 30);
+  assert.equal(clusterRadius(40, 40, 30, 120), 120);
+  assert.equal(clusterRadius(5, 1, 30, 120), 30);
+});

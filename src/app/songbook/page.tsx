@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArtistBubbles } from "@/components/ArtistBubbles";
 import { db } from "@/lib/db";
 import { openGraph } from "@/lib/seo";
 import { PAGE_FILTERS, matchesPages, pagesLabel, pathTo, subtreeIds, type PageFilter } from "@/lib/songbook";
@@ -50,6 +51,7 @@ export default async function SongbookPage(props: PageProps<"/songbook">) {
 
   return (
     <section className="page page-wide songbook">
+      <ArtistBubbles artists={songs.map((s) => s.artist)} />
       <h1 className="page-title">Songbook</h1>
       <p className="lede">My arrangements: chord charts and lead sheets, mostly for piano. Open one, print it, play it.</p>
 

@@ -6,13 +6,18 @@ import { PDFDocument } from "pdf-lib";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { str, uniqueSlug } from "@/lib/forms";
-import { SONG_LIMITS, prettyTitle, wouldCycle } from "@/lib/songbook";
+import { SONG_LIMITS, flatten, prettyTitle, splitArtist, wouldCycle } from "@/lib/songbook";
 import { deleteFile, saveFile } from "@/lib/storage";
 
-export type UploadResult = { ok: boolean; title?: string; pages?: number; error?: string };
+export type UploadResult = { ok: boolean; title?: string; artist?: string; pages?: number; error?: string };
+
+/** What the song editor gets back: the values as saved (so the form shows the truth), or a plain-words error. */
+export type SaveResult =
+  | { ok: true; song: { title: string; artist: string; notes: string; folderId: string | null; published: boolean }; folderLabel: string; moved: boolean }
+  | { ok: false; error: string };
 
 const refresh = () => {
-  revalidatePath("/songbook", "layout");
+  revalidatePath("/songbook");
   revalidatePath("/admin/songbook");
 };
 
@@ -42,29 +47,50 @@ export async function uploadSong(form: FormData): Promise<UploadResult> {
   if (!(file instanceof File)) return { ok: false, error: "No file." };
   const pdf = await readPdf(file);
   if (typeof pdf === "string") return { ok: false, title: file.name, error: pdf };
-  const title = (str(form, "title") || prettyTitle(file.name)).slice(0, SONG_LIMITS.title);
+  // The file name fills in the title; "Artist - Title.pdf" also fills in the artist (unless the uploader turned that off).
+  const guess = form.get("split") === "off" ? { title: prettyTitle(file.name), artist: "" } : splitArtist(file.name);
+  const title = (str(form, "title") || guess.title).slice(0, SONG_LIMITS.title);
+  const artist = (str(form, "artist") || guess.artist).slice(0, SONG_LIMITS.artist);
   const key = await saveFile(pdf.bytes, file.name, "application/pdf");
   const slug = await uniqueSlug(title, async (s) => !!(await db.song.findUnique({ where: { slug: s }, select: { id: true } })));
   await db.song.create({
-    data: { slug, title, fileKey: key, fileName: file.name, size: pdf.bytes.length, pages: pdf.pages, folderId: await folderIdOf(form) },
+    data: { slug, title, artist, fileKey: key, fileName: file.name, size: pdf.bytes.length, pages: pdf.pages, folderId: await folderIdOf(form) },
   });
   refresh();
-  return { ok: true, title, pages: pdf.pages };
+  return { ok: true, title, artist, pages: pdf.pages };
 }
 
-export async function updateSong(form: FormData) {
+// Called from the song editor (a client component), so it returns a result instead of redirecting. It does NOT
+// revalidate /admin/songbook: that would re-render the list under the editor (and, in a folder view, make a song
+// that was just moved vanish before its "Saved" note could be read). The editor refreshes the page itself.
+export async function updateSong(form: FormData): Promise<SaveResult> {
   await requireAdmin("/admin/songbook");
-  await db.song.update({
-    where: { id: str(form, "id") },
-    data: {
-      title: str(form, "title").slice(0, SONG_LIMITS.title) || "Untitled",
-      artist: str(form, "artist").slice(0, SONG_LIMITS.artist),
-      notes: str(form, "notes").slice(0, SONG_LIMITS.notes),
-      folderId: await folderIdOf(form),
-      published: form.get("published") === "on",
-    },
-  });
-  refresh();
+  const id = str(form, "id");
+  const before = await db.song.findUnique({ where: { id }, select: { folderId: true } });
+  if (!before) return { ok: false, error: "That song isn't there any more. Reload the page." };
+  const wanted = str(form, "folderId");
+  const folders = await db.songFolder.findMany({ select: { id: true, name: true, parentId: true } });
+  if (wanted && !folders.some((f) => f.id === wanted)) return { ok: false, error: "That folder was deleted. Reload the page and pick another." };
+  const title = str(form, "title").slice(0, SONG_LIMITS.title);
+  if (!title) return { ok: false, error: "A song needs a title." };
+  try {
+    const song = await db.song.update({
+      where: { id },
+      data: {
+        title,
+        artist: str(form, "artist").slice(0, SONG_LIMITS.artist),
+        notes: str(form, "notes").slice(0, SONG_LIMITS.notes),
+        folderId: wanted || null,
+        published: form.get("published") === "on",
+      },
+      select: { title: true, artist: true, notes: true, folderId: true, published: true },
+    });
+    revalidatePath("/songbook");
+    const folderLabel = song.folderId ? (flatten(folders).find((o) => o.id === song.folderId)?.label ?? "a folder") : "No folder";
+    return { ok: true, song, folderLabel, moved: before.folderId !== song.folderId };
+  } catch {
+    return { ok: false, error: "Couldn't save. Check your connection and try again." };
+  }
 }
 
 // A newer version of the same arrangement: same page on the site, new PDF, old file removed.
