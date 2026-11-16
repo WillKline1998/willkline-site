@@ -91,7 +91,25 @@ export function splitArtist(name: string): { title: string; artist: string } {
   return title && artist ? { title, artist } : { title: base, artist: "" };
 }
 
-export type ArtistCluster = { name: string; count: number; none?: boolean; rest?: boolean; folder?: boolean };
+export type ArtistCluster = {
+  name: string;
+  count: number;
+  none?: boolean;
+  rest?: boolean;
+  folder?: boolean;
+  /** Only on the "+N more" cluster: the artists folded into it, biggest first. */
+  members?: { name: string; count: number }[];
+};
+
+/**
+ * How many bubbles to allow before folding into "+N more". `total` = distinct artists (incl. "No artist") +
+ * sub-folder bubbles. A catalogue that only just overflows the base cap (20 desktop / 12 phone) shows everything,
+ * up to a hard ceiling (24 / 14); only past that does folding kick in.
+ */
+export function bubbleCap(total: number, phone: boolean): number {
+  const [base, ceiling] = phone ? [12, 14] : [20, 24];
+  return Math.max(base, Math.min(total, ceiling));
+}
 
 /**
  * One bubble per artist for demo mode, biggest first. Past `cap`, the smallest artists fold into one
@@ -118,7 +136,7 @@ export function artistClusters(artists: string[], cap = 20): ArtistCluster[] {
   if (named.length <= budget) return none ? [...named, none] : named;
   const keep = named.slice(0, budget - 1);
   const rest = named.slice(budget - 1);
-  const restCluster: ArtistCluster = { name: `+${rest.length} more`, count: rest.reduce((n, c) => n + c.count, 0), rest: true };
+  const restCluster: ArtistCluster = { name: `+${rest.length} more`, count: rest.reduce((n, c) => n + c.count, 0), rest: true, members: rest.map((c) => ({ name: c.name, count: c.count })) };
   return none ? [...keep, restCluster, none] : [...keep, restCluster];
 }
 

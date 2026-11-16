@@ -1003,7 +1003,15 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .wk-artist-name { color: var(--ink); font-weight: 700; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .wk-artist-count { color: var(--ink); opacity: 0.7; font-size: 0.8em; }
 .wk-artist-none { border-style: dashed; }
-.wk-artist-rest { opacity: 0.45; }
+.wk-artist-rest { opacity: 0.45; pointer-events: auto; cursor: help; } /* the one non-click-through bubble */
+.wk-artist-rest:focus-visible, .wk-artist-rest.wk-rest-open { opacity: 0.85; outline: 2px solid currentColor; outline-offset: 3px; }
+.wk-rest-pop {
+  position: fixed; left: 0; top: 0; z-index: 70; pointer-events: auto; max-width: min(260px, calc(100vw - 16px)); max-height: 50vh; overflow: auto;
+  padding: 0.55rem 0.8rem; box-sizing: border-box; background: #170804; color: #fff4e8; border: 1px solid #ffb86c; border-radius: 10px;
+  box-shadow: 0 10px 28px #000a, 0 0 22px #ff7a1866; font-family: var(--font-label); font-size: 0.8rem; line-height: 1.5;
+}
+.wk-rest-pop[hidden] { display: none; }
+.wk-rest-pop ul { list-style: none; margin: 0; padding: 0; }
 .wk-folder-bubble { border-style: double; border-width: 5px; }
 .artist-legend-folder { border-style: double !important; border-width: 3px !important; }
 .artist-legend { display: none; }

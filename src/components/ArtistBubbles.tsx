@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { artistClusters, clusterRadius, type ArtistCluster } from "@/lib/songbook";
+import { artistClusters, bubbleCap, clusterRadius, type ArtistCluster } from "@/lib/songbook";
 import { useDemoMode } from "./DemoMode";
 
 /**
@@ -11,8 +11,14 @@ import { useDemoMode } from "./DemoMode";
  * between a minimum (a one-song artist stays readable) and a maximum (a 20-song artist can't eat the screen).
  *
  * Same safety recipe as DemoBounce: one fixed layer behind the content (z-index -1, pointer-events none,
- * aria-hidden), transforms only, one requestAnimationFrame loop, ≤20 circles (≤12 on phones; the rest fold into
- * "+N more"), paused while the tab is hidden. Under prefers-reduced-motion nothing moves: a static legend instead.
+ * aria-hidden), transforms only, one requestAnimationFrame loop, paused while the tab is hidden. Cap: bubbleCap()
+ * (20 desktop / 12 phone, stretched to 24 / 14 when the catalogue only just overflows); past it the smallest
+ * artists fold into "+N more".
+ *
+ * The one exception to click-through: the "+N more" bubble. Hovering it (or tapping it on open background, or
+ * tabbing to it) opens a small popover listing the folded artists ("Temples · 1"); outside click / Escape closes.
+ * The layer sits behind the content, so the hit test is done by geometry on document pointer events, and it
+ * never fires when the pointer is over a link/button/input — those keep working exactly as before. Under prefers-reduced-motion nothing moves: a static legend instead.
  *
  * `folders` (optional): sub-folders of the folder being viewed, one extra circle each, sized by song count on the
  * same clamped scale as the artists. They take slots from the cap, so the total never grows.
@@ -30,7 +36,8 @@ const subscribeReduced = (cb: () => void) => {
 
 type FolderBubble = { name: string; count: number };
 
-function allClusters(artists: string[], folders: FolderBubble[], cap: number): ArtistCluster[] {
+function allClusters(artists: string[], folders: FolderBubble[], phone: boolean): ArtistCluster[] {
+  const cap = bubbleCap(artistClusters(artists, Infinity).length + folders.length, phone);
   const own = folders.slice(0, Math.max(0, cap - 2)).map((f) => ({ ...f, folder: true }));
   return [...artistClusters(artists, cap - own.length), ...own];
 }
@@ -43,22 +50,22 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
   useEffect(() => {
     if (!demo || reduced || artists.length + folders.length === 0) return;
     const phone = innerWidth < 560;
-    const clusters = allClusters(artists, folders, phone ? 12 : 20);
+    const clusters = allClusters(artists, folders, phone);
     const maxCount = Math.max(...clusters.map((c) => c.count));
-    let [minR, maxR] = phone ? [30, 72] : [40, 120];
+    let [minR, maxR] = phone ? [28, 72] : [36, 120];
     // Never fill more than ~40% of the screen, whatever the catalogue looks like.
     const area = clusters.reduce((a, c) => a + Math.PI * clusterRadius(c.count, maxCount, minR, maxR) ** 2, 0);
     const room = innerWidth * innerHeight * 0.4;
     if (area > room) {
       const k = Math.sqrt(room / area);
-      minR = Math.max(phone ? 24 : 30, minR * k);
+      minR = Math.max(phone ? 22 : 28, minR * k);
       maxR = Math.max(minR, maxR * k);
     }
 
     const layer = document.createElement("div");
     layer.className = "wk-bounce wk-artist-bubbles";
-    layer.setAttribute("aria-hidden", "true");
     layer.dataset.hits = "0";
+    const restRef: { v: { el: HTMLDivElement; c: ArtistCluster; d: Disc } | null } = { v: null };
     document.body.appendChild(layer);
 
     const rnd = (a: number, b: number) => a + Math.random() * (b - a);
@@ -78,6 +85,14 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
       count.className = "wk-artist-count";
       count.textContent = c.folder ? `📁 ${c.count} ${c.count === 1 ? "song" : "songs"}` : c.rest ? `${c.count} songs` : `${c.count} ${c.count === 1 ? "song" : "songs"}`;
       el.append(name, count);
+      if (c.rest) {
+        el.tabIndex = 0;
+        el.setAttribute("role", "button");
+        el.setAttribute("aria-label", `${c.name} artists: show the list`);
+        el.setAttribute("aria-expanded", "false");
+        el.removeAttribute("aria-hidden");
+        restRef.v = { el, c, d: null as unknown as Disc };
+      } else el.setAttribute("aria-hidden", "true");
       layer.appendChild(el);
       // Drop it somewhere free (a few tries), so circles don't start stacked.
       let x = 0;
@@ -89,8 +104,13 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
       }
       const speed = rnd(28, 60) * (phone ? 0.8 : 1); // px per second; calm
       const a = rnd(0, Math.PI * 2);
+      el.style.transform = `translate3d(${x - r}px,${y - r}px,0)`; // placed before the first frame, so hit tests match
       discs.push({ el, x, y, r, m: r * r, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed });
+      if (restRef.v && restRef.v.el === el) restRef.v.d = discs[discs.length - 1];
     });
+    const rest = restRef.v;
+    const popover = rest ? restPopover(rest.el, rest.c) : null;
+    const offPopover = popover && rest ? wirePopover(rest.el, rest.d, popover) : () => {};
 
     let hits = 0;
     let frame = 0;
@@ -154,6 +174,7 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
         d.vy *= target / s;
         d.el.style.transform = `translate3d(${d.x - d.r}px,${d.y - d.r}px,0)`;
       }
+      popover?.follow();
       if (++frame % 30 === 0) layer.dataset.hits = String(hits);
       raf = requestAnimationFrame(tick);
     };
@@ -169,6 +190,8 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener("visibilitychange", visibility);
+      offPopover();
+      popover?.el.remove();
       layer.remove();
     };
     // `key` stands in for the artists array (a new array each render, same contents).
@@ -179,11 +202,106 @@ export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; fo
   // Reduced motion: the same groups, standing still, as a small legend.
   return (
     <ul className="artist-legend" aria-label="Artists in the Songbook">
-      {allClusters(artists, folders, 20).map((c) => (
+      {allClusters(artists, folders, false).map((c) => (
         <li key={(c.folder ? "f:" : "a:") + c.name} className={c.none ? "artist-legend-none" : c.folder ? "artist-legend-folder" : undefined}>
           {c.name} <span className="muted">{c.count}</span>
         </li>
       ))}
     </ul>
   );
+}
+
+const INTERACTIVE = "a, button, input, select, textarea, label, summary, [role=button]:not(.wk-artist-rest), [contenteditable]";
+
+/** The "+N more" list: portalled to <body>, above everything, follows the drifting bubble while open. */
+function restPopover(bubble: HTMLDivElement, c: ArtistCluster) {
+  const el = document.createElement("div");
+  el.className = "wk-rest-pop";
+  el.id = "wk-rest-pop";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", "More artists");
+  el.hidden = true;
+  const ul = document.createElement("ul");
+  for (const m of c.members ?? []) {
+    const li = document.createElement("li");
+    li.textContent = `${m.name} · ${m.count}`;
+    ul.appendChild(li);
+  }
+  el.appendChild(ul);
+  document.body.appendChild(el);
+  bubble.setAttribute("aria-controls", el.id);
+  const follow = () => {
+    if (el.hidden) return;
+    const r = bubble.getBoundingClientRect();
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), document.documentElement.clientWidth - w - 8);
+    const top = r.bottom + 8 + h > innerHeight - 8 && r.top - h - 8 > 0 ? r.top - h - 8 : Math.min(r.bottom + 8, innerHeight - h - 8);
+    el.style.transform = `translate3d(${Math.round(left)}px,${Math.round(Math.max(8, top))}px,0)`;
+  };
+  return { el, follow };
+}
+
+/** Hover / tap / focus / Escape wiring. Geometry hit test because the bubble layer sits behind the page. */
+function wirePopover(bubble: HTMLDivElement, d: Disc, pop: { el: HTMLDivElement; follow: () => void }) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let pinned = false; // opened by tap/click/focus: stays until outside click or Escape
+  const set = (open: boolean) => {
+    clearTimeout(timer);
+    if (!pop.el.hidden === open) return;
+    pop.el.hidden = !open;
+    bubble.setAttribute("aria-expanded", String(open));
+    bubble.classList.toggle("wk-rest-open", open);
+    if (open) pop.follow();
+    else pinned = false;
+  };
+  const over = (e: PointerEvent) => {
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > d.r) return false;
+    const t = e.target as Element | null;
+    return !t?.closest?.(INTERACTIVE) || t === bubble;
+  };
+  const move = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    if (over(e) || pop.el.contains(e.target as Node)) set(true);
+    else if (!pinned && !pop.el.hidden) {
+      clearTimeout(timer);
+      timer = setTimeout(() => set(false), 180);
+    }
+  };
+  const down = (e: PointerEvent) => {
+    if (pop.el.contains(e.target as Node)) return;
+    if (over(e)) {
+      pinned = true;
+      set(true);
+    } else set(false);
+  };
+  const key = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && !pop.el.hidden) {
+      set(false);
+      if (document.activeElement === bubble) bubble.blur();
+    } else if ((e.key === "Enter" || e.key === " ") && document.activeElement === bubble) {
+      e.preventDefault();
+      const open = pop.el.hidden === true;
+      set(open);
+      pinned = open;
+    }
+  };
+  const focus = () => {
+    pinned = true;
+    set(true);
+  };
+  const blur = () => set(false);
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerdown", down);
+  document.addEventListener("keydown", key);
+  bubble.addEventListener("focus", focus);
+  bubble.addEventListener("blur", blur);
+  return () => {
+    clearTimeout(timer);
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerdown", down);
+    document.removeEventListener("keydown", key);
+    bubble.removeEventListener("focus", focus);
+    bubble.removeEventListener("blur", blur);
+  };
 }

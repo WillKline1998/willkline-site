@@ -2,6 +2,12 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-15 — Songbook demo: no '+N more' for a barely-overflowing catalogue; transparent fold
+- Done: `bubbleCap(total, phone)` in lib/songbook.ts = max(20, min(total, 24)) desktop / max(12, min(total, 14)) phone, total = distinct artists + sub-folder bubbles. Prod Covers (22 clusters) now shows all 22 on desktop. Min radius one notch smaller (36/28 desktop, 28/22 phone floors); the 40%-of-screen room check is unchanged.
+- Done: the '+N more' bubble is the ONLY non-click-through circle (pointer-events auto, tabindex, role=button; others aria-hidden). Hover / tap on bare background / keyboard focus opens a popover ("Artist · count"), Escape or outside click closes. Hit test is geometric on document pointer events (the layer sits behind the page) and ignores links/buttons, so content stays clickable. Discs are now positioned before the first frame.
+- Verified: tsc, lint, build, e2e_songbook 99/99 (5 consecutive green runs locally): 22-cluster fixture no fold; 30-cluster fixture folds at 24, popover lists folded names, Escape/outside/focus, phone tap, phone cap 14, no-jank smoke test.
+- Next: the phone shows '+9 more' for prod Covers (cap 14) — by design; revisit if Will wants more on phones.
+
 ## 2026-11-15 — Songbook: Covers artists split in prod; folder-aware demo mode
 - Done: `songbook-split-artists.ts` now needs `--folder <id>` and only touches that folder's DIRECT songs. Ran on prod Covers: 70 songs split (Black Sabbath - Changes … Tom Waits - Come On Up To The House); Hymns/Christmas/Originals untouched; slugs unchanged; counts 8/71/6/3 before = after.
 - Done: /songbook demo mode is per folder. `BUBBLED_FOLDERS` (page.tsx, today ["Covers"]) get artist circles for the folder's own songs + one 📁 circle per sub-folder; every other view (root, search, Hymns, Christmas, Originals, any new folder) gets DemoBounce ghosts on the search/filter/folder controls.

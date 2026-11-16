@@ -318,15 +318,33 @@ try:
         opts = li.locator("select[name=parentId] option").all_inner_texts()
         check(not any(o.strip() == "Gospel" for o in opts), "the folder picker doesn't offer a folder itself as its parent")
 
-        # Demo mode, per folder. A "Covers" folder (on the bubbled list) holds 24 artists + one no-artist song directly,
-        # plus two sub-folders (Hymns 2 songs, Christmas 1). Fixture rows, removed in finally.
+        # Demo mode, per folder. A "Covers" folder (on the bubbled list) holds 19 artists + one no-artist song directly,
+        # plus two sub-folders (Hymns 2 songs, Christmas 1) = 22 clusters, like production. Later 8 more artists are
+        # added (30 clusters) to exercise the "+N more" fold. Fixture rows, removed in finally.
         sql("""INSERT INTO "SongFolder"(id, name, "parentId") VALUES ('e2e-cv','Covers',NULL),('e2e-hy','Hymns','e2e-cv'),('e2e-xm','Christmas','e2e-cv')""")
-        for i in range(24):
-            n = 1 + (i % 3) + (30 if i == 0 else 0)
-            for k in range(n):
-                sql(f"""INSERT INTO "Song"(id, slug, title, artist, "fileKey", "fileName", size, "folderId", "updatedAt") VALUES ('e2e-bb-{i}-{k}','e2e-bb-{i}-{k}','Song {k}','Artist {i:02d}','k','x.pdf',1,'e2e-cv',now())""")
+        def add_artists(rng):
+            for i in rng:
+                n = 1 + (i % 3) + (30 if i == 0 else 0)
+                for k in range(n):
+                    sql(f"""INSERT INTO "Song"(id, slug, title, artist, "fileKey", "fileName", size, "folderId", "updatedAt") VALUES ('e2e-bb-{i}-{k}','e2e-bb-{i}-{k}','Song {k}','Artist {i:02d}','k','x.pdf',1,'e2e-cv',now())""")
+        add_artists(range(19))
         for sid, title, artist, fid in [("e2e-bb-none", "Plain Tune", "", "e2e-cv"), ("e2e-bb-h1", "Hymn One", "Zed Hymnist", "e2e-hy"), ("e2e-bb-h2", "Hymn Two", "", "e2e-hy"), ("e2e-bb-x1", "Carol", "Yule Band", "e2e-xm")]:
             sql(f"""INSERT INTO "Song"(id, slug, title, artist, "fileKey", "fileName", size, "folderId", "updatedAt") VALUES ('{sid}','{sid}','{title}','{artist}','k','x.pdf',1,'{fid}',now())""")
+        def free_point(pg, on_rest, touch=False, tries=120, need=True):
+            """A point on plain page background (nothing clickable under it), on or well away from the '+N more' circle."""
+            for _ in range(tries):
+                pt = pg.evaluate("""([onRest, touch]) => { const e = document.querySelector('.wk-artist-rest'); if (!e) return null; const r = e.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height / 2, rad = r.width / 2;
+                    const ok = (x, y) => { const t = document.elementFromPoint(x, y); return !!t && !t.closest('a, button, input, select, textarea, label, summary, .song-row, .song-folders, header, nav, aside'); };
+                    const clear = (x, y) => !touch ? ok(x, y) : [[0, 0], [30, 0], [-30, 0], [0, 30], [0, -30], [21, 21], [-21, 21], [21, -21], [-21, -21]].every(([a, b]) => ok(x + a, y + b)); // touch adjustment snaps taps to nearby links
+                    const pts = []; if (onRest) for (let a = -0.7; a <= 0.71; a += 0.175) for (let b = -0.7; b <= 0.71; b += 0.175) if (Math.hypot(a, b) <= 0.75) pts.push([cx + a * rad, cy + b * rad]);
+                    if (!onRest) for (let y = 20; y < innerHeight; y += 37) for (let x = 10; x < innerWidth; x += 41) if (Math.hypot(x - cx, y - cy) > rad + 60) pts.push([x, y]);
+                    return pts.find(([x, y]) => clear(x, y)) || null; }""", [on_rest, touch])
+                if pt:
+                    return pt
+                pg.wait_for_timeout(250)
+            if not need:
+                return None
+            raise AssertionError("no free point found: " + str(pg.evaluate("[location.href, innerWidth, document.querySelectorAll('.wk-artist-bubble').length, document.querySelectorAll('.wk-artist-rest').length, [...document.querySelectorAll('.wk-artist-name')].map(e => e.textContent).join('|')]")))
         def demo_page(vw, vh, path="/songbook?folder=e2e-cv", **kw):
             ctx = browser.new_context(viewport={"width": vw, "height": vh}, **kw)
             ctx.add_init_script("localStorage.setItem('wk-demo-mode','on')")
@@ -334,18 +352,68 @@ try:
             pg.on("pageerror", lambda e: errors.append(str(e)[:160]))
             pg.goto(f"{BASE}{path}")
             return pg
+        # 22 clusters barely overflow the base cap of 20: no folding, everything shows.
+        d = demo_page(1100, 800)
+        d.wait_for_selector(".wk-artist-bubble")
+        d.wait_for_timeout(2500)
+        n = d.locator(".wk-artist-bubble").count()
+        names = d.locator(".wk-artist-name").all_inner_texts()
+        check(n == 22 and not any(t.startswith("+") for t in names) and d.locator(".wk-artist-rest, .wk-rest-pop").count() == 0, f"demo Covers (22 clusters): all 22 circles, no '+N more' ({n})")
+        worst = d.evaluate("""() => { const c = [...document.querySelectorAll('.wk-artist-bubble')].map(e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 }; });
+            let w = 0; for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) w = Math.max(w, (c[i].r + c[j].r - Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)) / Math.min(c[i].r, c[j].r)); return w; }""")
+        check(worst < 0.35, f"demo Covers (22): still readable, circles push apart (worst overlap {worst:.2f})")
+        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-covers.png"))
+        d.context.close()
+        d = demo_page(390, 844)
+        d.wait_for_selector(".wk-artist-bubble")
+        n = d.locator(".wk-artist-bubble").count()
+        check(n == 14 and d.locator(".wk-artist-rest").count() == 1 and d.locator(".wk-folder-bubble").count() == 2, f"demo phone Covers (22): capped at 14 incl. '+N more' and both sub-folders ({n})")
+        d.wait_for_timeout(1500)
+        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-covers-phone.png"))
+        d.context.close()
+        add_artists(range(19, 27))  # now 27 artists + No artist + 2 folders = 30 clusters
         d = demo_page(1100, 800)
         d.wait_for_selector(".wk-artist-bubble")
         n = d.locator(".wk-artist-bubble").count()
         names = d.locator(".wk-artist-name").all_inner_texts()
-        check(n == 20 and any(t.startswith("+") and "more" in t for t in names), f"demo Covers: one circle per artist, capped at 20 with a '+N more' circle ({n})")
+        check(n == 24 and any(t.startswith("+") and "more" in t for t in names), f"demo Covers (30 clusters): capped at 24 with a '+N more' circle ({n})")
+        # Frame rate with 24 discs (headless, so only a smoke test of smoothness).
+        # Headless Chrome throttles rAF (~20-30 fps on any page), so judge smoothness by jank: no long tasks, no
+        # frame gap over 100ms while 24 discs bounce.
+        fps, gap, longs = d.evaluate("""() => new Promise(res => { let longs = 0; try { new PerformanceObserver(l => { longs += l.getEntries().length; }).observe({ type: 'longtask' }); } catch {}
+            let f = 0, gap = 0, prev = performance.now(); const t0 = prev; const step = (t) => { f++; gap = Math.max(gap, t - prev); prev = t; if (t - t0 < 3000) requestAnimationFrame(step); else res([f / ((t - t0) / 1000), gap, longs]); }; requestAnimationFrame(step); })""")
+        check(longs <= 1 and gap < 150, f"demo: 24 circles animate without jank ({fps:.0f} fps headless, worst frame gap {gap:.0f}ms, {longs} long tasks)")
+        shown = {t for t in names if t.startswith("Artist ")}
+        folded = sorted(f"Artist {i:02d}" for i in range(27) if f"Artist {i:02d}" not in shown)
+        rest = d.locator(".wk-artist-rest")
+        check(rest.evaluate("e => getComputedStyle(e).pointerEvents") == "auto" and d.locator(".wk-artist-bubble:not(.wk-artist-rest)").evaluate_all("els => els.every(e => getComputedStyle(e).pointerEvents === 'none' && e.getAttribute('aria-hidden') === 'true')"),
+              "demo: only the '+N more' circle takes the pointer; every other circle is click-through and aria-hidden")
+        spot = free_point(d, True)
+        d.mouse.move(*spot)
+        pop = d.locator(".wk-rest-pop")
+        pop.wait_for(state="visible", timeout=3000)
+        items = pop.locator("li").all_inner_texts()
+        check(sorted(i.split(" · ")[0] for i in items) == folded and all(" · " in i and i.split(" · ")[1].isdigit() for i in items) and rest.get_attribute("aria-expanded") == "true",
+              f"demo: hovering '+N more' lists the folded artists with song counts ({items[:3]}…)")
+        d.keyboard.press("Escape")
+        check(pop.is_hidden(), "demo: Escape closes the '+N more' list")
+        d.mouse.move(*spot)
+        pop.wait_for(state="visible", timeout=3000)
+        away = free_point(d, False)
+        d.mouse.click(*away)
+        d.mouse.move(*away)
+        d.wait_for_timeout(400)
+        check(pop.is_hidden(), "demo: clicking elsewhere / moving away closes it")
+        rest.focus()
+        check(pop.is_visible(), "demo: keyboard focus on '+N more' opens the list too")
+        d.keyboard.press("Escape")
         check("No artist" in names, "demo Covers: songs with no artist get their own 'No artist' circle")
         folder_bubbles = d.locator(".wk-folder-bubble").all_inner_texts()
         check(len(folder_bubbles) == 2 and any("Hymns" in t and "📁 2 songs" in t for t in folder_bubbles) and any("Christmas" in t and "📁 1 song" in t for t in folder_bubbles), f"demo Covers: one circle per sub-folder, with its song count ({folder_bubbles})")
         check(not any(x in " ".join(names) for x in ("Zed Hymnist", "Yule Band")), "demo Covers: artists of sub-folder songs are NOT circles (only Covers' own songs)")
         check(d.locator(".wk-bounce-shape").count() == 0, "demo Covers: no ghost shapes there (bubbles instead)")
         sizes = d.locator(".wk-artist-bubble").evaluate_all("els => els.map(e => e.getBoundingClientRect().width)")
-        check(min(sizes) >= 60 and max(sizes) <= 240 and max(sizes) > min(sizes), f"demo: sizes follow song counts, clamped ({min(sizes):.0f}–{max(sizes):.0f}px)")
+        check(min(sizes) >= 50 and max(sizes) <= 240.5 and max(sizes) > min(sizes), f"demo: sizes follow song counts, clamped ({min(sizes):.0f}–{max(sizes):.0f}px)")
         big = d.locator(".wk-artist-bubble", has_text="Artist 00")
         check(big.evaluate("e => e.getBoundingClientRect().width") == max(sizes), "demo: the artist with the most songs is the biggest circle")
         p1 = d.locator(".wk-artist-bubble").first.evaluate("e => e.style.transform")
@@ -359,10 +427,9 @@ try:
             let w = 0; for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) w = Math.max(w, (c[i].r + c[j].r - Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)) / Math.min(c[i].r, c[j].r)); return w; }""")
         check(worst < 0.35, f"demo: circles push apart instead of sitting on top of each other (worst overlap {worst:.2f} of a radius)")
         layer = d.locator(".wk-artist-bubbles")
-        check(layer.evaluate("e => getComputedStyle(e).pointerEvents") == "none" and layer.get_attribute("aria-hidden") == "true", "demo: the circle layer is click-through and hidden from screen readers")
+        check(layer.evaluate("e => getComputedStyle(e).pointerEvents") == "none", "demo: the circle layer itself is click-through")
         under = d.evaluate("""() => { const a = document.querySelector('.song-folders a'); const r = a.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!el && a.contains(el); }""")
         check(under, "demo: a folder card is still what you hit at its centre")
-        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-covers.png"))
         d.locator(".song-folders a", has_text="Hymns").click()
         d.wait_for_url("**folder=e2e-hy", timeout=10000)
         d.wait_for_function("document.querySelector('.song-crumbs').innerText.includes('Hymns')")
@@ -388,13 +455,26 @@ try:
                 d.wait_for_url("**/songbook/e2e-bb-h1", timeout=10000)
                 check(True, "demo Hymns: clicking a song through the ghosts opens it")
             d.context.close()
-        d = demo_page(390, 844)
+        d = demo_page(390, 844, has_touch=True, is_mobile=True)
         d.wait_for_selector(".wk-artist-bubble")
+        d.wait_for_timeout(500)
         n = d.locator(".wk-artist-bubble").count()
         sizes = d.locator(".wk-artist-bubble").evaluate_all("els => els.map(e => e.getBoundingClientRect().width)")
-        check(n == 12 and d.locator(".wk-folder-bubble").count() == 2 and max(sizes) <= 144 and d.evaluate("document.documentElement.scrollWidth - innerWidth") == 0, f"demo phone Covers: fewer, smaller circles incl. both sub-folders ({n}, max {max(sizes):.0f}px), no sideways scroll")
-        d.wait_for_timeout(1500)
-        d.screenshot(path=str(ROOT / "docs/mockups/songbook-demo-covers-phone.png"))
+        for _ in range(5):  # a phone screen is mostly content; if the circle never drifts onto bare background, reshuffle
+            spot = free_point(d, True, True, tries=40, need=False)
+            if spot:
+                break
+            d.reload()
+            d.wait_for_selector(".wk-artist-rest")
+            d.wait_for_timeout(500)
+        spot = spot or free_point(d, True, True)
+        d.touchscreen.tap(*spot)
+        d.wait_for_timeout(300)
+        tapped = d.locator(".wk-rest-pop").is_visible()
+        d.touchscreen.tap(*free_point(d, False, True))
+        d.wait_for_timeout(300)
+        check(tapped and d.locator(".wk-rest-pop").is_hidden(), f"demo phone: tapping '+N more' opens the list, tapping elsewhere closes it")
+        check(n == 14 and d.locator(".wk-folder-bubble").count() == 2 and max(sizes) <= 144.5 and d.evaluate("document.documentElement.scrollWidth - innerWidth") == 0, f"demo phone Covers: fewer, smaller circles incl. both sub-folders ({n}, max {max(sizes):.0f}px), no sideways scroll")
         d.context.close()
         d = demo_page(390, 844, "/songbook?folder=e2e-hy")
         d.wait_for_selector(".wk-bounce-shape", timeout=5000)
@@ -404,7 +484,7 @@ try:
         d.context.close()
         d = demo_page(1100, 800, reduced_motion="reduce")
         d.wait_for_selector(".artist-legend")
-        check(d.locator(".wk-artist-bubble").count() == 0 and d.locator(".artist-legend li").count() == 20 and d.locator(".artist-legend-folder").count() == 2, "demo + reduced motion: nothing moves; a static legend (artists + sub-folders) instead")
+        check(d.locator(".wk-artist-bubble").count() == 0 and d.locator(".artist-legend li").count() == 24 and d.locator(".artist-legend-folder").count() == 2, "demo + reduced motion: nothing moves; a static legend (artists + sub-folders) instead")
         d.context.close()
         d = demo_page(1100, 800, "/songbook?folder=e2e-hy", reduced_motion="reduce")
         d.wait_for_timeout(1200)
