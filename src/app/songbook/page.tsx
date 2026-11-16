@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArtistBubbles } from "@/components/ArtistBubbles";
+import { DemoBounce } from "@/components/DemoBounce";
 import { db } from "@/lib/db";
 import { openGraph } from "@/lib/seo";
 import { PAGE_FILTERS, matchesPages, pagesLabel, pathTo, subtreeIds, type PageFilter } from "@/lib/songbook";
@@ -8,6 +9,15 @@ import { PAGE_FILTERS, matchesPages, pagesLabel, pathTo, subtreeIds, type PageFi
 const DESCRIPTION = "Piano arrangements and lead sheets as PDFs, sorted into folders.";
 export const metadata: Metadata = { title: "Songbook", description: DESCRIPTION, openGraph: openGraph({ title: "Songbook", description: DESCRIPTION }) };
 export const dynamic = "force-dynamic";
+
+/**
+ * Demo mode, per folder. Folders named here get the artist circles while you browse them: one circle per artist of
+ * the songs sitting DIRECTLY in that folder, plus one circle per sub-folder. Every other view (the front page, a
+ * search, and any folder NOT on this list, including folders added later) gets the normal treatment instead: the
+ * bouncing ghost shapes behind the page's controls, like Recipes, Music and the Wall.
+ * To opt a folder in, add its exact name (as shown on the site) to this list.
+ */
+const BUBBLED_FOLDERS = ["Covers"];
 
 export default async function SongbookPage(props: PageProps<"/songbook">) {
   const sp = await props.searchParams;
@@ -36,6 +46,8 @@ export default async function SongbookPage(props: PageProps<"/songbook">) {
     const ids = subtreeIds(folders, id);
     return songs.filter((s) => s.folderId && ids.has(s.folderId)).length;
   };
+  const current = folders.find((f) => f.id === folderId);
+  const bubbled = !searching && !!current && BUBBLED_FOLDERS.includes(current.name);
   const folderLabel = (id: string | null) => pathTo(folders, id).map((f) => f.name).join(" / ");
 
   const href = (o: { folder?: string | null; q?: string; pages?: PageFilter | "" }) => {
@@ -51,7 +63,11 @@ export default async function SongbookPage(props: PageProps<"/songbook">) {
 
   return (
     <section className="page page-wide songbook">
-      <ArtistBubbles artists={songs.map((s) => s.artist)} />
+      {bubbled ? (
+        <ArtistBubbles artists={list.map((s) => s.artist)} folders={kids.map((k) => ({ name: k.name, count: countIn(k.id) }))} />
+      ) : (
+        <DemoBounce selector=".song-controls .search-form button, .song-controls .wall-filters a, .song-folders a" />
+      )}
       <h1 className="page-title">Songbook</h1>
       <p className="lede">My arrangements: chord charts and lead sheets, mostly for piano. Open one, print it, play it.</p>
 

@@ -13,6 +13,9 @@ import { useDemoMode } from "./DemoMode";
  * Same safety recipe as DemoBounce: one fixed layer behind the content (z-index -1, pointer-events none,
  * aria-hidden), transforms only, one requestAnimationFrame loop, ≤20 circles (≤12 on phones; the rest fold into
  * "+N more"), paused while the tab is hidden. Under prefers-reduced-motion nothing moves: a static legend instead.
+ *
+ * `folders` (optional): sub-folders of the folder being viewed, one extra circle each, sized by song count on the
+ * same clamped scale as the artists. They take slots from the cap, so the total never grows.
  */
 const COLORS = ["#ffb02e", "#ff7a18", "#ff5e62", "#ff3d81", "#ffd54a", "#7af0ff", "#9b8cff", "#5fe3a1"];
 
@@ -25,15 +28,22 @@ const subscribeReduced = (cb: () => void) => {
   return () => m.removeEventListener("change", cb);
 };
 
-export function ArtistBubbles({ artists }: { artists: string[] }) {
+type FolderBubble = { name: string; count: number };
+
+function allClusters(artists: string[], folders: FolderBubble[], cap: number): ArtistCluster[] {
+  const own = folders.slice(0, Math.max(0, cap - 2)).map((f) => ({ ...f, folder: true }));
+  return [...artistClusters(artists, cap - own.length), ...own];
+}
+
+export function ArtistBubbles({ artists, folders = [] }: { artists: string[]; folders?: FolderBubble[] }) {
   const { demo } = useDemoMode();
   const reduced = useSyncExternalStore(subscribeReduced, () => matchMedia(reducedQuery).matches, () => false);
-  const key = artists.join("\u0001");
+  const key = artists.join("\u0001") + "\u0002" + folders.map((f) => `${f.name}\u0003${f.count}`).join("\u0001");
 
   useEffect(() => {
-    if (!demo || reduced || artists.length === 0) return;
+    if (!demo || reduced || artists.length + folders.length === 0) return;
     const phone = innerWidth < 560;
-    const clusters = artistClusters(artists, phone ? 12 : 20);
+    const clusters = allClusters(artists, folders, phone ? 12 : 20);
     const maxCount = Math.max(...clusters.map((c) => c.count));
     let [minR, maxR] = phone ? [30, 72] : [40, 120];
     // Never fill more than ~40% of the screen, whatever the catalogue looks like.
@@ -56,7 +66,7 @@ export function ArtistBubbles({ artists }: { artists: string[] }) {
     clusters.forEach((c: ArtistCluster, i) => {
       const r = clusterRadius(c.count, maxCount, minR, maxR);
       const el = document.createElement("div");
-      el.className = "wk-artist-bubble" + (c.none ? " wk-artist-none" : "") + (c.rest ? " wk-artist-rest" : "");
+      el.className = "wk-artist-bubble" + (c.none ? " wk-artist-none" : "") + (c.rest ? " wk-artist-rest" : "") + (c.folder ? " wk-folder-bubble" : "");
       el.style.width = el.style.height = `${r * 2}px`;
       el.style.color = c.none ? "#c9c9d6" : COLORS[i % COLORS.length];
       el.dataset.count = String(c.count);
@@ -66,7 +76,7 @@ export function ArtistBubbles({ artists }: { artists: string[] }) {
       name.textContent = c.name;
       const count = document.createElement("span");
       count.className = "wk-artist-count";
-      count.textContent = c.rest ? `${c.count} songs` : `${c.count} ${c.count === 1 ? "song" : "songs"}`;
+      count.textContent = c.folder ? `📁 ${c.count} ${c.count === 1 ? "song" : "songs"}` : c.rest ? `${c.count} songs` : `${c.count} ${c.count === 1 ? "song" : "songs"}`;
       el.append(name, count);
       layer.appendChild(el);
       // Drop it somewhere free (a few tries), so circles don't start stacked.
@@ -165,12 +175,12 @@ export function ArtistBubbles({ artists }: { artists: string[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo, reduced, key]);
 
-  if (!demo || !reduced || artists.length === 0) return null;
+  if (!demo || !reduced || artists.length + folders.length === 0) return null;
   // Reduced motion: the same groups, standing still, as a small legend.
   return (
     <ul className="artist-legend" aria-label="Artists in the Songbook">
-      {artistClusters(artists, 20).map((c) => (
-        <li key={c.name} className={c.none ? "artist-legend-none" : undefined}>
+      {allClusters(artists, folders, 20).map((c) => (
+        <li key={(c.folder ? "f:" : "a:") + c.name} className={c.none ? "artist-legend-none" : c.folder ? "artist-legend-folder" : undefined}>
           {c.name} <span className="muted">{c.count}</span>
         </li>
       ))}

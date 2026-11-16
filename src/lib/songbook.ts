@@ -91,7 +91,7 @@ export function splitArtist(name: string): { title: string; artist: string } {
   return title && artist ? { title, artist } : { title: base, artist: "" };
 }
 
-export type ArtistCluster = { name: string; count: number; none?: boolean; rest?: boolean };
+export type ArtistCluster = { name: string; count: number; none?: boolean; rest?: boolean; folder?: boolean };
 
 /**
  * One bubble per artist for demo mode, biggest first. Past `cap`, the smallest artists fold into one

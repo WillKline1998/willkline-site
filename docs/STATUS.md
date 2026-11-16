@@ -2,6 +2,12 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-15 — Songbook: Covers artists split in prod; folder-aware demo mode
+- Done: `songbook-split-artists.ts` now needs `--folder <id>` and only touches that folder's DIRECT songs. Ran on prod Covers: 70 songs split (Black Sabbath - Changes … Tom Waits - Come On Up To The House); Hymns/Christmas/Originals untouched; slugs unchanged; counts 8/71/6/3 before = after.
+- Done: /songbook demo mode is per folder. `BUBBLED_FOLDERS` (page.tsx, today ["Covers"]) get artist circles for the folder's own songs + one 📁 circle per sub-folder; every other view (root, search, Hymns, Christmas, Originals, any new folder) gets DemoBounce ghosts on the search/filter/folder controls.
+- Verified: tsc, lint, build, e2e_songbook 89/89 (scope guard, Covers bubbles + folder bubbles, ghosts on Hymns/Christmas/Originals/root/search, click-through, phone, reduced motion).
+- Next: tiny phone circles can clip long names (e.g. "Christmas" at minimum size).
+
 ## 2026-11-15 — Songbook: artist editing, save feedback, flat root, demo artist circles (branch songbook-artist-move, NOT merged)
 **Done (code)**:
 - Artist + title per song: uploads take the title from the file name, and "Artist - Title.pdf" also fills the artist (a checkbox turns that off). `src/app/admin/songbook/SongEditor.tsx` edits title / artist / "No artist" / folder / notes / visible. The admin list says "No artist" when it's blank. The public song page shows the artist under the title. Search already matched artist.
