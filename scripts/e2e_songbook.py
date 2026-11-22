@@ -347,7 +347,7 @@ try:
             raise AssertionError("no free point found: " + str(pg.evaluate("[location.href, innerWidth, document.querySelectorAll('.wk-artist-bubble').length, document.querySelectorAll('.wk-artist-rest').length, [...document.querySelectorAll('.wk-artist-name')].map(e => e.textContent).join('|')]")))
         def demo_page(vw, vh, path="/songbook?folder=e2e-cv", **kw):
             ctx = browser.new_context(viewport={"width": vw, "height": vh}, **kw)
-            ctx.add_init_script("localStorage.setItem('wk-demo-mode','on')")
+            ctx.add_init_script("localStorage.setItem('wk-theme','demo')")
             pg = ctx.new_page()
             pg.on("pageerror", lambda e: errors.append(str(e)[:160]))
             pg.goto(f"{BASE}{path}")

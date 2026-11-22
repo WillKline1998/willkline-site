@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { sections } from "@/lib/sections";
-import { DemoToggle } from "@/components/DemoMode";
+import { ThemeCycler } from "@/components/Theme";
 import { NavShell } from "@/components/NavShell";
 import { NavLink } from "@/components/NavLink";
 import { AccountLinks } from "@/components/AccountLinks";
@@ -26,7 +26,7 @@ export function Nav() {
         </ul>
       </nav>
       <div className="nav-foot">
-        <DemoToggle />
+        <ThemeCycler />
         <AccountLinks />
       </div>
     </NavShell>

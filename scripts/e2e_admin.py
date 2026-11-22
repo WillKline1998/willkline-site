@@ -277,7 +277,10 @@ try:
         pg.uncheck("input[name=status][value=IDEA]"); pg.check("input[name=status][value=BUILDING]")
         pg.fill("input[name=description]", "A test gadget")
         pg.fill("input[name=tech]", "Max/MSP, Web Audio")
-        pg.check("input[name=published]"); pg.click("button:text('Save')"); pg.wait_for_load_state("networkidle")
+        pg.check("input[name=published]")
+        # The save is a Server Action with no redirect: wait for its POST to finish before reading /lab.
+        with pg.expect_response(lambda r: r.request.method == "POST" and "/admin/lab/" in r.url):
+            pg.click("button:text('Save')")
         anon.goto(f"{BASE}/lab")
         card = anon.locator(".lab-card", has_text="E2E Gadget")
         check(card.count() == 1 and card.get_by_text("In progress").count() == 1 and card.locator(".chips li").count() == 2, "lab card shows status + tech")

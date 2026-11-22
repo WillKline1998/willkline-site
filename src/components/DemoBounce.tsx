@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useDemoMode } from "./DemoMode";
+import { useDemoMode } from "./Theme";
 
 /**
  * Demo mode's DVD-screensaver layer for the recipe filters. Each filter/sort button gets a "back shape" (a

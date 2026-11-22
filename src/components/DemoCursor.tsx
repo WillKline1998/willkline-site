@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useDemoMode } from "./DemoMode";
+import { useDemoMode } from "./Theme";
 
 const COLORS = [
   "#ffd54a",

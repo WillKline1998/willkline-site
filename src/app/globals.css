@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 /* ==================================================================
-   NORMAL MODE: "Quiet Studio" (chosen by Will 2026-10-07; the
-   alternatives live in git history, commit c17f2c9).
+   FOUNDATION = THEME "Original Design" (data-theme="original").
+   "Quiet Studio", chosen by Will 2026-10-07: the site's first look,
+   kept to commemorate it. Every rule outside a html[data-theme=...]
+   block is this foundation; the other themes layer over it:
+     pop art   -> html[data-theme="pop-art"] block (below)
+     demo mode -> html[data-theme="demo"] layer (further below; it was
+                  designed over this foundation and still sits on it)
+   Theme registry + cycler order: src/lib/themes.ts.
    ================================================================== */
 
 :root {
@@ -437,6 +443,8 @@ a:hover { text-decoration: underline; }
 }
 .admin-form input[type=checkbox], .admin-form input[type=radio] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); flex: none; }
 .admin-form > .btn { justify-self: start; min-width: 8rem; }
+.theme-default-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.theme-default-form legend { font-family: var(--font-label); font-size: 0.85rem; margin-bottom: 0.5rem; }
 .admin-form .inline-form input[type=number] { width: auto; }
 input[type=file] { max-width: 100%; min-height: 40px; font: inherit; font-family: var(--font-body); font-size: 0.9rem; color: var(--muted); }
 /* Make "Choose file" look like the site's other buttons. */
@@ -467,7 +475,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .album-detail { display: grid; gap: 2rem; margin-top: 1rem; }
 @media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
 .album-detail > div { container-type: inline-size; min-width: 0; }
-:is(html, html:not([data-mode="demo"])) .album-detail .page-title { font-size: min(clamp(2.6rem, 11vw, 5rem), calc(100cqi / (var(--fit, 1) * 0.8 + 0.3))); }
+html .album-detail .page-title { font-size: min(clamp(2.6rem, 11vw, 5rem), calc(100cqi / (var(--fit, 1) * 0.8 + 0.3))); }
 .listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
 
 .not-found-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; list-style: none; padding: 0; font-weight: 600; }
@@ -523,17 +531,20 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .section-label { border-bottom: 0; }
 
 /* ==================================================================
-   NORMAL MODE: "Bauhaus Pop" (2026-11-21). LaCroix boxes x Warhol
+   THEME "pop art" (data-theme="pop-art"): "Bauhaus Pop" (2026-11-21). LaCroix boxes x Warhol
    Shadows II x Bauhaus posters. Palette anchored on Will's coolors set
    e56399 / fba00e / 056bf0 / 89bf4a / fff25e / 7a6563, plus black ink and
    lemon-tinted paper. Hard 3px black rules, square corners, offset block
-   shadows (never blurs), heavy type. Scoped to :not([data-mode=demo]) for
-   the decorative parts so the demo layer keeps its own look.
+   shadows (never blurs), heavy type. Everything is scoped to
+   html[data-theme="pop-art"], layered over the Original Design foundation.
    Revert: git reset --hard pre-bauhaus-redesign
    ================================================================== */
+/* The palette is global (harmless names); the tokens that change the look are theme-scoped. */
 :root {
   --pink: #e56399; --orange: #fba00e; --blue: #056bf0; --lime: #89bf4a; --lemon: #fff25e; --taupe: #7a6563;
   --black: #111111;
+}
+html[data-theme="pop-art"] {
   --bg: #fffbe6;           /* warm paper (sky-blue #7ab6ff tried in the rebalance; paper reads text better) */
   --panel: #ffffff;
   --nav-bg: var(--lime);
@@ -546,179 +557,179 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
   --shadow: 6px 6px 0 var(--black);
   --shadow-sm: 4px 4px 0 var(--black);
 }
-html:not([data-mode="demo"]) {
+html[data-theme="pop-art"] {
   /* Bauhaus page field: a faint grid of the paper itself. */
   background: var(--bg);
 }
-html:not([data-mode="demo"]) body {
+html[data-theme="pop-art"] body {
   background-color: var(--bg);
   background-image: linear-gradient(#11111108 1px, transparent 1px), linear-gradient(90deg, #11111108 1px, transparent 1px);
   background-size: 32px 32px;
 }
-html:not([data-mode="demo"]) ::selection { background: var(--pink); color: var(--black); }
+html[data-theme="pop-art"] ::selection { background: var(--pink); color: var(--black); }
 
 /* Type: big, heavy, tight. */
-html:not([data-mode="demo"]) :is(h1, .page-title, .home-title) {
+html[data-theme="pop-art"] :is(h1, .page-title, .home-title) {
   font-weight: 900; letter-spacing: -0.045em; line-height: 0.95; text-transform: uppercase;
 }
-html:not([data-mode="demo"]) .page-title.as-written { text-transform: none; }
-html:not([data-mode="demo"]) .page-title { font-size: clamp(2.6rem, 11vw, 5rem); }
-html:not([data-mode="demo"]) .home-title { font-size: clamp(2.4rem, 9vw, 4.4rem); }
+html[data-theme="pop-art"] .page-title.as-written { text-transform: none; }
+html[data-theme="pop-art"] .page-title { font-size: clamp(2.6rem, 11vw, 5rem); }
+html[data-theme="pop-art"] .home-title { font-size: clamp(2.4rem, 9vw, 4.4rem); }
 /* A Warhol "shadow" block under every page title: a pink bar offset behind the type. */
-html:not([data-mode="demo"]) :is(.page-title, .home-title) {
+html[data-theme="pop-art"] :is(.page-title, .home-title) {
   display: inline; padding: 0 0.12em;
   background: linear-gradient(transparent 58%, var(--sec2, var(--pink)) 58%, var(--sec2, var(--pink)) 92%, transparent 92%);
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
-html:not([data-mode="demo"]) :is(.page-title, .home-title) + * { margin-top: 1rem; }
-html:not([data-mode="demo"]) :is(h2, h3, .notice-title, .lab-title, .post-title, .wall-title, .song-title) { font-weight: 800; letter-spacing: -0.02em; }
-html:not([data-mode="demo"]) .lede { color: var(--black); font-weight: 500; }
+html[data-theme="pop-art"] :is(.page-title, .home-title) + * { margin-top: 1rem; }
+html[data-theme="pop-art"] :is(h2, h3, .notice-title, .lab-title, .post-title, .wall-title, .song-title) { font-weight: 800; letter-spacing: -0.02em; }
+html[data-theme="pop-art"] .lede { color: var(--black); font-weight: 500; }
 
 /* Section labels become black slabs with lemon type. */
-html:not([data-mode="demo"]) :is(.section-label, .cv-heading) {
+html[data-theme="pop-art"] :is(.section-label, .cv-heading) {
   display: inline-block; background: var(--black); color: var(--lemon);
   padding: 0.35rem 0.7rem; border: 0; letter-spacing: 0.16em; font-weight: 800;
   box-shadow: 5px 5px 0 var(--orange);
 }
-html:not([data-mode="demo"]) .rail-label { color: var(--black); font-weight: 800; }
+html[data-theme="pop-art"] .rail-label { color: var(--black); font-weight: 800; }
 
 /* Nav: lime slab with a thick black edge; current page = black block. */
-html:not([data-mode="demo"]) .site-nav { background: var(--lime); border-bottom: var(--line); border-right: 0; }
+html[data-theme="pop-art"] .site-nav { background: var(--lime); border-bottom: var(--line); border-right: 0; }
 @media (min-width: 768px) {
-  html:not([data-mode="demo"]) .site-nav { border-bottom: 0; border-right: 6px solid var(--black); }
-  html:not([data-mode="demo"]) .site-nav::before { background: var(--lime); }
+  html[data-theme="pop-art"] .site-nav { border-bottom: 0; border-right: 6px solid var(--black); }
+  html[data-theme="pop-art"] .site-nav::before { background: var(--lime); }
   /* Bauhaus geometry at the foot of the sidebar: circle, square, triangle. */
-  html:not([data-mode="demo"]) .site-nav::after {
+  html[data-theme="pop-art"] .site-nav::after {
     content: ""; position: absolute; left: 1.5rem; bottom: 1.25rem; width: 132px; height: 40px; pointer-events: none;
     background:
       radial-gradient(circle at 20px 20px, var(--pink) 19px, transparent 20px),
       linear-gradient(var(--blue), var(--blue)) 48px 0 / 40px 40px no-repeat,
       linear-gradient(to top right, var(--orange) 50%, transparent 50%) 92px 0 / 40px 40px no-repeat;
   }
-  html:not([data-mode="demo"]) .nav-foot { padding-bottom: 4rem; }
-  html:not([data-mode="demo"]) .site-nav li a[aria-current="page"]::before { display: none; }
+  html[data-theme="pop-art"] .nav-foot { padding-bottom: 4rem; }
+  html[data-theme="pop-art"] .site-nav li a[aria-current="page"]::before { display: none; }
 }
-html:not([data-mode="demo"]) .site-name { font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 0.9; }
-html:not([data-mode="demo"]) .site-tagline { color: var(--black); font-weight: 600; }
-html:not([data-mode="demo"]) .site-nav li a { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.85rem; border-bottom: 2px solid var(--black); }
+html[data-theme="pop-art"] .site-name { font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 0.9; }
+html[data-theme="pop-art"] .site-tagline { color: var(--black); font-weight: 600; }
+html[data-theme="pop-art"] .site-nav li a { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.85rem; border-bottom: 2px solid var(--black); }
 @media (min-width: 768px) {
-  html:not([data-mode="demo"]) .site-nav li a { border-bottom: 0; padding: 0.3rem 0.5rem; margin-left: -0.5rem; }
+  html[data-theme="pop-art"] .site-nav li a { border-bottom: 0; padding: 0.3rem 0.5rem; margin-left: -0.5rem; }
 }
-html:not([data-mode="demo"]) .site-nav li a:hover { color: var(--black); background: var(--orange); }
-html:not([data-mode="demo"]) .site-nav li a[aria-current="page"] { background: var(--black); color: var(--lemon); }
-html:not([data-mode="demo"]) .menu-button { border: var(--line); border-radius: 0; background: var(--white, #fff); font-weight: 700; box-shadow: var(--shadow-sm); }
-html:not([data-mode="demo"]) .demo-toggle { border: var(--line); border-radius: 0; background: var(--pink); color: var(--black); font-weight: 800; box-shadow: var(--shadow-sm); }
-html:not([data-mode="demo"]) .account-link, html:not([data-mode="demo"]) .account .link-button { color: var(--black); }
+html[data-theme="pop-art"] .site-nav li a:hover { color: var(--black); background: var(--orange); }
+html[data-theme="pop-art"] .site-nav li a[aria-current="page"] { background: var(--black); color: var(--lemon); }
+html[data-theme="pop-art"] .menu-button { border: var(--line); border-radius: 0; background: var(--white, #fff); font-weight: 700; box-shadow: var(--shadow-sm); }
+html[data-theme="pop-art"] .theme-cycler { border: var(--line); border-radius: 0; background: var(--pink); color: var(--black); font-weight: 800; box-shadow: var(--shadow-sm); }
+html[data-theme="pop-art"] .account-link, html[data-theme="pop-art"] .account .link-button { color: var(--black); }
 
 /* Footer: a full black bar. */
-html:not([data-mode="demo"]) .site-footer { background: var(--black); color: var(--lime); border-top: 0; }
-html:not([data-mode="demo"]) .site-footer a { color: var(--lime); }
+html[data-theme="pop-art"] .site-footer { background: var(--black); color: var(--lime); border-top: 0; }
+html[data-theme="pop-art"] .site-footer a { color: var(--lime); }
 
 /* Cards: white blocks, 3px black edge, offset black shadow; a colour band on top
    cycles through the LaCroix flavours. */
-html:not([data-mode="demo"]) :is(.notice, .lab-card, .wall-card, .press-list li, .admin-tools li, .admin-form, .recipe-card,
+html[data-theme="pop-art"] :is(.notice, .lab-card, .wall-card, .press-list li, .admin-tools li, .admin-form, .recipe-card,
   .song-folders a, .song-row, .dd-day, .dd-about, .dd-gift, .dd-trough, .cleanup-stats > div, .cleanup-fly, .cleanup-mine,
   .file-card, .song-admin-list > li, .pov, .rail-box) {
   border: var(--line); border-radius: 0; box-shadow: var(--shadow); background: var(--panel);
 }
-html:not([data-mode="demo"]) :is(.song-row, .file-card, .cleanup-fly) { box-shadow: var(--shadow-sm); }
-html:not([data-mode="demo"]) :is(.notice, .lab-card, .recipe-card, .wall-card, .dd-day) { border-top-width: 14px; }
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+1) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+1):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--orange); }
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+2) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+2):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--pink); }
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--blue); }
-html:not([data-mode="demo"]) .notice-show { border-left: 14px solid var(--blue); }
+html[data-theme="pop-art"] :is(.song-row, .file-card, .cleanup-fly) { box-shadow: var(--shadow-sm); }
+html[data-theme="pop-art"] :is(.notice, .lab-card, .recipe-card, .wall-card, .dd-day) { border-top-width: 14px; }
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+1) :is(.notice, .lab-card, .recipe-card, .dd-day),
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+1):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--orange); }
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+2) :is(.notice, .lab-card, .recipe-card, .dd-day),
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+2):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--pink); }
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3) :is(.notice, .lab-card, .recipe-card, .dd-day),
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4) :is(.notice, .lab-card, .recipe-card, .dd-day),
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n) :is(.notice, .lab-card, .recipe-card, .dd-day),
+html[data-theme="pop-art"] :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--blue); }
+html[data-theme="pop-art"] .notice-show { border-left: 14px solid var(--blue); }
 /* Hover: the block lifts off its shadow, poster-press style. */
-html:not([data-mode="demo"]) :is(.notice, .lab-card, .recipe-card, .wall-card, .song-folders a, .song-row, .file-card, .cleanup-fly, .album-card) {
+html[data-theme="pop-art"] :is(.notice, .lab-card, .recipe-card, .wall-card, .song-folders a, .song-row, .file-card, .cleanup-fly, .album-card) {
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-html:not([data-mode="demo"]) :is(.recipe-card, .wall-card, .song-folders a, .song-row, .file-card, .cleanup-fly):hover {
+html[data-theme="pop-art"] :is(.recipe-card, .wall-card, .song-folders a, .song-row, .file-card, .cleanup-fly):hover {
   transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--black); border-color: var(--black);
 }
-html:not([data-mode="demo"]) .song-folders a { border-left: 14px solid var(--lime); }
-html:not([data-mode="demo"]) .song-folders li:nth-child(4n+2) a { border-left-color: var(--pink); }
-html:not([data-mode="demo"]) .song-folders li:nth-child(4n+3) a { border-left-color: var(--orange); }
-html:not([data-mode="demo"]) .song-folders li:nth-child(4n) a { border-left-color: var(--blue); }
-html:not([data-mode="demo"]) .rail-box { border-top: 14px solid var(--blue); }
-html:not([data-mode="demo"]) .rail .rail-box:nth-child(2) { border-top-color: var(--pink); }
-html:not([data-mode="demo"]) .rail .rail-box:nth-child(3) { border-top-color: var(--lime); }
-html:not([data-mode="demo"]) .rail .rail-box:nth-child(4) { border-top-color: var(--orange); }
+html[data-theme="pop-art"] .song-folders a { border-left: 14px solid var(--lime); }
+html[data-theme="pop-art"] .song-folders li:nth-child(4n+2) a { border-left-color: var(--pink); }
+html[data-theme="pop-art"] .song-folders li:nth-child(4n+3) a { border-left-color: var(--orange); }
+html[data-theme="pop-art"] .song-folders li:nth-child(4n) a { border-left-color: var(--blue); }
+html[data-theme="pop-art"] .rail-box { border-top: 14px solid var(--blue); }
+html[data-theme="pop-art"] .rail .rail-box:nth-child(2) { border-top-color: var(--pink); }
+html[data-theme="pop-art"] .rail .rail-box:nth-child(3) { border-top-color: var(--lime); }
+html[data-theme="pop-art"] .rail .rail-box:nth-child(4) { border-top-color: var(--orange); }
 
 /* Images get the same hard frame. */
-html:not([data-mode="demo"]) :is(.album-cover, .home-photo, .bio-photo, .recipe-hero, .lead-image img, .photo-thumb, .rail-cover, .rail-photo, .song-viewer, .cleanup-map, .drawer-map, .media img) {
+html[data-theme="pop-art"] :is(.album-cover, .home-photo, .bio-photo, .recipe-hero, .lead-image img, .photo-thumb, .rail-cover, .rail-photo, .song-viewer, .cleanup-map, .drawer-map, .media img) {
   border-radius: 0; border: var(--line); box-shadow: var(--shadow-sm);
 }
-html:not([data-mode="demo"]) .album-soon { border-radius: 0; border: 2px solid var(--black); color: var(--black); background: var(--lemon); font-weight: 800; }
-html:not([data-mode="demo"]) .album-cover-wrap .album-soon { top: auto; bottom: -0.55rem; left: auto; right: -0.55rem; transform: rotate(-4deg); box-shadow: 3px 3px 0 var(--black); }
-html:not([data-mode="demo"]) .album-card:hover { transform: translate(-3px, -3px) rotate(-1deg); }
-html:not([data-mode="demo"]) .album-card:hover .album-title { color: var(--black); background: var(--lemon); text-decoration: none; }
-html:not([data-mode="demo"]) .bio-photo { box-shadow: 12px 12px 0 var(--blue), 12px 12px 0 3px var(--black); }
+html[data-theme="pop-art"] .album-soon { border-radius: 0; border: 2px solid var(--black); color: var(--black); background: var(--lemon); font-weight: 800; }
+html[data-theme="pop-art"] .album-cover-wrap .album-soon { top: auto; bottom: -0.55rem; left: auto; right: -0.55rem; transform: rotate(-4deg); box-shadow: 3px 3px 0 var(--black); }
+html[data-theme="pop-art"] .album-card:hover { transform: translate(-3px, -3px) rotate(-1deg); }
+html[data-theme="pop-art"] .album-card:hover .album-title { color: var(--black); background: var(--lemon); text-decoration: none; }
+html[data-theme="pop-art"] .bio-photo { box-shadow: 12px 12px 0 var(--blue), 12px 12px 0 3px var(--black); }
 
 /* Buttons: flat colour blocks that press in. */
-html:not([data-mode="demo"]) .btn {
+html[data-theme="pop-art"] .btn {
   border: var(--line); border-radius: 0; background: var(--orange); color: var(--black); font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.85rem; box-shadow: var(--shadow-sm);
   transition: transform 0.08s, box-shadow 0.08s;
 }
-html:not([data-mode="demo"]) .btn:hover { background: var(--lemon); }
-html:not([data-mode="demo"]) .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--black); }
-html:not([data-mode="demo"]) .btn-quiet { background: #fff; }
-html:not([data-mode="demo"]) .btn-danger { background: #fff; color: #b0102a; border-color: #b0102a; box-shadow: 4px 4px 0 #b0102a; }
-html:not([data-mode="demo"]) :is(.search-form .btn, .dd-play, .dd-listen, .dd-gift-send) { border-radius: 0; }
-html:not([data-mode="demo"]) .song-editor-actions .btn[data-state=saved] { background: var(--lime); color: var(--black); border-color: var(--black); }
-html:not([data-mode="demo"]) .jump-to-recipe { border-radius: 0; border: var(--line); background: var(--pink); color: var(--black); font-weight: 800; box-shadow: var(--shadow-sm); }
-html:not([data-mode="demo"]) input[type=file]::file-selector-button { border: var(--line); border-radius: 0; background: var(--blue); color: #fff; font-weight: 700; }
+html[data-theme="pop-art"] .btn:hover { background: var(--lemon); }
+html[data-theme="pop-art"] .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--black); }
+html[data-theme="pop-art"] .btn-quiet { background: #fff; }
+html[data-theme="pop-art"] .btn-danger { background: #fff; color: #b0102a; border-color: #b0102a; box-shadow: 4px 4px 0 #b0102a; }
+html[data-theme="pop-art"] :is(.search-form .btn, .dd-play, .dd-listen, .dd-gift-send) { border-radius: 0; }
+html[data-theme="pop-art"] .song-editor-actions .btn[data-state=saved] { background: var(--lime); color: var(--black); border-color: var(--black); }
+html[data-theme="pop-art"] .jump-to-recipe { border-radius: 0; border: var(--line); background: var(--pink); color: var(--black); font-weight: 800; box-shadow: var(--shadow-sm); }
+html[data-theme="pop-art"] input[type=file]::file-selector-button { border: var(--line); border-radius: 0; background: var(--blue); color: #fff; font-weight: 700; }
 
 /* Chips / filters / tags: square tabs; the active one is a black block. */
-html:not([data-mode="demo"]) :is(.wall-filters a, .wall-sort a, .recipe-tags a, .drawer-mode, .dd-word, .artist-legend li) {
+html[data-theme="pop-art"] :is(.wall-filters a, .wall-sort a, .recipe-tags a, .drawer-mode, .dd-word, .artist-legend li) {
   border: 2px solid var(--black); border-radius: 0; background: #fff; font-weight: 700;
 }
-html:not([data-mode="demo"]) :is(.wall-filters a, .wall-sort a, .recipe-tags a):hover { background: var(--lemon); color: var(--black); border-color: var(--black); }
-html:not([data-mode="demo"]) :is(.wall-filters a[aria-current="page"], .wall-sort a[aria-current="page"], .drawer-mode.on, .dd-word[data-on]) {
+html[data-theme="pop-art"] :is(.wall-filters a, .wall-sort a, .recipe-tags a):hover { background: var(--lemon); color: var(--black); border-color: var(--black); }
+html[data-theme="pop-art"] :is(.wall-filters a[aria-current="page"], .wall-sort a[aria-current="page"], .drawer-mode.on, .dd-word[data-on]) {
   background: var(--black); color: var(--lemon); border-color: var(--black); box-shadow: 3px 3px 0 var(--pink);
 }
-html:not([data-mode="demo"]) .chips li { border: 2px solid var(--black); border-radius: 0; background: #b9d8ff; font-weight: 600; }
-html:not([data-mode="demo"]) .chips li:nth-child(4n+2) { background: #f7c9dc; }
-html:not([data-mode="demo"]) .chips li:nth-child(4n+3) { background: #d3eab7; }
-html:not([data-mode="demo"]) .chips li:nth-child(4n) { background: #ffdca0; }
-html:not([data-mode="demo"]) .lab-status { border-radius: 0; border: 2px solid var(--black); color: var(--black); background: #fff; font-weight: 800; }
-html:not([data-mode="demo"]) .lab-status-building { background: var(--orange); }
-html:not([data-mode="demo"]) .lab-status-live { background: var(--lime); }
-html:not([data-mode="demo"]) .dd-badge { border: 2px solid var(--black); border-radius: 0; color: var(--black); background: var(--lemon); font-weight: 700; }
-html:not([data-mode="demo"]) :is(.notice-kind) { color: var(--black); background: var(--lemon); padding: 0.05rem 0.4rem; border: 2px solid var(--black); font-weight: 800; }
-html:not([data-mode="demo"]) .post-tag { color: var(--black); font-weight: 700; }
-html:not([data-mode="demo"]) .cal { border: var(--line); border-radius: 0; }
-html:not([data-mode="demo"]) .cal-m { background: var(--pink); color: var(--black); font-weight: 800; }
-html:not([data-mode="demo"]) .file-icon { background: var(--blue); border-radius: 0; }
-html:not([data-mode="demo"]) .tech-card { border: var(--line); border-radius: 0; box-shadow: var(--shadow); }
-html:not([data-mode="demo"]) .tech-card-logo { border-radius: 0; background: var(--lime); }
+html[data-theme="pop-art"] .chips li { border: 2px solid var(--black); border-radius: 0; background: #b9d8ff; font-weight: 600; }
+html[data-theme="pop-art"] .chips li:nth-child(4n+2) { background: #f7c9dc; }
+html[data-theme="pop-art"] .chips li:nth-child(4n+3) { background: #d3eab7; }
+html[data-theme="pop-art"] .chips li:nth-child(4n) { background: #ffdca0; }
+html[data-theme="pop-art"] .lab-status { border-radius: 0; border: 2px solid var(--black); color: var(--black); background: #fff; font-weight: 800; }
+html[data-theme="pop-art"] .lab-status-building { background: var(--orange); }
+html[data-theme="pop-art"] .lab-status-live { background: var(--lime); }
+html[data-theme="pop-art"] .dd-badge { border: 2px solid var(--black); border-radius: 0; color: var(--black); background: var(--lemon); font-weight: 700; }
+html[data-theme="pop-art"] :is(.notice-kind) { color: var(--black); background: var(--lemon); padding: 0.05rem 0.4rem; border: 2px solid var(--black); font-weight: 800; }
+html[data-theme="pop-art"] .post-tag { color: var(--black); font-weight: 700; }
+html[data-theme="pop-art"] .cal { border: var(--line); border-radius: 0; }
+html[data-theme="pop-art"] .cal-m { background: var(--pink); color: var(--black); font-weight: 800; }
+html[data-theme="pop-art"] .file-icon { background: var(--blue); border-radius: 0; }
+html[data-theme="pop-art"] .tech-card { border: var(--line); border-radius: 0; box-shadow: var(--shadow); }
+html[data-theme="pop-art"] .tech-card-logo { border-radius: 0; background: var(--lime); }
 
 /* Form fields: hard boxes, thick focus ring in blue. */
-html:not([data-mode="demo"]) :is(.admin-form, .admin-table, .song-editor, .cleanup-form, .track-row, .search-form, .drawer-find) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select),
-html:not([data-mode="demo"]) .search-form input[type=search] {
+html[data-theme="pop-art"] :is(.admin-form, .admin-table, .song-editor, .cleanup-form, .track-row, .search-form, .drawer-find) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select),
+html[data-theme="pop-art"] .search-form input[type=search] {
   border: 2px solid var(--black); border-radius: 0; background: #fff;
 }
-html:not([data-mode="demo"]) :is(input, textarea, select):focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
-html:not([data-mode="demo"]) .admin-form label, html:not([data-mode="demo"]) .song-editor label { color: var(--black); font-weight: 600; }
-html:not([data-mode="demo"]) .admin-note { border-left: 10px solid var(--orange); border-top: 2px solid var(--black); border-right: 2px solid var(--black); border-bottom: 2px solid var(--black); }
+html[data-theme="pop-art"] :is(input, textarea, select):focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+html[data-theme="pop-art"] .admin-form label, html[data-theme="pop-art"] .song-editor label { color: var(--black); font-weight: 600; }
+html[data-theme="pop-art"] .admin-note { border-left: 10px solid var(--orange); border-top: 2px solid var(--black); border-right: 2px solid var(--black); border-bottom: 2px solid var(--black); }
 
 /* Page-level colour blocking: each section gets a flat poster field behind its header. */
 /* Drawn as backgrounds of .site-main (not pseudo-elements) so no stacking context is created:
    the photo viewer and other fixed overlays inside main must still paint above the sticky nav. */
-html:not([data-mode="demo"]) .site-main {
+html[data-theme="pop-art"] .site-main {
   --band: 6.5rem;
   background:
     linear-gradient(var(--black), var(--black)) 0 var(--band) / 100% 6px no-repeat,
     linear-gradient(var(--sec, var(--orange)), var(--sec, var(--orange))) 0 0 / 100% var(--band) no-repeat;
 }
 @media (min-width: 768px) {
-  html:not([data-mode="demo"]) .site-main {
+  html[data-theme="pop-art"] .site-main {
     --band: 8.25rem;
     background:
       radial-gradient(circle at calc(100% - 6rem) 5.6rem, var(--sec2, var(--blue)) 3.6rem, var(--black) calc(3.6rem + 1px) 4rem, transparent calc(4rem + 1px)),
@@ -727,26 +738,26 @@ html:not([data-mode="demo"]) .site-main {
   }
 }
 @media (min-width: 1080px) {
-  html:not([data-mode="demo"]) .site-main:has(.home) {
+  html[data-theme="pop-art"] .site-main:has(.home) {
     background:
       linear-gradient(var(--black), var(--black)) 0 var(--band) / 100% 6px no-repeat,
       linear-gradient(var(--sec, var(--orange)), var(--sec, var(--orange))) 0 0 / 100% var(--band) no-repeat;
   }
 }
-html:not([data-mode="demo"]) .site-main:has(.home)        { --sec: var(--orange); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.bio-layout)  { --sec: var(--pink);   --sec2: var(--lime); }
-html:not([data-mode="demo"]) .site-main:has(.lab-grid, .lab-detail) { --sec: var(--blue); --sec2: var(--orange); }
-html:not([data-mode="demo"]) .site-main:has(.recipe-grid, .recipe-page, .recipe-form) { --sec: var(--lime); --sec2: var(--pink); }
-html:not([data-mode="demo"]) .site-main:has(.song-folders, .song-list, .song-viewer) { --sec: var(--lime); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.album-grid, .album-detail) { --sec: var(--pink); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.media-page, .photo-grid) { --sec: var(--lime); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.wall-page) { --sec: var(--orange); --sec2: var(--pink); }
-html:not([data-mode="demo"]) .site-main:has(.cleanup) { --sec: var(--blue); --sec2: var(--lime); }
-html:not([data-mode="demo"]) .site-main:has(.dd-feed, .dd-studio) { --sec: var(--pink); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.cv, .post-list, .markdown) { --sec: var(--blue); --sec2: var(--lime); }
+html[data-theme="pop-art"] .site-main:has(.home)        { --sec: var(--orange); --sec2: var(--blue); }
+html[data-theme="pop-art"] .site-main:has(.bio-layout)  { --sec: var(--pink);   --sec2: var(--lime); }
+html[data-theme="pop-art"] .site-main:has(.lab-grid, .lab-detail) { --sec: var(--blue); --sec2: var(--orange); }
+html[data-theme="pop-art"] .site-main:has(.recipe-grid, .recipe-page, .recipe-form) { --sec: var(--lime); --sec2: var(--pink); }
+html[data-theme="pop-art"] .site-main:has(.song-folders, .song-list, .song-viewer) { --sec: var(--lime); --sec2: var(--blue); }
+html[data-theme="pop-art"] .site-main:has(.album-grid, .album-detail) { --sec: var(--pink); --sec2: var(--blue); }
+html[data-theme="pop-art"] .site-main:has(.media-page, .photo-grid) { --sec: var(--lime); --sec2: var(--blue); }
+html[data-theme="pop-art"] .site-main:has(.wall-page) { --sec: var(--orange); --sec2: var(--pink); }
+html[data-theme="pop-art"] .site-main:has(.cleanup) { --sec: var(--blue); --sec2: var(--lime); }
+html[data-theme="pop-art"] .site-main:has(.dd-feed, .dd-studio) { --sec: var(--pink); --sec2: var(--blue); }
+html[data-theme="pop-art"] .site-main:has(.cv, .post-list, .markdown) { --sec: var(--blue); --sec2: var(--lime); }
 /* On the blue fields the title needs to stay black-on-pink (it does via its own bar); the lede sits on colour, so white-backed. */
-html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table; margin-top: 1rem; padding: 0.2rem 0.5rem; border: 2px solid var(--black); }
-@media (max-width: 767px) { html:not([data-mode="demo"]) .bio-prose { padding-top: 1.5rem; } }
+html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; margin-top: 1rem; padding: 0.2rem 0.5rem; border: 2px solid var(--black); }
+@media (max-width: 767px) { html[data-theme="pop-art"] .bio-prose { padding-top: 1.5rem; } }
 /* Bio on wide screens: the heading + photo column is sticky, so the pink header band must be sticky too —
    as a .site-main background it scrolled away and left the frozen heading floating on the grid, with the
    first lines of text scrolling up out of the band. Here the band is a real sticky element (.bio-band) that
@@ -754,41 +765,54 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
    off for this page only. (No fixed overlays live on the bio page, so the band's stacking context is safe.) */
 .bio-band { display: none; }
 @media (min-width: 768px) {
-  html:not([data-mode="demo"]) .site-main:has(.bio-band) { background: none; }
-  html:not([data-mode="demo"]) .bio-band {
+  html[data-theme="pop-art"] .site-main:has(.bio-band) { background: none; }
+  html[data-theme="pop-art"] .bio-band {
     display: block; position: sticky; top: 0; z-index: 1;
     height: calc(var(--band) + 6px); margin: -2.5rem -2rem calc(2.5rem - var(--band) - 6px);
     background: var(--sec, var(--pink)); border-bottom: 6px solid var(--black); box-sizing: border-box;
   }
   /* The poster circle, hanging off the band's right end exactly where the .site-main version sat. */
-  html:not([data-mode="demo"]) .bio-band::after {
+  html[data-theme="pop-art"] .bio-band::after {
     content: ""; position: absolute; top: 1.6rem; right: 2rem; width: 8rem; height: 8rem; box-sizing: border-box;
     border-radius: 50%; background: var(--sec2, var(--lime)); border: 0.4rem solid var(--black);
   }
-  html:not([data-mode="demo"]) .bio-layout.has-photo .bio-keep { z-index: 2; }
-  html:not([data-mode="demo"]) .bio-layout.has-photo .bio-prose { padding-top: calc(var(--band) + 6px - 2.5rem + 1.5rem); }
+  html[data-theme="pop-art"] .bio-layout.has-photo .bio-keep { z-index: 2; }
+  html[data-theme="pop-art"] .bio-layout.has-photo .bio-prose { padding-top: calc(var(--band) + 6px - 2.5rem + 1.5rem); }
 }
 
 /* ------------------------------------------------------------------
-   DEMO MODE ("effervescent orange")
-   Everything flashy lives below, scoped to [data-mode="demo"].
+   THEME "demo mode" (data-theme="demo"): "effervescent orange"
+   Everything flashy lives below, scoped to [data-theme="demo"]; it
+   layers on the Original Design foundation (pop art rules don't apply).
    Palette: tangerine / amber / coral / hot pink-orange / golden
    highlights on a dark warm brown. Motion is transform/opacity only.
    ------------------------------------------------------------------ */
 
-.demo-toggle {
-  font-family: var(--font-label); font-size: 0.8em;
-  border: 1px solid currentColor; border-radius: 999px; padding: 0.2rem 0.8rem; min-height: 44px;
+/* The theme cycler (sidebar foot / phone menu): shows the current theme; each press moves to the next.
+   Its base look lives here; each theme dresses it in its own block. */
+.theme-cycler {
+  /* Two rows so the longest name ("Original Design") fits the 220px sidebar: small label over the name,
+     the cycle arrow to the right of both. */
+  display: inline-grid; grid-template-columns: auto auto; column-gap: 0.6rem; align-items: center; text-align: left;
+  font-family: var(--font-label); font-size: 0.8em; line-height: 1.25; max-width: 100%;
+  border: 1px solid currentColor; border-radius: 999px; padding: 0.3rem 1rem; min-height: 44px;
   background: transparent; color: var(--ink); cursor: pointer;
+}
+.theme-cycler-label { grid-column: 1; font-size: max(12px, 0.8em); text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
+.theme-cycler-name { grid-column: 1; grid-row: 2; font-weight: 700; white-space: nowrap; }
+.theme-cycler-icon { grid-column: 2; grid-row: 1 / span 2; font-size: 1.3em; line-height: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .theme-cycler-icon { transition: transform 0.3s ease; }
+  .theme-cycler:hover .theme-cycler-icon { transform: rotate(180deg); }
 }
 
 /* An opaque base on <html> (not just <body>) means no seam can ever show
    white, even while a layer is being re-rasterised. */
-[data-mode="demo"] {
+[data-theme="demo"] {
   background: #170804;
   color-scheme: dark;
 }
-[data-mode="demo"] body {
+[data-theme="demo"] body {
   --bg: #170804;
   --panel: linear-gradient(135deg, #ffffff14, #ff8a3d14);
   --ink: #fff4e8;       /* 17:1 on --bg */
@@ -799,16 +823,16 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
   --shadow: none;
   background: transparent;
 }
-[data-mode="demo"] ::selection { background: #ff7a18; color: #170804; }
+[data-theme="demo"] ::selection { background: #ff7a18; color: #170804; }
 
 /* The animated backdrop is a fixed layer that we move with transform, not
    an animated background-position: that repainted the whole canvas every
    frame, and the sidebar flashed white while it was being re-rasterised. */
-[data-mode="demo"] body::before,
-[data-mode="demo"] body::after {
+[data-theme="demo"] body::before,
+[data-theme="demo"] body::after {
   content: ""; position: fixed; z-index: -1; pointer-events: none;
 }
-[data-mode="demo"] body::before {
+[data-theme="demo"] body::before {
   inset: -30%;
   background:
     radial-gradient(circle at 18% 22%, #ff6a1a99, transparent 34%),
@@ -820,41 +844,41 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
   will-change: transform;
 }
 /* Fine grain keeps the big gradients from banding and feels tactile. */
-[data-mode="demo"] body::after {
+[data-theme="demo"] body::after {
   inset: 0; opacity: 0.09; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-[data-mode="demo"] .site-shell { background: transparent; }
+[data-theme="demo"] .site-shell { background: transparent; }
 /* Desktop: the sidebar floats on the backdrop (a tinted box would end where the
    centred shell ends and read as a stray rectangle). Phones: the bar is sticky over
    scrolling content, so it needs a body of its own. */
-[data-mode="demo"] .site-nav { background: transparent; border-right-color: var(--rule); }
+[data-theme="demo"] .site-nav { background: transparent; border-right-color: var(--rule); }
 @media (max-width: 767px) {
-  [data-mode="demo"] .site-nav { background: #170804ee; border-bottom-color: var(--rule); }
+  [data-theme="demo"] .site-nav { background: #170804ee; border-bottom-color: var(--rule); }
 }
 
 /* Nav links: slide, glow, and an underline that draws in. */
-[data-mode="demo"] .site-nav li a {
+[data-theme="demo"] .site-nav li a {
   position: relative; transition: color 0.25s, transform 0.25s, text-shadow 0.25s;
 }
-[data-mode="demo"] .site-nav li a::after {
+[data-theme="demo"] .site-nav li a::after {
   content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 2px;
   background: linear-gradient(90deg, #ffd54a, #ff7a18, #ff3d81);
   transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
 }
-[data-mode="demo"] .site-nav li a:hover,
-[data-mode="demo"] .site-nav li a:focus-visible {
+[data-theme="demo"] .site-nav li a:hover,
+[data-theme="demo"] .site-nav li a:focus-visible {
   color: #ffc46b; transform: translateX(6px); text-shadow: 0 0 14px #ff8a3dcc;
 }
-[data-mode="demo"] .site-nav li a:hover::after,
-[data-mode="demo"] .site-nav li a:focus-visible::after { transform: scaleX(1); }
+[data-theme="demo"] .site-nav li a:hover::after,
+[data-theme="demo"] .site-nav li a:focus-visible::after { transform: scaleX(1); }
 
-[data-mode="demo"] .site-name { text-shadow: 0 0 22px #ff7a1899; }
+[data-theme="demo"] .site-name { text-shadow: 0 0 22px #ff7a1899; }
 
 /* Headings: molten gradient with a soft glow. drop-shadow, because
    text-shadow would paint behind the transparent gradient text. */
-[data-mode="demo"] h1 {
+[data-theme="demo"] h1 {
   background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62, #ff3d81, #ffd54a);
   background-size: 300% 100%;
   -webkit-background-clip: text;
@@ -863,49 +887,49 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
   filter: drop-shadow(0 0 18px #ff7a1866);
   animation: wk-shimmer 7s linear infinite;
 }
-[data-mode="demo"] .section-label,
-[data-mode="demo"] .rail-label { color: #ffc46b; }
-[data-mode="demo"] .rail-box { border-top-color: #ff9a3c; box-shadow: 0 -8px 18px -12px #ff7a18; }
+[data-theme="demo"] .section-label,
+[data-theme="demo"] .rail-label { color: #ffc46b; }
+[data-theme="demo"] .rail-box { border-top-color: #ff9a3c; box-shadow: 0 -8px 18px -12px #ff7a18; }
 
 /* Warm glass panels that tilt ("cockeyed") and glow on hover. */
-[data-mode="demo"] .notice,
-[data-mode="demo"] .album-card,
-[data-mode="demo"] .lab-card,
-[data-mode="demo"] .wall-card,
-[data-mode="demo"] .press-list li {
+[data-theme="demo"] .notice,
+[data-theme="demo"] .album-card,
+[data-theme="demo"] .lab-card,
+[data-theme="demo"] .wall-card,
+[data-theme="demo"] .press-list li {
   backdrop-filter: blur(6px);
   transition: transform 0.4s cubic-bezier(.2,.8,.2,1.4), box-shadow 0.4s, border-color 0.4s;
 }
-[data-mode="demo"] .notice,
-[data-mode="demo"] .lab-card,
-[data-mode="demo"] .wall-card,
-[data-mode="demo"] .press-list li {
+[data-theme="demo"] .notice,
+[data-theme="demo"] .lab-card,
+[data-theme="demo"] .wall-card,
+[data-theme="demo"] .press-list li {
   border: 1px solid #ffb86c40;
   box-shadow: 0 8px 30px -14px #ff7a18aa;
 }
-[data-mode="demo"] .notice:hover,
-[data-mode="demo"] .album-card:hover,
-[data-mode="demo"] .lab-card:hover,
-[data-mode="demo"] .wall-card:hover {
+[data-theme="demo"] .notice:hover,
+[data-theme="demo"] .album-card:hover,
+[data-theme="demo"] .lab-card:hover,
+[data-theme="demo"] .wall-card:hover {
   transform: rotate(-1.5deg) scale(1.03);
   border-color: #ffb347;
   box-shadow: 0 0 34px #ff8a3d88, 0 12px 40px -10px #ff5e6288;
 }
 /* Alternate the lean so a grid of cards feels hand-scattered. */
-[data-mode="demo"] .notice:nth-child(even):hover,
-[data-mode="demo"] .album-card:nth-child(even):hover { transform: rotate(1.3deg) scale(1.03); }
-[data-mode="demo"] .notice-show { border-left: 4px solid #ffb02e; }
+[data-theme="demo"] .notice:nth-child(even):hover,
+[data-theme="demo"] .album-card:nth-child(even):hover { transform: rotate(1.3deg) scale(1.03); }
+[data-theme="demo"] .notice-show { border-left: 4px solid #ffb02e; }
 
 /* Dark text on bright-orange fills (white on orange fails AA). */
-[data-mode="demo"] .cal-m,
-[data-mode="demo"] .file-icon,
-[data-mode="demo"] .btn { color: #170804; }
-[data-mode="demo"] .btn { background: var(--accent); border-color: var(--accent); }
-[data-mode="demo"] .wall-filters a[aria-current="page"],
-[data-mode="demo"] .wall-sort a[aria-current="page"] { background: var(--accent); border-color: var(--accent); }
+[data-theme="demo"] .cal-m,
+[data-theme="demo"] .file-icon,
+[data-theme="demo"] .btn { color: #170804; }
+[data-theme="demo"] .btn { background: var(--accent); border-color: var(--accent); }
+[data-theme="demo"] .wall-filters a[aria-current="page"],
+[data-theme="demo"] .wall-sort a[aria-current="page"] { background: var(--accent); border-color: var(--accent); }
 
 /* The toggle glows with a pulsing halo (opacity-animated pseudo-element). */
-[data-mode="demo"] .demo-toggle {
+[data-theme="demo"] .theme-cycler {
   position: relative; color: #170804; border-color: transparent;
   /* Starts and ends on the same color, and 300% wide like the headings, so
      the shimmer loop wraps without a visible seam. */
@@ -914,7 +938,7 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
   font-weight: 700;
   animation: wk-shimmer 5s linear infinite;
 }
-[data-mode="demo"] .demo-toggle::after {
+[data-theme="demo"] .theme-cycler::after {
   content: ""; position: absolute; inset: -4px; border-radius: inherit; z-index: -1;
   background: inherit; filter: blur(14px);
   animation: wk-pulse 2.4s ease-in-out infinite alternate;
@@ -934,26 +958,26 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
 
 /* Respect users who ask for less motion: the palette and glow stay, motion goes. */
 @media (prefers-reduced-motion: reduce) {
-  [data-mode="demo"] body::before,
-  [data-mode="demo"] h1,
-  [data-mode="demo"] .demo-toggle,
-  [data-mode="demo"] .demo-toggle::after { animation: none; }
-  [data-mode="demo"] .notice,
-  [data-mode="demo"] .album-card,
-  [data-mode="demo"] .lab-card,
-  [data-mode="demo"] .wall-card,
-  [data-mode="demo"] .site-nav li a { transition: none; }
-  [data-mode="demo"] .notice:hover,
-  [data-mode="demo"] .album-card:hover,
-  [data-mode="demo"] .lab-card:hover,
-  [data-mode="demo"] .wall-card:hover,
-  [data-mode="demo"] .site-nav li a:hover { transform: none; }
+  [data-theme="demo"] body::before,
+  [data-theme="demo"] h1,
+  [data-theme="demo"] .theme-cycler,
+  [data-theme="demo"] .theme-cycler::after { animation: none; }
+  [data-theme="demo"] .notice,
+  [data-theme="demo"] .album-card,
+  [data-theme="demo"] .lab-card,
+  [data-theme="demo"] .wall-card,
+  [data-theme="demo"] .site-nav li a { transition: none; }
+  [data-theme="demo"] .notice:hover,
+  [data-theme="demo"] .album-card:hover,
+  [data-theme="demo"] .lab-card:hover,
+  [data-theme="demo"] .wall-card:hover,
+  [data-theme="demo"] .site-nav li a:hover { transform: none; }
 }
 
 /* Extra demo mode for the Lab: each card is a little stage where the cursor
    can push, pull and hover things that move in their own little loop (like
    leaves on a spring). Chips turn into mini cards you can read at once. */
-[data-mode="demo"] .lab-card {
+[data-theme="demo"] .lab-card {
   overflow: visible;
   padding: 1.2rem;
   border: 1px solid #ffb02e40;
@@ -962,9 +986,9 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
   box-shadow: 0 0 0 1px #ffb02e20, 0 14px 30px -12px #ff7a18cc;
   position: relative;
 }
-[data-mode="demo"] .lab-title { position: relative; z-index: 1; }
-[data-mode="demo"] .lab-card:hover { border-color: #ffb02e70; }
-[data-mode="demo"] .lab-card::before {
+[data-theme="demo"] .lab-title { position: relative; z-index: 1; }
+[data-theme="demo"] .lab-card:hover { border-color: #ffb02e70; }
+[data-theme="demo"] .lab-card::before {
   content: "";
   position: absolute; inset: 0; border-radius: inherit;
   background: conic-gradient(from 0deg, #ffb02e30, #ff7a1830, #ff5e6230, #ffb02e30);
@@ -975,58 +999,60 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
 @keyframes wk-spin { to { transform: rotate(360deg); } }
 
 /* Tiny loopy label that follows the cursor a little. */
-[data-mode="demo"] .lab-card { transition: transform 0.18s ease, box-shadow 0.18s ease; }
-[data-mode="demo"] .lab-card:hover { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+[data-theme="demo"] .lab-card { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+[data-theme="demo"] .lab-card:hover { transition: transform 0.12s ease, box-shadow 0.12s ease; }
 
 /* The chips are small floating cards on hover. */
-[data-mode="demo"] .chips li {
+[data-theme="demo"] .chips li {
   position: relative;
   transition: transform 0.2s cubic-bezier(.2,.8,.2,1.4), background 0.3s, border-color 0.3s, box-shadow 0.3s;
   box-shadow: 0 2px 0 #ffb86c20;
 }
-[data-mode="demo"] .chips li:hover {
+[data-theme="demo"] .chips li:hover {
   transform: translateY(-2px) scale(1.04);
   background: #ffb02e20;
   border-color: #ffd27a;
   box-shadow: 0 6px 16px #ff7a1855;
 }
-[data-mode="demo"] .tech-card { background: #170804; color: #fff4e8; border-color: #ffb86c; box-shadow: 0 10px 28px #000a, 0 0 22px #ff7a1866; }
-[data-mode="demo"] .tech-card-logo { background: #ffd27a; }
-[data-mode="demo"] .tech-card-name { color: #ffc46b; }
+[data-theme="demo"] .tech-card { background: #170804; color: #fff4e8; border-color: #ffb86c; box-shadow: 0 10px 28px #000a, 0 0 22px #ff7a1866; }
+[data-theme="demo"] .tech-card-logo { background: #ffd27a; }
+[data-theme="demo"] .tech-card-name { color: #ffc46b; }
+/* The foundation's green "Live" chip is too dark for the brown ground (pre-existing; ~2:1): a light green reads 9:1. */
+[data-theme="demo"] .lab-status-live { color: #9be37a; }
 
 /* Headroom: the widget window bounces like a little skip toy. */
-[data-mode="demo"] .window-tray { animation: wk-bob 3.4s ease-in-out infinite; }
-[data-mode="demo"] .window-tray:hover { animation: wk-bob 1.4s ease-in-out infinite; }
+[data-theme="demo"] .window-tray { animation: wk-bob 3.4s ease-in-out infinite; }
+[data-theme="demo"] .window-tray:hover { animation: wk-bob 1.4s ease-in-out infinite; }
 @keyframes wk-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
 }
 
 /* Lab grid: cards drift with the cursor, then settle. */
-[data-mode="demo"] .lab-grid { perspective: 600px; }
-[data-mode="demo"] .lab-grid:hover { animation: wk-grid-drift 6s ease-in-out infinite alternate; }
+[data-theme="demo"] .lab-grid { perspective: 600px; }
+[data-theme="demo"] .lab-grid:hover { animation: wk-grid-drift 6s ease-in-out infinite alternate; }
 @keyframes wk-grid-drift {
   from { transform: rotate(0deg) translateX(0); }
   to { transform: rotate(1.2deg) translateX(2px); }
 }
 
 /* Walls and notices get a little tilt. */
-[data-mode="demo"] .notice, [data-mode="demo"] .wall-card, [data-mode="demo"] .press-list li {
+[data-theme="demo"] .notice, [data-theme="demo"] .wall-card, [data-theme="demo"] .press-list li {
   transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s;
 }
-[data-mode="demo"] .notice:hover, [data-mode="demo"] .wall-card:hover, [data-mode="demo"] .press-list li:hover {
+[data-theme="demo"] .notice:hover, [data-theme="demo"] .wall-card:hover, [data-theme="demo"] .press-list li:hover {
   transform: rotate(-1.2deg) scale(1.02);
   border-color: #ffb86c70;
   box-shadow: 0 0 26px #ff8a3d66, 0 10px 30px -10px #ff5e6288;
 }
 
 /* Music album cards wobble a little when you let them. */
-[data-mode="demo"] .album-card { transition: transform 0.16s, box-shadow 0.16s, border-color 0.16s; }
-[data-mode="demo"] .album-card:hover { transform: rotate(0.8deg) scale(1.02); border-color: #ffb02e70; box-shadow: 0 8px 24px -12px #ff7a18aa; }
+[data-theme="demo"] .album-card { transition: transform 0.16s, box-shadow 0.16s, border-color 0.16s; }
+[data-theme="demo"] .album-card:hover { transform: rotate(0.8deg) scale(1.02); border-color: #ffb02e70; box-shadow: 0 8px 24px -12px #ff7a18aa; }
 
 /* Photos: thumbnails swell and glow like they are breathing. */
-[data-mode="demo"] .photo-thumb img { transition: transform 0.25s ease, filter 0.25s; }
-[data-mode="demo"] .photo-thumb:hover img { transform: scale(1.06); filter: drop-shadow(0 0 8px #ff7a1888); }
+[data-theme="demo"] .photo-thumb img { transition: transform 0.25s ease, filter 0.25s; }
+[data-theme="demo"] .photo-thumb:hover img { transform: scale(1.06); filter: drop-shadow(0 0 8px #ff7a1888); }
 
 /* Demo mode cursor: the real system cursor always stays visible (never
    cursor: none). DemoCursor.tsx drops short-lived sparkles behind it into one
@@ -1223,23 +1249,23 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
 /* Demo mode: the Lab's rotating backdrop, peppered onto a few more pages (lab project pages, bio photo,
    media photo grid). Same recipe as .lab-card::before: one spinning conic pseudo-element behind the content,
    low opacity so text stays readable. */
-[data-mode="demo"] .lab-detail,
-[data-mode="demo"] .bio-keep,
-[data-mode="demo"] .photo-grid,
-[data-mode="demo"] .home-photo-wrap { position: relative; isolation: isolate; }
-[data-mode="demo"] .lab-detail::before,
-[data-mode="demo"] .bio-keep::before,
-[data-mode="demo"] .photo-grid::before {
+[data-theme="demo"] .lab-detail,
+[data-theme="demo"] .bio-keep,
+[data-theme="demo"] .photo-grid,
+[data-theme="demo"] .home-photo-wrap { position: relative; isolation: isolate; }
+[data-theme="demo"] .lab-detail::before,
+[data-theme="demo"] .bio-keep::before,
+[data-theme="demo"] .photo-grid::before {
   content: ""; position: absolute; z-index: -1; pointer-events: none; border-radius: 18px;
   background: conic-gradient(from 0deg, #ffb02e26, #ff7a1826, #ff5e6226, #ffb02e26);
   border: 1px solid #ffb02e30;
   animation: wk-spin 40s linear infinite;
 }
-[data-mode="demo"] .lab-detail::before { inset: 1rem 8% auto 8%; height: min(70vh, 520px); opacity: 0.45; }
-[data-mode="demo"] .bio-keep::before { inset: 2.5rem -0.75rem -0.75rem; opacity: 0.5; animation-duration: 34s; }
-[data-mode="demo"] .photo-grid::before { inset: 10% 15%; opacity: 0.35; animation-direction: reverse; animation-duration: 50s; }
+[data-theme="demo"] .lab-detail::before { inset: 1rem 8% auto 8%; height: min(70vh, 520px); opacity: 0.45; }
+[data-theme="demo"] .bio-keep::before { inset: 2.5rem -0.75rem -0.75rem; opacity: 0.5; animation-duration: 34s; }
+[data-theme="demo"] .photo-grid::before { inset: 10% 15%; opacity: 0.35; animation-direction: reverse; animation-duration: 50s; }
 /* A second, slower tilting card behind lab project pages. */
-[data-mode="demo"] .lab-detail::after {
+[data-theme="demo"] .lab-detail::after {
   content: ""; position: absolute; z-index: -1; pointer-events: none; inset: 4rem 18% auto 14%; height: min(50vh, 380px);
   border-radius: 22px; border: 1px solid #ff5e6230; background: linear-gradient(135deg, #ff5e6218, #ffd54a12);
   animation: wk-tilt 18s ease-in-out infinite alternate;
@@ -1277,48 +1303,48 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
 .wk-folder-bubble { border-style: double; border-width: 5px; }
 .artist-legend-folder { border-style: double !important; border-width: 3px !important; }
 .artist-legend { display: none; }
-[data-mode="demo"] .artist-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; padding: 0; margin: 0 0 1rem; font-family: var(--font-label); font-size: 0.8rem; }
+[data-theme="demo"] .artist-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; list-style: none; padding: 0; margin: 0 0 1rem; font-family: var(--font-label); font-size: 0.8rem; }
 .artist-legend li { padding: 0.2rem 0.6rem; border: 1px solid var(--accent); border-radius: 999px; }
 .artist-legend-none { border-style: dashed !important; }
 @media (prefers-reduced-motion: reduce) {
-  [data-mode="demo"] .lab-detail::before, [data-mode="demo"] .lab-detail::after,
-  [data-mode="demo"] .bio-keep::before, [data-mode="demo"] .photo-grid::before { animation: none; }
+  [data-theme="demo"] .lab-detail::before, [data-theme="demo"] .lab-detail::after,
+  [data-theme="demo"] .bio-keep::before, [data-theme="demo"] .photo-grid::before { animation: none; }
   .wk-bounce { display: none; }
 }
 
 /* Demo mode: more rotating rectangles — cleanup map page, inspiration wall, media page. Same recipe as above:
    pseudo-elements behind the content (z-index -1 inside an isolated section), pointer-events none, faint. On
    /cleanup the map is opaque and paints above it, so the backdrop only shows around it and never takes clicks. */
-[data-mode="demo"] .cleanup,
-[data-mode="demo"] .wall-page,
-[data-mode="demo"] .media-page { position: relative; isolation: isolate; }
-[data-mode="demo"] .cleanup::before,
-[data-mode="demo"] .cleanup::after,
-[data-mode="demo"] .wall-page::before,
-[data-mode="demo"] .media-page::before,
-[data-mode="demo"] .media-page::after {
+[data-theme="demo"] .cleanup,
+[data-theme="demo"] .wall-page,
+[data-theme="demo"] .media-page { position: relative; isolation: isolate; }
+[data-theme="demo"] .cleanup::before,
+[data-theme="demo"] .cleanup::after,
+[data-theme="demo"] .wall-page::before,
+[data-theme="demo"] .media-page::before,
+[data-theme="demo"] .media-page::after {
   content: ""; position: absolute; z-index: -1; pointer-events: none; border-radius: 22px;
   background: conic-gradient(from 0deg, #ffb02e2e, #ff7a182e, #ff5e622e, #ffb02e2e);
   border: 1px solid #ffb02e40;
   animation: wk-spin 44s linear infinite;
 }
-[data-mode="demo"] .cleanup::before { inset: 1rem -3% auto -3%; height: min(85vh, 720px); opacity: 0.6; }
-[data-mode="demo"] .cleanup::after {
+[data-theme="demo"] .cleanup::before { inset: 1rem -3% auto -3%; height: min(85vh, 720px); opacity: 0.6; }
+[data-theme="demo"] .cleanup::after {
   inset: auto 4% 2rem 10%; height: min(45vh, 360px); opacity: 0.55;
   background: linear-gradient(135deg, #ff5e621f, #ffd54a17); border-color: #ff5e6236;
   animation: wk-tilt 20s ease-in-out infinite alternate;
 }
-[data-mode="demo"] .wall-page::before { inset: 6rem 4% auto 4%; height: min(85vh, 760px); opacity: 0.45; animation-duration: 60s; }
-[data-mode="demo"] .media-page::before { inset: 3rem 2% auto 2%; height: min(80vh, 680px); opacity: 0.6; animation-duration: 38s; }
-[data-mode="demo"] .media-page::after {
+[data-theme="demo"] .wall-page::before { inset: 6rem 4% auto 4%; height: min(85vh, 760px); opacity: 0.45; animation-duration: 60s; }
+[data-theme="demo"] .media-page::before { inset: 3rem 2% auto 2%; height: min(80vh, 680px); opacity: 0.6; animation-duration: 38s; }
+[data-theme="demo"] .media-page::after {
   inset: 12rem 20% auto 22%; height: min(55vh, 440px); opacity: 0.55;
   background: linear-gradient(135deg, #ff3d8124, #7af0ff18); border-color: #7af0ff3a;
   animation: wk-tilt 16s ease-in-out infinite alternate-reverse;
 }
-[data-mode="demo"] .photo-grid::before { opacity: 0.55; }
+[data-theme="demo"] .photo-grid::before { opacity: 0.55; }
 @media (prefers-reduced-motion: reduce) {
-  [data-mode="demo"] .cleanup::before, [data-mode="demo"] .cleanup::after, [data-mode="demo"] .wall-page::before,
-  [data-mode="demo"] .media-page::before, [data-mode="demo"] .media-page::after { animation: none; }
+  [data-theme="demo"] .cleanup::before, [data-theme="demo"] .cleanup::after, [data-theme="demo"] .wall-page::before,
+  [data-theme="demo"] .media-page::before, [data-theme="demo"] .media-page::after { animation: none; }
 }
 
 /* ------------------------------------------------------------------

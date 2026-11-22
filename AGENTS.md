@@ -13,7 +13,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 Read `docs/PLAN.md` (vision + milestones), `docs/STATUS.md` (latest progress), and `docs/DECISIONS.md` before starting work.
 
 - This is a **portfolio piece**: code quality is part of the product. Small, readable components; no dead code; comments explain *why*.
-- **Normal mode must stay clean and fast.** All demo-mode effects are scoped under `[data-mode="demo"]` (CSS) or gated on `useDemoMode()`. Always respect `prefers-reduced-motion`.
+- **Themes (pop art / demo mode / Original Design) are CSS layers.** `data-theme` on `<html>` picks one; registry + cycle order in `src/lib/themes.ts`, client service in `src/components/Theme.tsx`. Unscoped CSS = the Original Design foundation; pop art rules live under `html[data-theme="pop-art"]`, demo effects under `[data-theme="demo"]` (or gated on `useDemoMode()` in components). Never branch page components on the theme. Always respect `prefers-reduced-motion`. Name it "Original Design", never "plain".
 - Site sections are defined once in `src/lib/sections.ts`.
 - Data model: `prisma/schema.prisma`. Change it via `npm run db:migrate`. Keep it Postgres-compatible (no SQLite-only tricks).
 - Prisma client is generated to `src/generated/prisma` (gitignored); import the shared client from `@/lib/db`.

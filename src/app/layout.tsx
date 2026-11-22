@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { DemoModeProvider } from "@/components/DemoMode";
+import { ThemeProvider } from "@/components/Theme";
+import { getDefaultTheme } from "@/lib/theme-setting";
+import { themeBootScript } from "@/lib/themes";
 import { DemoCursor } from "@/components/DemoCursor";
 import { Nav } from "@/components/Nav";
 import { openGraph } from "@/lib/seo";
@@ -25,15 +27,22 @@ export const metadata: Metadata = {
 };
 
 // Artist-page layout: sidebar nav + one content column (top bar on mobile).
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The admin default is rendered into the HTML; the boot script swaps in the visitor's own choice pre-paint
+  // (hence suppressHydrationWarning: <html data-theme> may legitimately differ from the server render).
+  const defaultTheme = await getDefaultTheme();
   return (
     <html
       lang="en"
-      data-mode="normal"
+      data-theme={defaultTheme}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript() }} />
+      </head>
       <body>
-        <DemoModeProvider>
+        <ThemeProvider defaultTheme={defaultTheme}>
           <DemoCursor />
           <div className="site-shell">
             <Nav />
@@ -45,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               </footer>
             </div>
           </div>
-        </DemoModeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
