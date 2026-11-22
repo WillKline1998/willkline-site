@@ -2,6 +2,10 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-21 — Bauhaus Pop colour rebalance
+- Done: Will asked for more punch, more greens/blues, less yellow. Page ground #fffbe6 paper → saturated sky blue #7ab6ff with a white 2px grid; sidebar lemon → lime; footer text lemon → lime; songbook band lemon/pink → lime/blue; bio circle lemon → lime; CV/writing band lemon → blue/lime; music/media circles → blue; 5th card stripe lemon → blue (4th → lime); first chip lemon → pale blue; tech logos lime. Lemon kept as accents (label text on black slabs, active filters, badges, button hover). --accent #00338c (5.4:1 on ground), --muted #3f3230 (5.8:1).
+- Verified: tsc/lint/build, all 7 e2e suites + responsive audit (0 issues), desktop+phone screenshots.
+
 ## 2026-11-21 — Bauhaus Pop redesign (normal mode)
 - Done: new design layer in globals.css ("Bauhaus Pop" block after the old Quiet Studio rules). Palette from Will's coolors set: pink #e56399, tangerine #fba00e, blue #056bf0, lime #89bf4a, lemon #fff25e, taupe #7a6563 (darkened to #5e4c4a for muted text), ink #111, paper #fffbe6. Square corners, 3px black rules, offset black block shadows, heavy uppercase titles with a Warhol offset colour bar, black-slab section labels, lemon sidebar with circle/square/triangle, per-section colour band + circle drawn as .site-main backgrounds (NOT pseudo-elements: an isolated stacking context trapped the photo viewer under the sticky nav). Card top bands cycle orange/pink/lime/blue/lemon. Decorative rules scoped to html:not([data-mode="demo"]); demo mode unchanged.
 - Tests: e2e_recipes/e2e_cleanup/e2e_songbook h1 checks use text_content() (titles are text-transform: uppercase, which inner_text reflects).
