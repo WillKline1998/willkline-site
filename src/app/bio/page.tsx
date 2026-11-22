@@ -18,17 +18,16 @@ export default async function BioPage() {
     .filter(Boolean);
   return (
     <section className="page bio-page">
-      {/* Wide screens: the section's colour band, sticky so it stays with the frozen heading (see globals.css). */}
-      {photo && <div className="bio-band" aria-hidden="true" />}
+      {/* Wide screens: the photo alone is frozen (sticky from the first scrolled pixel); the heading belongs to
+          the text and scrolls away with it. Phones: one column (heading, photo, text), nothing sticky. */}
       <div className={photo ? "bio-layout has-photo" : "bio-layout"}>
-        {/* The whole left column (heading + photo) stays put on wide screens; only the text scrolls. */}
-        <div className="bio-keep">
-          <h1 className="page-title">Bio</h1>
-          {photo && (
-            // eslint-disable-next-line @next/next/no-img-element
+        <h1 className="page-title bio-title">Bio</h1>
+        {photo && (
+          <div className="bio-keep">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={photo} alt={alt} className="bio-photo" />
-          )}
-        </div>
+          </div>
+        )}
         <div className="prose bio-prose">
           {paragraphs.length ? (
             paragraphs.map((p, i) => <p key={i}>{p}</p>)

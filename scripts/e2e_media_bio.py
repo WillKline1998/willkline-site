@@ -192,20 +192,19 @@ try:
         y_text = page.locator(".prose p").first.evaluate("e => e.getBoundingClientRect().top")
         check(abs(y_photo - y_text) < 160, "beside the text on a wide screen")
         page.evaluate("document.querySelector('.bio-prose').insertAdjacentHTML('beforeend', '<p>filler</p>'.repeat(120))")
-        h0 = page.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
-        p0 = photo.evaluate("e => e.getBoundingClientRect().top")
-        t0 = page.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
-        band = page.locator(".bio-band")
-        b0 = band.evaluate("e => e.getBoundingClientRect().bottom")
-        check(b0 > h0 and t0 >= b0, f"the colour band sits behind the heading and the text starts below it (band bottom {b0:.0f}, heading {h0:.0f}, text {t0:.0f})")
+        # Only the photo is frozen; the heading scrolls up with the text (Will, 2026-11).
+        check(page.locator(".bio-keep h1").count() == 0 and page.locator(".bio-band").count() == 0,
+              "the heading is not in the sticky column and there is no separate sticky band")
+        POS = "(() => [scrollY, ...['.bio-title', '.bio-photo', '.bio-prose p'].map(s => document.querySelector(s).getBoundingClientRect().top)])()"
+        y0, h0, p0, t0 = page.evaluate(POS)
+        check(abs(p0 - h0) < 400 and t0 > h0, f"heading above the text, photo beside them (heading {h0:.0f}, photo {p0:.0f}, text {t0:.0f})")
         page.mouse.wheel(0, 1500)
         page.wait_for_timeout(400)
-        b1 = band.evaluate("e => e.getBoundingClientRect().bottom")
-        check(abs(b1 - b0) < 1, f"the band stays frozen with the heading while the text slides under it ({b0:.0f}->{b1:.0f})")
-        h1 = page.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
-        p1 = photo.evaluate("e => e.getBoundingClientRect().top")
-        t1 = page.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
-        check(t0 - t1 > 1000 and abs(p1 - h1 - (p0 - h0)) < 1 and h1 >= 0 and abs(h1 - h0) < 1, f"the heading and photo stay frozen together while the text scrolls (heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
+        y1, h1, p1, t1 = page.evaluate(POS)
+        d = y1 - y0
+        check(d > 1000 and abs((h0 - h1) - d) < 1 and abs((t0 - t1) - d) < 1,
+              f"the heading scrolls away with the text, pixel for pixel (scrolled {d:.0f}; heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
+        check(abs(p1 - p0) < 0.5 and p1 >= 0, f"the photo stays frozen while both scroll ({p0:.0f}->{p1:.0f})")
         first_url = photo.get_attribute("src")
         page.goto(f"{BASE}/admin/bio")
         page.locator("input[name=image]").set_input_files(str(tmp / "wide.png"))

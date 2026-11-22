@@ -64,7 +64,9 @@ export function useDemoMode() {
   return { demo: useTheme().theme === "demo" };
 }
 
-/** The sidebar button: shows the current theme; each press advances to the next one. */
+/** The theme button: shows the current theme; each press advances to the next one. It is pinned to one fixed
+ * viewport spot (globals.css, "Pinned theme button") with a fixed size, so it never moves between pages, scroll
+ * positions or themes: a visitor can click-cycle without moving the mouse. Rendered once, by the root layout. */
 export function ThemeCycler() {
   const { theme, cycle } = useTheme();
   const name = themeName(theme);

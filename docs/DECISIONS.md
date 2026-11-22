@@ -71,3 +71,9 @@ The song editor is a client component with controlled inputs, and `updateSong` r
 - Demo mode layers on the Original Design foundation, never on pop art — it was designed against that base and the pop art block was already excluded under demo. Stacking it on pop art would need a demo-on-pop-art variant; not worth it now.
 - Admin default lives in SiteSetting `default_theme` (wall_signups precedent). Precedence today: visitor's own choice > admin default. Per-user startup themes for logged-in users slot in between later.
 
+
+## 2026-11-21 — The theme button is pinned (fixed), not part of the sidebar
+Will wants to click-cycle themes without moving the mouse. A sidebar button moves with sidebar content, scroll and theme metrics, so it is a single `position: fixed` element with a fixed box, rendered by the root layout. Desktop spot: sidebar foot (computed from the centred shell + `scrollbar-gutter: stable`); phone spot: bottom-left (thumb zone; the top bar has no room at 320px). Themes may restyle it but never resize or move it. e2e_theme asserts the identical rect.
+
+## 2026-11-21 — Bio: only the photo is sticky
+Heading joins the text column and scrolls with it; the sticky `.bio-band` was removed (the band now scrolls with the heading, like every other page). `--bio-photo-top` is both the natural offset and the sticky top so the photo never drifts.
