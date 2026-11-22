@@ -124,6 +124,16 @@ export const TECH: Record<string, TechInfo> = {
     blurb:
       "An open-source AI agent from Nous Research that runs on Will's computer. Every morning it wakes DingDong up, hands his day to a language model (GLM 5.3), and saves what he wrote.",
   },
+  "Max/MSP": {
+    logo: "/tech/max.svg",
+    blurb:
+      "A visual programming language for music and sound, made by Cycling '74. Instead of writing lines of code you place boxes on a canvas and wire them together, and audio and timing flow through the wires.",
+  },
+  "Claude Code": {
+    logo: "/tech/claude.svg",
+    blurb:
+      "Anthropic's AI coding agent, running the Claude model. It does the building here: placing and wiring the Max patch through a small bridge into Max, then reading the patch back to check its own work.",
+  },
 };
 
 export type TechKey = keyof typeof TECH;

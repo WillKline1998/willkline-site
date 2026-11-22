@@ -39,7 +39,8 @@ export default async function LabProjectPage(props: PageProps<"/lab/[slug]">) {
         <Link href="/lab">← Lab</Link>
       </p>
       <LabStatus status={p.status} />
-      <h1 className="page-title">{p.title}</h1>
+      {/* A deliberately lowercase name ("polymetric sequencer") keeps its case instead of the uppercase title style. */}
+      <h1 className={p.title === p.title.toLowerCase() ? "page-title as-written" : "page-title"}>{p.title}</h1>
       {p.description && <p className="lede">{p.description}</p>}
       {techList(p.tech).length > 0 && (
         <ul className="chips">

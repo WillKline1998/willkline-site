@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { checked, int, optional, slugify, str, uniqueSlug } from "@/lib/forms";
+import { LAB_STATUSES } from "@/components/LabStatus";
 
-const STATUSES = ["IDEA", "BUILDING", "LIVE"];
 const slugTaken = (id?: string) => async (slug: string) => Boolean(await db.labProject.findFirst({ where: { slug, NOT: { id } } }));
 
 function refresh(slug?: string) {
@@ -38,7 +38,7 @@ export async function saveProject(form: FormData) {
       slug,
       description: str(form, "description"),
       body: String(form.get("body") ?? "").replace(/\r\n/g, "\n"),
-      status: STATUSES.includes(str(form, "status")) ? str(form, "status") : "IDEA",
+      status: LAB_STATUSES.filter((s) => form.getAll("status").includes(s)).join(",") || "IDEA",
       tech: str(form, "tech"),
       url: optional(form, "url"),
       repoUrl: optional(form, "repoUrl"),
