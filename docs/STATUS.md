@@ -2,6 +2,10 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-21 — Paper ground back; bio header band sticks with the frozen column
+- Done: page ground reverted to warm paper #fffbe6 with the faint dark 1px/32px grid (#11111108), as at 3a85dd3; everything else from the rebalance (lime sidebar/footer/bands, lemon accents, --accent/--muted) stays. Bio: the sticky heading+photo column still worked mechanically, but the redesign paints each section's colour band (and circle) as a `.site-main` background, which scrolls — so the frozen "BIO" + photo floated on the grid once the band left, and the first lines of text scrolled up out of the band. On wide screens with a photo the bio now renders a real sticky `.bio-band` (pink band + lime circle, z 1) that stays with the frozen column (z 2); the text starts under the band and slides beneath it. `.site-main` band is off for that page only; phones unchanged.
+- Verified: tsc/lint/build; e2e_media_bio (2 new band checks), e2e_recipes, e2e_songbook ALL PASS on a throwaway DB; responsive audit 0 issues; desktop (820/1000/1366, top/mid/bottom) + phone screenshots inspected.
+
 ## 2026-11-21 — Lab: multiple status chips; polymetric sequencer entry
 - Done: `LabProject.status` is now a comma-separated list (same convention as `tech`, no migration), so a project can show "In progress" AND "Live". `LabStatus` renders one chip per value (`.lab-statuses` row); the admin edit form uses checkboxes instead of a select. DingDong → `BUILDING,LIVE` (scripts/add-dingdong-lab.ts). New entry "polymetric sequencer" (lowercase on purpose, In progress, no live link) via scripts/add-polymeter-lab.ts (upsert). New tech chips Max/MSP and Claude Code with Simple Icons logos (max.svg, claude.svg). An all-lowercase lab title keeps its case on the detail page (`.page-title.as-written`).
 - Verified: tsc/lint/build; scripts proven on a throwaway DB (add + re-run update); Playwright lab check; e2e_admin ALL PASS (now also round-trips two ticked statuses).
