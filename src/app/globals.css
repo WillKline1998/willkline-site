@@ -523,12 +523,12 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 :root {
   --pink: #e56399; --orange: #fba00e; --blue: #056bf0; --lime: #89bf4a; --lemon: #fff25e; --taupe: #7a6563;
   --black: #111111;
-  --bg: #fffbe6;           /* paper with a lemon cast */
+  --bg: #7ab6ff;           /* saturated sky-blue ground (was lemon paper #fffbe6) */
   --panel: #ffffff;
-  --nav-bg: var(--lemon);
+  --nav-bg: var(--lime);
   --ink: var(--black);
-  --muted: #5e4c4a;        /* darkened taupe: 7.6:1 on paper */
-  --accent: #0458c4;       /* electric blue nudged darker for link text: 6.6:1 */
+  --muted: #3f3230;        /* deep taupe: 5.8:1 on the blue ground, 12:1 on white */
+  --accent: #00338c;       /* deep electric blue: 5.4:1 on the blue ground, 11:1 on white */
   --rule: var(--black);
   --radius: 0px;
   --line: 3px solid var(--black);
@@ -541,7 +541,7 @@ html:not([data-mode="demo"]) {
 }
 html:not([data-mode="demo"]) body {
   background-color: var(--bg);
-  background-image: linear-gradient(#11111108 1px, transparent 1px), linear-gradient(90deg, #11111108 1px, transparent 1px);
+  background-image: linear-gradient(#ffffff59 2px, transparent 2px), linear-gradient(90deg, #ffffff59 2px, transparent 2px);
   background-size: 32px 32px;
 }
 html:not([data-mode="demo"]) ::selection { background: var(--pink); color: var(--black); }
@@ -570,11 +570,11 @@ html:not([data-mode="demo"]) :is(.section-label, .cv-heading) {
 }
 html:not([data-mode="demo"]) .rail-label { color: var(--black); font-weight: 800; }
 
-/* Nav: lemon slab with a thick black edge; current page = black block. */
-html:not([data-mode="demo"]) .site-nav { background: var(--lemon); border-bottom: var(--line); border-right: 0; }
+/* Nav: lime slab with a thick black edge; current page = black block. */
+html:not([data-mode="demo"]) .site-nav { background: var(--lime); border-bottom: var(--line); border-right: 0; }
 @media (min-width: 768px) {
   html:not([data-mode="demo"]) .site-nav { border-bottom: 0; border-right: 6px solid var(--black); }
-  html:not([data-mode="demo"]) .site-nav::before { background: var(--lemon); }
+  html:not([data-mode="demo"]) .site-nav::before { background: var(--lime); }
   /* Bauhaus geometry at the foot of the sidebar: circle, square, triangle. */
   html:not([data-mode="demo"]) .site-nav::after {
     content: ""; position: absolute; left: 1.5rem; bottom: 1.25rem; width: 132px; height: 40px; pointer-events: none;
@@ -599,8 +599,8 @@ html:not([data-mode="demo"]) .demo-toggle { border: var(--line); border-radius: 
 html:not([data-mode="demo"]) .account-link, html:not([data-mode="demo"]) .account .link-button { color: var(--black); }
 
 /* Footer: a full black bar. */
-html:not([data-mode="demo"]) .site-footer { background: var(--black); color: var(--lemon); border-top: 0; }
-html:not([data-mode="demo"]) .site-footer a { color: var(--lemon); }
+html:not([data-mode="demo"]) .site-footer { background: var(--black); color: var(--lime); border-top: 0; }
+html:not([data-mode="demo"]) .site-footer a { color: var(--lime); }
 
 /* Cards: white blocks, 3px black edge, offset black shadow; a colour band on top
    cycles through the LaCroix flavours. */
@@ -618,9 +618,9 @@ html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > 
 html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3) :is(.notice, .lab-card, .recipe-card, .dd-day),
 html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+3):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
 html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--blue); }
+html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n+4):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lime); }
 html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n) :is(.notice, .lab-card, .recipe-card, .dd-day),
-html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--lemon); }
+html:not([data-mode="demo"]) :is(.notices, .lab-grid, .recipe-grid, .dd-feed) > :nth-child(5n):is(.notice, .lab-card, .recipe-card, .dd-day) { border-top-color: var(--blue); }
 html:not([data-mode="demo"]) .notice-show { border-left: 14px solid var(--blue); }
 /* Hover: the block lifts off its shadow, poster-press style. */
 html:not([data-mode="demo"]) :is(.notice, .lab-card, .recipe-card, .wall-card, .song-folders a, .song-row, .file-card, .cleanup-fly, .album-card) {
@@ -669,7 +669,7 @@ html:not([data-mode="demo"]) :is(.wall-filters a, .wall-sort a, .recipe-tags a):
 html:not([data-mode="demo"]) :is(.wall-filters a[aria-current="page"], .wall-sort a[aria-current="page"], .drawer-mode.on, .dd-word[data-on]) {
   background: var(--black); color: var(--lemon); border-color: var(--black); box-shadow: 3px 3px 0 var(--pink);
 }
-html:not([data-mode="demo"]) .chips li { border: 2px solid var(--black); border-radius: 0; background: var(--lemon); font-weight: 600; }
+html:not([data-mode="demo"]) .chips li { border: 2px solid var(--black); border-radius: 0; background: #b9d8ff; font-weight: 600; }
 html:not([data-mode="demo"]) .chips li:nth-child(4n+2) { background: #f7c9dc; }
 html:not([data-mode="demo"]) .chips li:nth-child(4n+3) { background: #d3eab7; }
 html:not([data-mode="demo"]) .chips li:nth-child(4n) { background: #ffdca0; }
@@ -683,7 +683,7 @@ html:not([data-mode="demo"]) .cal { border: var(--line); border-radius: 0; }
 html:not([data-mode="demo"]) .cal-m { background: var(--pink); color: var(--black); font-weight: 800; }
 html:not([data-mode="demo"]) .file-icon { background: var(--blue); border-radius: 0; }
 html:not([data-mode="demo"]) .tech-card { border: var(--line); border-radius: 0; box-shadow: var(--shadow); }
-html:not([data-mode="demo"]) .tech-card-logo { border-radius: 0; background: var(--lemon); }
+html:not([data-mode="demo"]) .tech-card-logo { border-radius: 0; background: var(--lime); }
 
 /* Form fields: hard boxes, thick focus ring in blue. */
 html:not([data-mode="demo"]) :is(.admin-form, .admin-table, .song-editor, .cleanup-form, .track-row, .search-form, .drawer-find) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select),
@@ -720,16 +720,16 @@ html:not([data-mode="demo"]) .site-main {
   }
 }
 html:not([data-mode="demo"]) .site-main:has(.home)        { --sec: var(--orange); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.bio-layout)  { --sec: var(--pink);   --sec2: var(--lemon); }
+html:not([data-mode="demo"]) .site-main:has(.bio-layout)  { --sec: var(--pink);   --sec2: var(--lime); }
 html:not([data-mode="demo"]) .site-main:has(.lab-grid, .lab-detail) { --sec: var(--blue); --sec2: var(--orange); }
 html:not([data-mode="demo"]) .site-main:has(.recipe-grid, .recipe-page, .recipe-form) { --sec: var(--lime); --sec2: var(--pink); }
-html:not([data-mode="demo"]) .site-main:has(.song-folders, .song-list, .song-viewer) { --sec: var(--lemon); --sec2: var(--pink); }
-html:not([data-mode="demo"]) .site-main:has(.album-grid, .album-detail) { --sec: var(--pink); --sec2: var(--lime); }
-html:not([data-mode="demo"]) .site-main:has(.media-page, .photo-grid) { --sec: var(--lime); --sec2: var(--orange); }
+html:not([data-mode="demo"]) .site-main:has(.song-folders, .song-list, .song-viewer) { --sec: var(--lime); --sec2: var(--blue); }
+html:not([data-mode="demo"]) .site-main:has(.album-grid, .album-detail) { --sec: var(--pink); --sec2: var(--blue); }
+html:not([data-mode="demo"]) .site-main:has(.media-page, .photo-grid) { --sec: var(--lime); --sec2: var(--blue); }
 html:not([data-mode="demo"]) .site-main:has(.wall-page) { --sec: var(--orange); --sec2: var(--pink); }
 html:not([data-mode="demo"]) .site-main:has(.cleanup) { --sec: var(--blue); --sec2: var(--lime); }
 html:not([data-mode="demo"]) .site-main:has(.dd-feed, .dd-studio) { --sec: var(--pink); --sec2: var(--blue); }
-html:not([data-mode="demo"]) .site-main:has(.cv, .post-list, .markdown) { --sec: var(--lemon); --sec2: var(--blue); }
+html:not([data-mode="demo"]) .site-main:has(.cv, .post-list, .markdown) { --sec: var(--blue); --sec2: var(--lime); }
 /* On the blue fields the title needs to stay black-on-pink (it does via its own bar); the lede sits on colour, so white-backed. */
 html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table; margin-top: 1rem; padding: 0.2rem 0.5rem; border: 2px solid var(--black); }
 @media (max-width: 767px) { html:not([data-mode="demo"]) .bio-prose { padding-top: 1.5rem; } }
