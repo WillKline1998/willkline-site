@@ -524,7 +524,7 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 :root {
   --pink: #e56399; --orange: #fba00e; --blue: #056bf0; --lime: #89bf4a; --lemon: #fff25e; --taupe: #7a6563;
   --black: #111111;
-  --bg: #7ab6ff;           /* saturated sky-blue ground (was lemon paper #fffbe6) */
+  --bg: #fffbe6;           /* warm paper (sky-blue #7ab6ff tried in the rebalance; paper reads text better) */
   --panel: #ffffff;
   --nav-bg: var(--lime);
   --ink: var(--black);
@@ -542,7 +542,7 @@ html:not([data-mode="demo"]) {
 }
 html:not([data-mode="demo"]) body {
   background-color: var(--bg);
-  background-image: linear-gradient(#ffffff59 2px, transparent 2px), linear-gradient(90deg, #ffffff59 2px, transparent 2px);
+  background-image: linear-gradient(#11111108 1px, transparent 1px), linear-gradient(90deg, #11111108 1px, transparent 1px);
   background-size: 32px 32px;
 }
 html:not([data-mode="demo"]) ::selection { background: var(--pink); color: var(--black); }
@@ -735,6 +735,27 @@ html:not([data-mode="demo"]) .site-main:has(.cv, .post-list, .markdown) { --sec:
 /* On the blue fields the title needs to stay black-on-pink (it does via its own bar); the lede sits on colour, so white-backed. */
 html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table; margin-top: 1rem; padding: 0.2rem 0.5rem; border: 2px solid var(--black); }
 @media (max-width: 767px) { html:not([data-mode="demo"]) .bio-prose { padding-top: 1.5rem; } }
+/* Bio on wide screens: the heading + photo column is sticky, so the pink header band must be sticky too —
+   as a .site-main background it scrolled away and left the frozen heading floating on the grid, with the
+   first lines of text scrolling up out of the band. Here the band is a real sticky element (.bio-band) that
+   stays put with the heading; the text starts below it and slides UNDER it. The .site-main band is switched
+   off for this page only. (No fixed overlays live on the bio page, so the band's stacking context is safe.) */
+.bio-band { display: none; }
+@media (min-width: 768px) {
+  html:not([data-mode="demo"]) .site-main:has(.bio-band) { background: none; }
+  html:not([data-mode="demo"]) .bio-band {
+    display: block; position: sticky; top: 0; z-index: 1;
+    height: calc(var(--band) + 6px); margin: -2.5rem -2rem calc(2.5rem - var(--band) - 6px);
+    background: var(--sec, var(--pink)); border-bottom: 6px solid var(--black); box-sizing: border-box;
+  }
+  /* The poster circle, hanging off the band's right end exactly where the .site-main version sat. */
+  html:not([data-mode="demo"]) .bio-band::after {
+    content: ""; position: absolute; top: 1.6rem; right: 2rem; width: 8rem; height: 8rem; box-sizing: border-box;
+    border-radius: 50%; background: var(--sec2, var(--lime)); border: 0.4rem solid var(--black);
+  }
+  html:not([data-mode="demo"]) .bio-layout.has-photo .bio-keep { z-index: 2; }
+  html:not([data-mode="demo"]) .bio-layout.has-photo .bio-prose { padding-top: calc(var(--band) + 6px - 2.5rem + 1.5rem); }
+}
 
 /* ------------------------------------------------------------------
    DEMO MODE ("effervescent orange")
@@ -1112,6 +1133,10 @@ html:not([data-mode="demo"]) .site-main .lede { background: #fff; display: table
 /* Wide screens: the whole left column (heading + photo) is sticky; only the text scrolls.
    Phones: one column, nothing sticky. */
 .bio-layout { display: grid; gap: 1.25rem; }
+/* The bio section spans the full main column (so the sticky header band can too); the layout keeps the
+   usual .page measure (760px minus the 2rem side padding). */
+.bio-page { max-width: none; }
+@media (min-width: 768px) { .bio-page .bio-layout { max-width: calc(760px - 4rem); } }
 .bio-keep .page-title { margin-bottom: 1rem; }
 .bio-photo { max-height: 58vh; width: 100%; max-width: 420px; height: auto; object-fit: cover; border-radius: var(--radius); display: block; box-shadow: var(--shadow); }
 /* The sticky top equals where the column already sits (the .page top padding, 2.5rem from 768px, where

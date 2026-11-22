@@ -17,7 +17,9 @@ export default async function BioPage() {
     .map((p) => p.trim())
     .filter(Boolean);
   return (
-    <section className="page">
+    <section className="page bio-page">
+      {/* Wide screens: the section's colour band, sticky so it stays with the frozen heading (see globals.css). */}
+      {photo && <div className="bio-band" aria-hidden="true" />}
       <div className={photo ? "bio-layout has-photo" : "bio-layout"}>
         {/* The whole left column (heading + photo) stays put on wide screens; only the text scrolls. */}
         <div className="bio-keep">
