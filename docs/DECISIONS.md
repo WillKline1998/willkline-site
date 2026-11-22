@@ -64,3 +64,10 @@ The song editor is a client component with controlled inputs, and `updateSong` r
 
 ## 2026-11-21 — Coming-soon releases are a flag on Album, the placeholder cover is code-side
 `Album.comingSoon` (boolean column) rather than overloading `published`/`year` or a magic `links` key: the same row becomes the real release by setting `coverUrl` + `links` and unticking the flag, with no restructuring. The "no cover yet" art is one generic file used whenever `coverUrl` is null, not stored in the row, so a real cover simply replaces it and the placeholder never becomes a link-preview image. Tech chips: tools used only to BUILD a project (Claude, Claude Code, Hermes) aren't listed; only genuinely user-facing uses are (Will's standing rule).
+
+## 2026-11-21 — Themes are data-theme CSS layers over the Original Design foundation
+- `data-theme` on `<html>` (pop-art | demo | original), set server-side from the admin default and overridden pre-paint by the visitor's localStorage choice. Pattern after next-themes (MIT, ~6k★): inline head script + suppressHydrationWarning on `<html>`; no dependency added (we need ~30 lines, and the cycler/default precedence is ours).
+- The brief suggested "pop art = base, Original Design = old tokens as a scoped block". Rejected: the redesign changed ~250 rules (borders, bands, uppercase titles, nav), not just tokens, so an Original Design block would be a huge undo-sheet that drifts. Instead the unscoped CSS stays the first look (as in the `pre-bauhaus-redesign` tag) and each other theme is one scoped layer. Theme #4 = one registry entry + one `html[data-theme="x"]` block.
+- Demo mode layers on the Original Design foundation, never on pop art — it was designed against that base and the pop art block was already excluded under demo. Stacking it on pop art would need a demo-on-pop-art variant; not worth it now.
+- Admin default lives in SiteSetting `default_theme` (wall_signups precedent). Precedence today: visitor's own choice > admin default. Per-user startup themes for logged-in users slot in between later.
+

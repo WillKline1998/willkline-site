@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { artistClusters, bubbleCap, clusterRadius, type ArtistCluster } from "@/lib/songbook";
-import { useDemoMode } from "./DemoMode";
+import { useDemoMode } from "./Theme";
 
 /**
  * Demo mode on /songbook: one circle per artist, sized by how many songs they have, drifting DVD-screensaver style.
