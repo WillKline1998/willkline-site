@@ -231,7 +231,7 @@ try:
         v.goto(f"{BASE}/songbook?q=moon")
         check("Rodgers and Hart" in v.locator(".song-row").inner_text(), "and so does the song list")
         v.goto(f"{BASE}/songbook/long-medley")
-        check(v.locator(".song-by").count() == 0 and v.locator("h1").inner_text() == "Long Medley (Hymns)", "a song with no artist shows no artist line, and the new title shows publicly")
+        check(v.locator(".song-by").count() == 0 and v.locator("h1").text_content() == "Long Medley (Hymns)", "a song with no artist shows no artist line, and the new title shows publicly")
         v.goto(f"{BASE}/songbook?pages=3")
         check([t.strip() for t in v.locator(".song-title").all_inner_texts()] == ["Long Medley (Hymns)"], "the 3+ pages filter finds the long one, wherever it is")
         v.goto(f"{BASE}/songbook?pages=1")
