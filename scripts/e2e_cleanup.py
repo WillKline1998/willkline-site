@@ -63,7 +63,7 @@ try:
 
         # Signed out: the public page works, the drawing page asks you to log in.
         page.goto(f"{BASE}/cleanup")
-        check("Cleanup Map" in page.locator("h1").inner_text(), "the public page loads")
+        check("Cleanup Map" in page.locator("h1").text_content(), "the public page loads")
         check(page.locator(".cleanup-map canvas").count() == 1, "with a globe on it")
         page.goto(f"{BASE}/cleanup/new")
         check("/login" in page.url, "adding one sends a signed-out visitor to log in")

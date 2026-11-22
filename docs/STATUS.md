@@ -2,6 +2,12 @@
 
 Newest first. Every work session ends with an entry: what changed, what's verified, what's next.
 
+## 2026-11-21 — Bauhaus Pop redesign (normal mode)
+- Done: new design layer in globals.css ("Bauhaus Pop" block after the old Quiet Studio rules). Palette from Will's coolors set: pink #e56399, tangerine #fba00e, blue #056bf0, lime #89bf4a, lemon #fff25e, taupe #7a6563 (darkened to #5e4c4a for muted text), ink #111, paper #fffbe6. Square corners, 3px black rules, offset black block shadows, heavy uppercase titles with a Warhol offset colour bar, black-slab section labels, lemon sidebar with circle/square/triangle, per-section colour band + circle drawn as .site-main backgrounds (NOT pseudo-elements: an isolated stacking context trapped the photo viewer under the sticky nav). Card top bands cycle orange/pink/lime/blue/lemon. Decorative rules scoped to html:not([data-mode="demo"]); demo mode unchanged.
+- Tests: e2e_recipes/e2e_cleanup/e2e_songbook h1 checks use text_content() (titles are text-transform: uppercase, which inner_text reflects).
+- Verified: tsc, lint, build; responsive_audit 0 issues; e2e admin/media_bio/recipes/wall/dingdong/cleanup/songbook ALL PASS; Playwright screenshots desktop+390px reviewed.
+- Revert: `git reset --hard pre-bauhaus-redesign` (tag) then force-push, or `git revert` the merge.
+
 ## 2026-11-15 — Songbook demo: no '+N more' for a barely-overflowing catalogue; transparent fold
 - Done: `bubbleCap(total, phone)` in lib/songbook.ts = max(20, min(total, 24)) desktop / max(12, min(total, 14)) phone, total = distinct artists + sub-folder bubbles. Prod Covers (22 clusters) now shows all 22 on desktop. Min radius one notch smaller (36/28 desktop, 28/22 phone floors); the 40%-of-screen room check is unchanged.
 - Done: the '+N more' bubble is the ONLY non-click-through circle (pointer-events auto, tabindex, role=button; others aria-hidden). Hover / tap on bare background / keyboard focus opens a popover ("Artist · count"), Escape or outside click closes. Hit test is geometric on document pointer events (the layer sits behind the page) and ignores links/buttons, so content stays clickable. Discs are now positioned before the first frame.

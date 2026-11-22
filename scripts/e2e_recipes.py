@@ -67,7 +67,7 @@ try:
 
         # Public wall and the tag filter (no login needed to look).
         page.goto(f"{BASE}/recipes")
-        check(page.locator("h1").inner_text() == "Recipes", "the wall loads for a visitor")
+        check(page.locator("h1").text_content() == "Recipes", "the wall loads for a visitor")
         check({"E2E Vegan only", "E2E Indian only", "E2E Vegan Indian", "E2E No tags"} <= set(titles(page)), "and shows every recipe")
         check(titles(page).index("E2E No tags") < titles(page).index("E2E Vegan only"), "newest first by default")
         page.goto(f"{BASE}/recipes?sort=old")
