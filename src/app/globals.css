@@ -272,6 +272,7 @@ a:hover { text-decoration: underline; }
 .lab-desc { margin: 0; }
 .lab-links { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; margin: auto 0 0; padding-top: 0.3rem; }
 .lab-links a { display: inline-flex; align-items: center; min-height: 32px; }
+.lab-statuses { display: flex; flex-wrap: wrap; gap: 0.35rem; align-self: flex-start; }
 .lab-status {
   align-self: flex-start; font-family: var(--font-label); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
   padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; color: var(--muted);
@@ -550,6 +551,7 @@ html:not([data-mode="demo"]) ::selection { background: var(--pink); color: var(-
 html:not([data-mode="demo"]) :is(h1, .page-title, .home-title) {
   font-weight: 900; letter-spacing: -0.045em; line-height: 0.95; text-transform: uppercase;
 }
+html:not([data-mode="demo"]) .page-title.as-written { text-transform: none; }
 html:not([data-mode="demo"]) .page-title { font-size: clamp(2.6rem, 11vw, 5rem); }
 html:not([data-mode="demo"]) .home-title { font-size: clamp(2.4rem, 9vw, 4.4rem); }
 /* A Warhol "shadow" block under every page title: a pink bar offset behind the type. */

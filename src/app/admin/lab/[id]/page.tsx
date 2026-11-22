@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { deleteProject, saveProject } from "../actions";
+import { statusList } from "@/components/LabStatus";
 
 export const metadata: Metadata = { title: "Edit project · Admin" };
 export const dynamic = "force-dynamic";
@@ -21,14 +22,12 @@ export default async function EditProject(props: PageProps<"/admin/lab/[id]">) {
         <input type="hidden" name="id" value={p.id} />
         <label>Name<input type="text" name="title" defaultValue={p.title} required /></label>
         <label>Web address: willkline.net/lab/…<input type="text" name="slug" defaultValue={p.slug} /></label>
-        <label>
-          Status
-          <select name="status" defaultValue={p.status}>
-            <option value="IDEA">Idea</option>
-            <option value="BUILDING">In progress</option>
-            <option value="LIVE">Live</option>
-          </select>
-        </label>
+        <fieldset className="inline-form" style={{ border: 0, padding: 0, margin: 0 }}>
+          <legend>Status (tick one or more)</legend>
+          {[["IDEA", "Idea"], ["BUILDING", "In progress"], ["LIVE", "Live"]].map(([v, l]) => (
+            <label key={v}><input type="checkbox" name="status" value={v} defaultChecked={statusList(p.status).includes(v)} /> {l}</label>
+          ))}
+        </fieldset>
         <label>One-line description (shown on the card)<input type="text" name="description" defaultValue={p.description} /></label>
         <label>Tools / tech, comma-separated<input type="text" name="tech" defaultValue={p.tech} placeholder="Max/MSP, Web Audio, TypeScript" /></label>
         <label>Live link (optional)<input type="url" name="url" defaultValue={p.url ?? ""} /></label>

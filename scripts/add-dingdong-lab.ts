@@ -5,7 +5,7 @@ import { db } from "../src/lib/db";
 
 const entry = {
   title: "DingDong",
-  status: "BUILDING",
+  status: "BUILDING,LIVE", // both chips: still being built, and live at /dingdong
   description:
     "A small AI creature who lives on this site. He wakes up every morning, works on his ears a little, reads the words visitors leave him, and sometimes asks for things.",
   body: `## What it is
