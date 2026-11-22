@@ -3,8 +3,9 @@
 Checks: a fresh visitor gets the admin default (pop art until changed); the sidebar button cycles
 pop art -> demo mode -> Original Design -> pop art, labels the current theme, and stores the choice in
 localStorage; the choice survives a reload and is applied BEFORE first paint (no flash of the default);
-the old demo-toggle key still means demo mode; the bio sticky column (and pop art's sticky band) works in
-every theme; no hydration errors. Then a throwaway admin sets the default to Original Design in /admin/theme:
+the old demo-toggle key still means demo mode; the theme button is pinned (identical rect across pages, scroll
+positions and presses, cycled with an unmoved mouse); on the bio the photo alone is frozen and the heading scrolls with
+the text in every theme; no hydration errors. Then a throwaway admin sets the default to Original Design in /admin/theme:
 fresh logged-out visitors get it, a visitor who chose a theme keeps theirs. Cleans up after itself.
 Screenshots of home/bio/lab/songbook per theme (desktop + phone) go to docs/mockups/themes/.
 Run: ~/JobSearch/.venv/bin/python scripts/e2e_theme.py   (SHOTS=0 skips the screenshots)
@@ -55,7 +56,7 @@ def theme(pg):
 
 
 def cycler(pg):
-    # Desktop sidebar or phone menu: the same single button.
+    # One pinned button on every width (rendered by the root layout, outside the sidebar).
     return pg.locator("button.theme-cycler")
 
 
@@ -124,27 +125,85 @@ try:
         check(pg.evaluate("localStorage.getItem('wk-demo-mode')") is None, "cycling retires the old key")
         ctx.close()
 
-        # --- bio sticky column in every theme ---
+        # --- the pinned theme button: ONE fixed spot, nailed through the screen ---
+        # Same viewport rectangle (to the pixel) on every page, at every scroll position and in every theme, so
+        # a visitor can click-cycle without moving the mouse. Proven with real mouse clicks at one point.
+        RECT = "(() => { const r = document.querySelector('button.theme-cycler').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; })()"
+        for label, (vw, vh) in (("desktop", (1366, 900)), ("laptop", (1024, 700)), ("phone", (390, 844)), ("small phone", (320, 640))):
+            ctx, pg = fresh(vw, vh)
+            rects = {}
+            for path in ("/", "/bio", "/media", "/lab", "/cv"):  # /media is short (no scrollbar) in a test DB
+                load(pg, path)
+                check(pg.locator("button.theme-cycler").count() == 1 and pg.locator(".site-nav button.theme-cycler").count() == 0,
+                      f"{label} {path}: exactly one theme button, and it is not inside the sidebar/menu")
+                for pos in ("top", "middle", "bottom"):
+                    pg.evaluate({"top": "scrollTo(0, 0)", "middle": "scrollTo(0, document.documentElement.scrollHeight / 2)",
+                                 "bottom": "scrollTo(0, document.documentElement.scrollHeight)"}[pos])
+                    pg.wait_for_timeout(150)
+                    rects[(path, pos)] = tuple(pg.evaluate(RECT))
+                if path == "/cv":  # cycle with the mouse parked on one point; it must never have to move
+                    x0, y0, w0, h0 = rects[(path, "bottom")]
+                    cx, cy = x0 + w0 / 2, y0 + h0 / 2
+                    pg.mouse.move(cx, cy)
+                    seen = []
+                    for i in range(6):
+                        on_top = pg.evaluate(f"document.elementFromPoint({cx}, {cy})?.closest('button.theme-cycler') !== null")
+                        pg.mouse.down(); pg.mouse.up()
+                        pg.wait_for_timeout(120)
+                        seen.append(theme(pg))
+                        rects[(path, f"after press {i + 1} ({seen[-1]})")] = tuple(pg.evaluate(RECT))
+                        if not on_top:
+                            break
+                    check(seen == ["demo", "original", "pop-art"] * 2,
+                          f"{label}: six presses at one unmoved mouse point cycle demo -> original -> pop art twice ({seen})")
+            first = next(iter(rects.values()))
+            off = {k: v for k, v in rects.items() if v != first}
+            check(not off, f"{label}: the button is at the identical rect {first} on 5 pages (long and short) x 3 scroll positions x every press ({len(rects)} samples)"
+                  + (f"; moved at {off}" if off else ""))
+            # It must not cover the site's own controls or the end of the page.
+            load(pg, "/lab")
+            covered = pg.evaluate("""(() => { const b = document.querySelector('button.theme-cycler').getBoundingClientRect();
+                const hit = q => q.height > 0 && !(q.right <= b.left || q.left >= b.right || q.bottom <= b.top || q.top >= b.bottom);
+                return [...document.querySelectorAll('.site-nav a, .site-nav button, .site-name')].filter(e => hit(e.getBoundingClientRect())).map(e => e.textContent.trim()); })()""")
+            check(not covered, f"{label}: the button covers no sidebar/top-bar control ({covered})")
+            if vw >= 768:
+                al = pg.evaluate("(() => { const b = document.querySelector('button.theme-cycler').getBoundingClientRect(), n = document.querySelector('.site-nav').getBoundingClientRect(); return [b.left, b.right, n.left + parseFloat(getComputedStyle(document.querySelector('.site-nav')).paddingLeft), n.right]; })()")
+                check(abs(al[0] - al[2]) < 0.5 and al[1] <= al[3] - 8,
+                      f"{label}: the button lines up with the sidebar's content edge and fits inside it (button {al[0]:.1f}-{al[1]:.1f}, content edge {al[2]:.1f}, sidebar right {al[3]:.1f})")
+            pg.evaluate("scrollTo(0, document.documentElement.scrollHeight)"); pg.wait_for_timeout(150)
+            foot = pg.evaluate("""(() => { const b = document.querySelector('button.theme-cycler').getBoundingClientRect();
+                const r = document.createRange(); r.selectNodeContents(document.querySelector('.site-footer')); const t = r.getBoundingClientRect();
+                return !(t.right <= b.left || t.left >= b.right || t.bottom <= b.top || t.top >= b.bottom); })()""")
+            check(not foot, f"{label}: scrolled to the very end, the footer text is clear of the button")
+            ctx.close()
+
+        # --- bio: the PHOTO alone is frozen; the heading scrolls away with the text (every theme) ---
         for tid, name in CYCLE:
             ctx, pg = fresh(init=f"localStorage.setItem('wk-theme','{tid}')")
             load(pg, "/bio")
-            fit = pg.evaluate("(() => { const b = document.querySelector('button.theme-cycler').getBoundingClientRect(), n = document.querySelector('.site-nav').getBoundingClientRect(); return [b.right, n.right]; })()")
-            check(fit[0] <= fit[1] - 8, f"{name}: the theme button fits inside the sidebar (button right {fit[0]:.0f}, sidebar right {fit[1]:.0f})")
+            check(pg.locator(".bio-band").count() == 0 and pg.locator(".bio-keep h1").count() == 0
+                  and pg.locator(".bio-keep .bio-photo").count() == 1,
+                  f"{name}: the sticky wrapper holds only the photo (no heading in it, no separate sticky band)")
             pg.evaluate("document.querySelector('.bio-prose').insertAdjacentHTML('beforeend', '<p>filler</p>'.repeat(120))")
-            h0 = pg.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
-            t0 = pg.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
-            band = pg.locator(".bio-band")
-            shown = band.evaluate("e => getComputedStyle(e).display") != "none"
-            b0 = band.evaluate("e => e.getBoundingClientRect().bottom")
-            pg.mouse.wheel(0, 900); pg.wait_for_timeout(400)
-            h1 = pg.locator(".bio-keep h1").evaluate("e => e.getBoundingClientRect().top")
-            t1 = pg.locator(".bio-prose p").first.evaluate("e => e.getBoundingClientRect().top")
-            b1 = band.evaluate("e => e.getBoundingClientRect().bottom")
-            check(abs(h1 - h0) < 1 and t1 < t0 - 500, f"{name}: bio heading + photo stay frozen while the text scrolls (heading {h0:.0f}->{h1:.0f}, text {t0:.0f}->{t1:.0f})")
+            POS = """(() => { const t = s => document.querySelector(s).getBoundingClientRect().top;
+                return [scrollY, t('.bio-title'), t('.bio-photo'), t('.bio-prose p')]; })()"""
+            y0, h0, p0, t0 = pg.evaluate(POS)
+            moved_ok, frozen_ok, log = True, True, []
+            for step in (1, 60, 400, 900, 1600):  # from the very first pixel to deep in the text
+                pg.evaluate(f"scrollTo(0, {step})"); pg.wait_for_timeout(120)
+                y, h, ph, t = pg.evaluate(POS)
+                d = y - y0
+                moved_ok &= abs((h0 - h) - d) < 1 and abs((t0 - t) - d) < 1
+                frozen_ok &= abs(ph - p0) < 0.5
+                log.append(f"{d:.0f}: heading {h:.0f}, photo {ph:.0f}")
+            check(moved_ok, f"{name}: the heading scrolls up exactly with the text at every step ({'; '.join(log)})")
+            check(frozen_ok, f"{name}: the photo stays frozen at {p0:.0f}px from the first scrolled pixel on")
+            check(h < -50, f"{name}: deep in the text the heading has scrolled out of view ({h:.0f})")
             if tid == "pop-art":
-                check(shown and abs(b1 - b0) < 1, f"{name}: the sticky colour band stays put with the heading ({b0:.0f}->{b1:.0f})")
-            else:
-                check(not shown, f"{name}: no pop-art band (the page has its own plain header)")
+                band = pg.evaluate("parseFloat(getComputedStyle(document.querySelector('.site-main')).getPropertyValue('--band')) * 16")
+                main_top = pg.evaluate("document.querySelector('.site-main').getBoundingClientRect().top + scrollY")
+                check(h0 - main_top < band and p0 - main_top >= band + 6,
+                      f"{name}: the heading starts inside the band and the photo is pinned clear of it (band {band:.0f}, heading {h0:.0f}, photo {p0:.0f})")
             ctx.close()
 
         # --- admin default ---
@@ -212,7 +271,7 @@ try:
                         if slug == "bio" and label == "desktop":
                             pg.mouse.wheel(0, 700); pg.wait_for_timeout(400)
                             pg.screenshot(path=str(SHOTS / f"{tid}-bio-scrolled-desktop.png"))
-                    if label == "phone":  # the cycler in the phone menu
+                    if label == "phone":  # the phone menu (the theme button is pinned outside it)
                         pg.click("button.menu-button"); pg.wait_for_timeout(300)
                         pg.screenshot(path=str(SHOTS / f"{tid}-menu-phone.png"))
                     ctx.close()

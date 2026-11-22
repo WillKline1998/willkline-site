@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/Theme";
+import { ThemeCycler, ThemeProvider } from "@/components/Theme";
 import { getDefaultTheme } from "@/lib/theme-setting";
 import { themeBootScript } from "@/lib/themes";
 import { DemoCursor } from "@/components/DemoCursor";
@@ -54,6 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               </footer>
             </div>
           </div>
+          <ThemeCycler />
         </ThemeProvider>
       </body>
     </html>

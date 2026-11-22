@@ -376,7 +376,14 @@ a:hover { text-decoration: underline; }
 .doc-text { display: flex; flex-direction: column; }
 .doc-title { font-weight: 600; }
 .doc-desc { font-size: 0.85em; color: var(--muted); }
-.cv-contact { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; font-family: var(--font-label); font-size: 0.85em; margin: 0 0 1rem; }
+/* The contact line is its own defined strip under the title (it used to hug the heading, and in pop art it ran
+   into the band's black rule): clear space above, hairlines above and below, tap-sized links. */
+.cv-contact {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0 1.5rem; font-family: var(--font-label); font-size: 0.85em;
+  margin: 1.25rem 0 2rem; padding: 0.35rem 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.cv-contact > span { display: inline-flex; align-items: center; min-height: 40px; overflow-wrap: anywhere; }
+.cv-contact a { display: inline-flex; align-items: center; min-height: 40px; }
 .cv { max-width: 900px; }
 .cv ul.doc-list { padding-left: 0; margin-bottom: 1.5rem; }
 .cv-summary { font-size: 1.12em; line-height: 1.65; max-width: 680px; margin: 1.5rem 0 0.5rem; }
@@ -574,7 +581,23 @@ html[data-theme="pop-art"] :is(h1, .page-title, .home-title) {
 }
 html[data-theme="pop-art"] .page-title.as-written { text-transform: none; }
 html[data-theme="pop-art"] .page-title { font-size: clamp(2.6rem, 11vw, 5rem); }
-html[data-theme="pop-art"] .home-title { font-size: clamp(2.4rem, 9vw, 4.4rem); }
+/* Pop-art titles must stay on ONE line inside the fixed-height colour band and clear of the poster circle
+   (wrapped titles ran across the band's black rule — Songbook/Cleanup Map/Inspiration Wall at 768–1100px, Wall and
+   Cleanup on phones — and Home/Recipes/Bio ran into the circle at 768px). The size follows the room left of the
+   circle: --title-fit ≈ the title's width in ems at this face plus air. Short titles keep the full poster size
+   from ~900px up; only long ones shrink, and only as far as they must. */
+html[data-theme="pop-art"] .site-main { --title-room: calc(100vw - 3rem); --title-fit: 4.6; }
+@media (min-width: 768px) {
+  html[data-theme="pop-art"] .site-main { --title-room: calc(min(100vw, var(--shell-max)) - var(--nav-width) - 2rem - 11rem); }
+  html[data-theme="pop-art"] .site-main:has(.bio-layout.has-photo) { --title-fit: 6.2; } /* sits right of the photo column */
+}
+html[data-theme="pop-art"] .site-main:has(.home) { --title-fit: 5.9; }
+html[data-theme="pop-art"] .site-main:has(.songbook) { --title-fit: 6.3; }
+html[data-theme="pop-art"] .site-main:has(.dd-feed) { --title-fit: 5.8; }
+html[data-theme="pop-art"] .site-main:has(.cleanup) { --title-fit: 7.8; }
+html[data-theme="pop-art"] .site-main:has(.wall-page) { --title-fit: 9.8; }
+html[data-theme="pop-art"] .page .page-title:not(.album-detail .page-title) { font-size: max(1.7rem, min(clamp(2.6rem, 11vw, 5rem), calc(var(--title-room) / var(--title-fit)))); }
+html[data-theme="pop-art"] .home-title { font-size: max(1.7rem, min(clamp(2.4rem, 9vw, 4.4rem), calc(var(--title-room) / var(--title-fit)))); }
 /* A Warhol "shadow" block under every page title: a pink bar offset behind the type. */
 html[data-theme="pop-art"] :is(.page-title, .home-title) {
   display: inline; padding: 0 0.12em;
@@ -600,13 +623,13 @@ html[data-theme="pop-art"] .site-nav { background: var(--lime); border-bottom: v
   html[data-theme="pop-art"] .site-nav::before { background: var(--lime); }
   /* Bauhaus geometry at the foot of the sidebar: circle, square, triangle. */
   html[data-theme="pop-art"] .site-nav::after {
-    content: ""; position: absolute; left: 1.5rem; bottom: 1.25rem; width: 132px; height: 40px; pointer-events: none;
+    content: ""; position: absolute; left: 1.5rem; bottom: calc(1.5rem + 52px + 1.25rem); width: 132px; height: 40px; pointer-events: none;
     background:
       radial-gradient(circle at 20px 20px, var(--pink) 19px, transparent 20px),
       linear-gradient(var(--blue), var(--blue)) 48px 0 / 40px 40px no-repeat,
       linear-gradient(to top right, var(--orange) 50%, transparent 50%) 92px 0 / 40px 40px no-repeat;
   }
-  html[data-theme="pop-art"] .nav-foot { padding-bottom: 4rem; }
+  html[data-theme="pop-art"] .nav-foot { padding-bottom: calc(52px + 1.25rem + 40px + 2.5rem); }
   html[data-theme="pop-art"] .site-nav li a[aria-current="page"]::before { display: none; }
 }
 html[data-theme="pop-art"] .site-name { font-weight: 900; text-transform: uppercase; letter-spacing: -0.04em; line-height: 0.9; }
@@ -756,28 +779,20 @@ html[data-theme="pop-art"] .site-main:has(.cleanup) { --sec: var(--blue); --sec2
 html[data-theme="pop-art"] .site-main:has(.dd-feed, .dd-studio) { --sec: var(--pink); --sec2: var(--blue); }
 html[data-theme="pop-art"] .site-main:has(.cv, .post-list, .markdown) { --sec: var(--blue); --sec2: var(--lime); }
 /* On the blue fields the title needs to stay black-on-pink (it does via its own bar); the lede sits on colour, so white-backed. */
+html[data-theme="pop-art"] .cv-contact { background: #fff; border: 2px solid var(--black); padding: 0.2rem 0.75rem; width: fit-content; max-width: 100%; box-sizing: border-box; box-shadow: var(--shadow-sm); }
+html[data-theme="pop-art"] .cv-contact a { color: var(--black); }
 html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; margin-top: 1rem; padding: 0.2rem 0.5rem; border: 2px solid var(--black); }
 @media (max-width: 767px) { html[data-theme="pop-art"] .bio-prose { padding-top: 1.5rem; } }
-/* Bio on wide screens: the heading + photo column is sticky, so the pink header band must be sticky too —
-   as a .site-main background it scrolled away and left the frozen heading floating on the grid, with the
-   first lines of text scrolling up out of the band. Here the band is a real sticky element (.bio-band) that
-   stays put with the heading; the text starts below it and slides UNDER it. The .site-main band is switched
-   off for this page only. (No fixed overlays live on the bio page, so the band's stacking context is safe.) */
-.bio-band { display: none; }
+/* Bio on wide screens: only the photo is frozen, so the pink band is the ordinary scrolling .site-main band
+   and the heading rides away with it and the text. The photo's frozen spot sits just below the band (not on
+   it), so it reads as a pinned print on the paper once the band has scrolled off. */
 @media (min-width: 768px) {
-  html[data-theme="pop-art"] .site-main:has(.bio-band) { background: none; }
-  html[data-theme="pop-art"] .bio-band {
-    display: block; position: sticky; top: 0; z-index: 1;
-    height: calc(var(--band) + 6px); margin: -2.5rem -2rem calc(2.5rem - var(--band) - 6px);
-    background: var(--sec, var(--pink)); border-bottom: 6px solid var(--black); box-sizing: border-box;
-  }
-  /* The poster circle, hanging off the band's right end exactly where the .site-main version sat. */
-  html[data-theme="pop-art"] .bio-band::after {
-    content: ""; position: absolute; top: 1.6rem; right: 2rem; width: 8rem; height: 8rem; box-sizing: border-box;
-    border-radius: 50%; background: var(--sec2, var(--lime)); border: 0.4rem solid var(--black);
-  }
-  html[data-theme="pop-art"] .bio-layout.has-photo .bio-keep { z-index: 2; }
-  html[data-theme="pop-art"] .bio-layout.has-photo .bio-prose { padding-top: calc(var(--band) + 6px - 2.5rem + 1.5rem); }
+  html[data-theme="pop-art"] .bio-layout.has-photo { --bio-photo-top: calc(var(--band) + 6px + 1.75rem); }
+  /* The text starts level with the photo, clear of the band's black rule AND the poster circle hanging below
+     it (at ~800px the text column runs under the circle). */
+  /* The heading row fills the band whatever the title's fitted size, so the text lines up exactly with the photo. */
+  html[data-theme="pop-art"] .bio-layout.has-photo { grid-template-rows: minmax(calc(var(--band) - 2.5rem), auto) 1fr; }
+  html[data-theme="pop-art"] .bio-layout.has-photo .bio-prose { padding-top: calc(var(--bio-photo-top) - var(--band) - 1rem); }
 }
 
 /* ------------------------------------------------------------------
@@ -788,18 +803,31 @@ html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; 
    highlights on a dark warm brown. Motion is transform/opacity only.
    ------------------------------------------------------------------ */
 
-/* The theme cycler (sidebar foot / phone menu): shows the current theme; each press moves to the next.
-   Its base look lives here; each theme dresses it in its own block. */
+/* Pinned theme button (Will: "a 10-inch nail through the screen"). One fixed spot and one fixed box size in
+   every theme, page and scroll position, so rapid click-cycling needs zero mouse movement:
+   - wide screens: the foot of the sidebar column (the shell is centred, so its left edge is computed from the
+     viewport; scrollbar-gutter keeps that maths identical on short and long pages). The sidebar reserves the
+     space at its foot (.nav-foot padding) so its links never slide under the button.
+   - phones: bottom-left, in the thumb zone; the footer reserves the space so the end of every page clears it.
+   Each theme only dresses it (colours/borders/shadow); nothing theme-specific may touch size or position. */
 .theme-cycler {
-  /* Two rows so the longest name ("Original Design") fits the 220px sidebar: small label over the name,
-     the cycle arrow to the right of both. */
-  display: inline-grid; grid-template-columns: auto auto; column-gap: 0.6rem; align-items: center; text-align: left;
-  font-family: var(--font-label); font-size: 0.8em; line-height: 1.25; max-width: 100%;
-  border: 1px solid currentColor; border-radius: 999px; padding: 0.3rem 1rem; min-height: 44px;
-  background: transparent; color: var(--ink); cursor: pointer;
+  --cycler-w: 172px; --cycler-h: 48px;
+  position: fixed; z-index: 40; left: 0.75rem; bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  width: var(--cycler-w); height: var(--cycler-h); box-sizing: border-box; margin: 0;
+  /* Two rows: small label over the name, the cycle arrow to the right of both. */
+  display: grid; grid-template-columns: 1fr auto; column-gap: 0.6rem; align-items: center; align-content: center; text-align: left;
+  font-family: var(--font-label); font-size: 13px; line-height: 1.2;
+  border: 1px solid currentColor; border-radius: 999px; padding: 0 1rem;
+  background: var(--bg); color: var(--ink); cursor: pointer;
 }
-.theme-cycler-label { grid-column: 1; font-size: max(12px, 0.8em); text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
-.theme-cycler-name { grid-column: 1; grid-row: 2; font-weight: 700; white-space: nowrap; }
+@media (min-width: 768px) {
+  html { scrollbar-gutter: stable; } /* phones anchor the button to the left edge, so they don't need it */
+  .theme-cycler { --cycler-h: 52px; left: calc(max(0px, (100% - var(--shell-max)) / 2) + 1.5rem); bottom: 1.5rem; } /* % of the viewport minus scrollbar = the shell maths */
+  .nav-foot { padding-bottom: calc(52px + 2.5rem); }
+}
+@media (max-width: 767px) { .site-footer { padding-bottom: calc(1.5rem + 48px + 1.25rem + env(safe-area-inset-bottom, 0px)); } }
+.theme-cycler-label { grid-column: 1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
+.theme-cycler-name { grid-column: 1; grid-row: 2; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .theme-cycler-icon { grid-column: 2; grid-row: 1 / span 2; font-size: 1.3em; line-height: 1; }
 @media (prefers-reduced-motion: no-preference) {
   .theme-cycler-icon { transition: transform 0.3s ease; }
@@ -930,7 +958,7 @@ html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; 
 
 /* The toggle glows with a pulsing halo (opacity-animated pseudo-element). */
 [data-theme="demo"] .theme-cycler {
-  position: relative; color: #170804; border-color: transparent;
+  color: #170804; border-color: transparent;
   /* Starts and ends on the same color, and 300% wide like the headings, so
      the shimmer loop wraps without a visible seam. */
   background: linear-gradient(90deg, #ffd54a, #ff9a3c, #ff5e62, #ff9a3c, #ffd54a);
@@ -1167,23 +1195,31 @@ html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; 
 .jump-to-recipe:hover { background: var(--accent); border-color: var(--accent); }
 @media (prefers-reduced-motion: no-preference) { .jump-to-recipe { animation: jump-in 0.2s ease-out; } @keyframes jump-in { from { opacity: 0; transform: translateY(8px); } } }
 
-/* Bio: an optional portrait at the head of the page; beside the text on wide screens. */
-/* Wide screens: the whole left column (heading + photo) is sticky; only the text scrolls.
-   Phones: one column, nothing sticky. */
+/* Bio: an optional portrait at the head of the page; beside the text on wide screens.
+   Wide screens: the PHOTO alone is sticky; the heading sits at the top of the text column and scrolls away
+   with the text (Will, 2026-11). Phones: one column (heading, photo, text), nothing sticky. */
 .bio-layout { display: grid; gap: 1.25rem; }
-/* The bio section spans the full main column (so the sticky header band can too); the layout keeps the
-   usual .page measure (760px minus the 2rem side padding). */
+/* The bio section spans the full main column; the layout keeps the usual .page measure (760px minus padding). */
 .bio-page { max-width: none; }
 @media (min-width: 768px) { .bio-page .bio-layout { max-width: calc(760px - 4rem); } }
-.bio-keep .page-title { margin-bottom: 1rem; }
+.bio-title { margin-bottom: 0; justify-self: start; }
 .bio-photo { max-height: 58vh; width: 100%; max-width: 420px; height: auto; object-fit: cover; border-radius: var(--radius); display: block; box-shadow: var(--shadow); }
-/* The sticky top equals where the column already sits (the .page top padding, 2.5rem from 768px, where
-   the sidebar replaces the phone top bar), so it is pinned from the first scrolled pixel and never drifts. */
+/* --bio-photo-top is BOTH the photo's natural distance from the viewport top (the .page top padding plus its
+   margin) and its sticky top, so it is pinned from the first scrolled pixel and never drifts. Themes may move
+   it (pop art drops it below the band); always change it here, never the margin or top alone. */
 @media (min-width: 768px) {
-  .bio-layout.has-photo { grid-template-columns: minmax(200px, 300px) minmax(0, 1fr); gap: 2rem; align-items: start; }
-  .bio-layout.has-photo .bio-keep { position: sticky; top: 2.5rem; }
-  .bio-layout.has-photo .bio-photo { max-height: calc(100vh - 9rem); }
-  .bio-layout.has-photo .bio-prose { padding-top: 0.6rem; }
+  .bio-layout.has-photo {
+    --bio-photo-top: 2.5rem;
+    grid-template-columns: clamp(180px, 34%, 300px) minmax(0, 1fr); grid-template-rows: auto 1fr;
+    column-gap: 2rem; row-gap: 1rem; align-items: start;
+  }
+  .bio-layout.has-photo .bio-title { grid-column: 2; grid-row: 1; }
+  .bio-layout.has-photo .bio-prose { grid-column: 2; grid-row: 2; }
+  .bio-layout.has-photo .bio-keep {
+    grid-column: 1; grid-row: 1 / span 2; position: sticky; top: var(--bio-photo-top);
+    margin-top: calc(var(--bio-photo-top) - 2.5rem);
+  }
+  .bio-layout.has-photo .bio-photo { max-height: calc(100vh - var(--bio-photo-top) - 2rem); }
 }
 .recipe-search { margin: 0.5rem 0 0.75rem; max-width: 560px; }
 .recipe-search input[type=search] { text-overflow: ellipsis; }
@@ -1262,7 +1298,7 @@ html[data-theme="pop-art"] .site-main .lede { background: #fff; display: table; 
   animation: wk-spin 40s linear infinite;
 }
 [data-theme="demo"] .lab-detail::before { inset: 1rem 8% auto 8%; height: min(70vh, 520px); opacity: 0.45; }
-[data-theme="demo"] .bio-keep::before { inset: 2.5rem -0.75rem -0.75rem; opacity: 0.5; animation-duration: 34s; }
+[data-theme="demo"] .bio-keep::before { inset: -0.75rem; opacity: 0.5; animation-duration: 34s; }
 [data-theme="demo"] .photo-grid::before { inset: 10% 15%; opacity: 0.35; animation-direction: reverse; animation-duration: 50s; }
 /* A second, slower tilting card behind lab project pages. */
 [data-theme="demo"] .lab-detail::after {
