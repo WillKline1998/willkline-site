@@ -29,6 +29,7 @@ export default async function AdminMusic() {
               <label className="small">Year <input type="number" name="year" defaultValue={a.year ?? ""} style={{ width: 90 }} /></label>
               <label className="small">Order <input type="number" name="sortOrder" defaultValue={a.sortOrder} style={{ width: 70 }} /></label>
               <label className="small"><input type="checkbox" name="published" defaultChecked={a.published} /> visible</label>
+              <label className="small"><input type="checkbox" name="comingSoon" defaultChecked={a.comingSoon} /> coming soon</label>
               <button className="btn btn-quiet">Save</button>
             </div>
           </div>

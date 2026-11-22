@@ -455,9 +455,19 @@ input[type=file]:focus-visible::file-selector-button { outline: 2px solid var(--
 .album-card:hover .album-title { color: var(--accent); text-decoration: underline; }
 .album-cover { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--rule); border-radius: var(--radius); }
 .album-title { margin-top: 0.45rem; font-family: var(--font-display); line-height: 1.25; }
+.album-cover-wrap { position: relative; display: block; }
+.album-cover-wrap .album-cover { display: block; }
+.album-soon {
+  display: inline-block; font-family: var(--font-label); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: 999px; color: var(--accent); background: var(--bg);
+}
+.album-cover-wrap .album-soon { position: absolute; top: 0.5rem; left: 0.5rem; }
+.album-kind .album-soon { margin-left: 0.6rem; vertical-align: 0.1em; }
 .album-kind { font-family: var(--font-label); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 .album-detail { display: grid; gap: 2rem; margin-top: 1rem; }
 @media (min-width: 900px) { .album-detail { grid-template-columns: 300px 1fr; } }
+.album-detail > div { container-type: inline-size; min-width: 0; }
+:is(html, html:not([data-mode="demo"])) .album-detail .page-title { font-size: min(clamp(2.6rem, 11vw, 5rem), calc(100cqi / (var(--fit, 1) * 0.8 + 0.3))); }
 .listen-links { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
 
 .not-found-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; list-style: none; padding: 0; font-weight: 600; }
@@ -644,6 +654,8 @@ html:not([data-mode="demo"]) .rail .rail-box:nth-child(4) { border-top-color: va
 html:not([data-mode="demo"]) :is(.album-cover, .home-photo, .bio-photo, .recipe-hero, .lead-image img, .photo-thumb, .rail-cover, .rail-photo, .song-viewer, .cleanup-map, .drawer-map, .media img) {
   border-radius: 0; border: var(--line); box-shadow: var(--shadow-sm);
 }
+html:not([data-mode="demo"]) .album-soon { border-radius: 0; border: 2px solid var(--black); color: var(--black); background: var(--lemon); font-weight: 800; }
+html:not([data-mode="demo"]) .album-cover-wrap .album-soon { top: auto; bottom: -0.55rem; left: auto; right: -0.55rem; transform: rotate(-4deg); box-shadow: 3px 3px 0 var(--black); }
 html:not([data-mode="demo"]) .album-card:hover { transform: translate(-3px, -3px) rotate(-1deg); }
 html:not([data-mode="demo"]) .album-card:hover .album-title { color: var(--black); background: var(--lemon); text-decoration: none; }
 html:not([data-mode="demo"]) .bio-photo { box-shadow: 12px 12px 0 var(--blue), 12px 12px 0 3px var(--black); }

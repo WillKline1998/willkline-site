@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DemoBounce } from "@/components/DemoBounce";
 import { db } from "@/lib/db";
-import { KIND_LABEL, KIND_PLURAL } from "@/lib/music";
+import { KIND_LABEL, KIND_PLURAL, PLACEHOLDER_COVER } from "@/lib/music";
 
 export const metadata: Metadata = { title: "Music" };
 export const dynamic = "force-dynamic";
@@ -33,9 +33,17 @@ export default async function MusicPage(props: PageProps<"/music">) {
         {albums.map((a) => (
           <li key={a.id}>
             <Link href={`/music/${a.slug}`} className="album-card">
-              {a.coverUrl && (
-                <Image src={a.coverUrl} alt={`${a.title} cover`} width={300} height={300} sizes="(min-width: 768px) 200px, 45vw" className="album-cover" />
-              )}
+              <span className="album-cover-wrap">
+                <Image
+                  src={a.coverUrl ?? PLACEHOLDER_COVER}
+                  alt={a.coverUrl ? `${a.title} cover` : `${a.title}: no cover yet`}
+                  width={300}
+                  height={300}
+                  sizes="(min-width: 768px) 200px, 45vw"
+                  className="album-cover"
+                />
+                {a.comingSoon && <span className="album-soon">Coming soon</span>}
+              </span>
               <span className="album-title">{a.title}</span>
               <span className="album-kind">{KIND_LABEL[a.kind] ?? "Album"}{a.year ? ` · ${a.year}` : ""}</span>
             </Link>

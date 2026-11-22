@@ -16,3 +16,6 @@ export const KIND_PLURAL: Record<string, string> = {
   COMPOSITION: "Compositions",
   PROJECT: "Projects",
 };
+
+// Generic "no cover yet" art for releases without a cover (e.g. coming-soon albums). Setting Album.coverUrl replaces it.
+export const PLACEHOLDER_COVER = "/covers/placeholder.png";
