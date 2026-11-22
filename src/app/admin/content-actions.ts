@@ -140,6 +140,7 @@ export async function saveAlbum(form: FormData) {
       year: Number.isFinite(year) ? year : null,
       sortOrder: parseInt(s("sortOrder"), 10) || 0,
       published: form.get("published") === "on",
+      comingSoon: form.get("comingSoon") === "on",
     },
   });
   revalidatePath("/music");

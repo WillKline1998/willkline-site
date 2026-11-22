@@ -83,6 +83,7 @@ model Album {
   links       String   @default("{}") // JSON: { spotify?, bandcamp?, soundcloud?, youtube?, hyperfollow?, ... }
   sortOrder   Int      @default(0)    // lower = shown first
   published   Boolean  @default(false)
+  comingSoon  Boolean  @default(false) // announced, not out: titles-only track list, no listen links, placeholder cover until coverUrl is set
   tracks      Track[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

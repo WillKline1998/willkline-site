@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { KIND_LABEL } from "@/lib/music";
+import { KIND_LABEL, PLACEHOLDER_COVER } from "@/lib/music";
 import { formatDuration } from "@/lib/duration";
 import { openGraph } from "@/lib/seo";
 
@@ -29,7 +30,7 @@ export async function generateMetadata(props: PageProps<"/music/[slug]">): Promi
   const { slug } = await props.params;
   const a = await getAlbum(slug);
   if (!a) return { title: "Music" };
-  const description = `${KIND_LABEL[a.kind] ?? "Album"}${a.year ? ` (${a.year})` : ""} by Will Kline. Listen on every platform.`;
+  const description = `${KIND_LABEL[a.kind] ?? "Album"}${a.year ? ` (${a.year})` : ""} by Will Kline. ${a.comingSoon ? "Coming soon." : "Listen on every platform."}`;
   // Cover art becomes the link preview image.
   const images = a.coverUrl ? [{ url: a.coverUrl, alt: `${a.title} cover` }] : undefined;
   return { title: a.title, description, openGraph: openGraph({ title: a.title, description, type: "music.album", ...(images && { images }) }), twitter: { card: "summary", images } };
@@ -46,22 +47,35 @@ export default async function AlbumPage(props: PageProps<"/music/[slug]">) {
     <section className="page">
       <p className="small"><Link href="/music">← All music</Link></p>
       <div className="album-detail">
-        {a.coverUrl && (
-          <Image src={a.coverUrl} alt={`${a.title} cover`} width={360} height={360} className="album-cover" priority />
-        )}
+        <Image
+          src={a.coverUrl ?? PLACEHOLDER_COVER}
+          alt={a.coverUrl ? `${a.title} cover` : `${a.title}: no cover yet`}
+          width={360}
+          height={360}
+          className="album-cover"
+          priority
+        />
         <div>
-          <h1 className="page-title">{a.title}</h1>
-          <p className="album-kind">{KIND_LABEL[a.kind] ?? "Album"}{a.year ? ` · ${a.year}` : ""}</p>
+          {/* --fit = longest word, so the huge display type shrinks instead of breaking mid-word (CONSUMPTION, REVELATION). */}
+          <h1 className="page-title" style={{ "--fit": Math.max(...a.title.split(/\s+/).map((w) => w.length)) } as CSSProperties}>{a.title}</h1>
+          <p className="album-kind">
+            {KIND_LABEL[a.kind] ?? "Album"}{a.year ? ` · ${a.year}` : ""}
+            {a.comingSoon && <span className="album-soon">Coming soon</span>}
+          </p>
           <p className={a.description ? "" : "muted"}>
             {a.description || "Liner notes coming soon."}
           </p>
           {a.tracks.length > 0 && <TrackList tracks={a.tracks} />}
           <h2 className="section-label">Listen</h2>
-          <ul className="listen-links">
-            {links.map(([k, url]) => (
-              <li key={k}><a href={url} target="_blank" rel="noreferrer">{PLATFORM[k] ?? k} ↗</a></li>
-            ))}
-          </ul>
+          {links.length > 0 ? (
+            <ul className="listen-links">
+              {links.map(([k, url]) => (
+                <li key={k}><a href={url} target="_blank" rel="noreferrer">{PLATFORM[k] ?? k} ↗</a></li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">{a.comingSoon ? "Not out yet. Links land here on release day." : "No links yet."}</p>
+          )}
         </div>
       </div>
     </section>

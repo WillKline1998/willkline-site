@@ -14,7 +14,7 @@ Every track keeps its own time. The music is what happens where they disagree.
 
 More here when it's ready to play with.
 `,
-  tech: "Max/MSP, Claude Code",
+  tech: "Max/MSP",
   url: null,
 };
 
